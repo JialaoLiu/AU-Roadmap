@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" fill="#140f50">
+  <!-- Adelaide University AU Monogram - transparent background -->
+  <!-- Left stroke of A -->
+  <polygon points="0,52 8,52 29,4 22,4"/>
+  <!-- Right stroke of A flowing into U curve -->
+  <path fill-rule="evenodd" d="
+    M 25,4 L 32,4 L 54,44 C 56,50 54,56 48,56 C 42,56 40,50 42,44 L 33,22 Z
+    M 36,28 L 47,46 C 48,50 47,52 45,52 C 43,52 42,50 43,46 L 39,34 Z
+  "/>
+</svg>
