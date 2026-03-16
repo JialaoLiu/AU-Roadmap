@@ -73,8 +73,8 @@ function navigateToResult(category, item) {
   query.value = '';
   if (category === 'programs') router.push(`/explore/programs/${item.id}`);
   else if (category === 'courses') router.push(`/explore/programs/${item.id}`);
-  else if (category === 'alumni') router.push('/student/alumni');
-  else if (category === 'industry') router.push('/student/industry');
+  else if (category === 'alumni') router.push('/research/connect');
+  else if (category === 'industry') router.push('/research/connect#partner');
   else if (category === 'careers') router.push('/explore/careers');
 }
 
