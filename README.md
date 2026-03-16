@@ -77,12 +77,12 @@ AU-Roadmap/
 
 ### Prerequisites
 - Node.js >= 20.19.0
-- MySQL 8.0+ (recommend Homebrew on macOS: `brew install mysql && brew services start mysql`)
+- MySQL 8.0+ 
 
 ### 1. Database Setup
 
 ```bash
-# macOS (Homebrew MySQL, no root password by default)
+# macOS
 mysql -u root < database/schema.sql
 mysql -u root au_roadmap < database/seed.sql
 
@@ -104,7 +104,7 @@ Edit `.env` with your settings:
 ```
 DB_HOST=localhost
 DB_USER=root
-DB_PASSWORD=          # leave empty if Homebrew MySQL with no password
+DB_PASSWORD=          
 DB_NAME=au_roadmap
 DB_PORT=3306
 JWT_SECRET=your_jwt_secret_here
@@ -125,7 +125,7 @@ npm run dev
 
 Frontend runs at `http://localhost:5173`
 
-### Test Accounts (from seed data)
+### Test Accounts
 
 All test account passwords: `11111111`
 
@@ -135,11 +135,3 @@ All test account passwords: `11111111`
 | Student | jialaoliu@adelaide.edu.au | 11111111 |
 | Prospective | prospect@example.com | 11111111 |
 
-## Team
-
-- **Jialao Liu** — Information Architecture & Development Lead
-- Built for Adelaide University, IRP Semester 1 2026
-
-## License
-
-This project is for academic purposes only.
