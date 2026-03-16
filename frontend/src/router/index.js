@@ -68,6 +68,50 @@ const router = createRouter({
       ],
     },
 
+    // Research & Innovation (public)
+    {
+      path: '/research',
+      component: () => import('@/layouts/Level2Layout.vue'),
+      children: [
+        {
+          path: '',
+          name: 'ResearchHome',
+          component: () => import('@/pages/research/ResearchHomePage.vue'),
+          meta: { title: 'Research & Innovation' },
+        },
+        {
+          path: 'impact',
+          name: 'ResearchImpact',
+          component: () => import('@/pages/research/ResearchImpactPage.vue'),
+          meta: { title: 'Research Impact' },
+        },
+        {
+          path: 'connect',
+          name: 'ResearchConnect',
+          component: () => import('@/pages/research/ResearchConnectPage.vue'),
+          meta: { title: 'Connect With Us' },
+        },
+        {
+          path: 'support',
+          name: 'ResearchSupport',
+          component: () => import('@/pages/research/ResearchSupportPage.vue'),
+          meta: { title: 'Research Support' },
+        },
+        {
+          path: 'institutes',
+          name: 'ResearchInstitutes',
+          component: () => import('@/pages/research/ResearchInstitutesPage.vue'),
+          meta: { title: 'Research Institutes' },
+        },
+        {
+          path: 'events',
+          name: 'ResearchEvents',
+          component: () => import('@/pages/research/ResearchEventsPage.vue'),
+          meta: { title: 'Research Events' },
+        },
+      ],
+    },
+
     // Level 1 - Current Students (auth required)
     {
       path: '/student',
@@ -172,7 +216,10 @@ const router = createRouter({
       meta: { title: '404 - Page Not Found' },
     },
   ],
-  scrollBehavior() {
+  scrollBehavior(to) {
+    if (to.hash) {
+      return { el: to.hash, behavior: 'smooth' };
+    }
     return { top: 0 };
   },
 });
