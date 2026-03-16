@@ -20,6 +20,14 @@ Built as part of the Industry Research Project (IRP) course, Semester 1, 2026.
 - **Campus Life** — highlights of facilities, clubs, city, and accommodation
 - **Application Guide** — step-by-step guide, key dates, and FAQ
 
+### Research & Innovation (Public)
+- **Research Home** — overview with stats, leadership, performance rankings, ERA results, institutes, centres, facilities
+- **Research Impact** — impact stories and Discovery Podcast series
+- **Connect With Us** — industry partnerships, ThincLab incubator, graduate research training, commercialisation
+- **Research Support** — researcher portal, graduate school, HPC and technology support
+- **Research Institutes** — 8 institute cards (AIML, Environment, ISER, IPAS, Robinson, SAiGENCI, Waite, DSI)
+- **Research Events** — Research Tuesdays, upcoming events calendar, past highlights
+
 ### Admin Panel
 - Full CRUD management for programs, courses, alumni, industry partners, career data, and users
 - Role-based access control (student / prospective / admin)
@@ -55,7 +63,7 @@ AU-Roadmap/
 │   │   ├── assets/      # Images, CSS variables, shared styles
 │   │   ├── components/  # Reusable components (Header, Footer, SearchBar, etc.)
 │   │   ├── layouts/     # Default, Level1, Level2, Admin layouts
-│   │   ├── pages/       # All page components
+│   │   ├── pages/       # All page components (level1/, level2/, research/, admin/)
 │   │   ├── router/      # Vue Router config
 │   │   └── stores/      # Pinia stores (auth, ui)
 │   └── index.html
@@ -69,11 +77,16 @@ AU-Roadmap/
 
 ### Prerequisites
 - Node.js >= 20.19.0
-- MySQL 8.0+
+- MySQL 8.0+ (recommend Homebrew on macOS: `brew install mysql && brew services start mysql`)
 
 ### 1. Database Setup
 
 ```bash
+# macOS (Homebrew MySQL, no root password by default)
+mysql -u root < database/schema.sql
+mysql -u root au_roadmap < database/seed.sql
+
+# Linux / password-protected MySQL
 mysql -u root -p < database/schema.sql
 mysql -u root -p au_roadmap < database/seed.sql
 ```
@@ -83,9 +96,20 @@ mysql -u root -p au_roadmap < database/seed.sql
 ```bash
 cd backend
 cp .env.example .env
-# Edit .env with your MySQL credentials and JWT secret
 npm install
 npm run dev
+```
+
+Edit `.env` with your settings:
+```
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=          # leave empty if Homebrew MySQL with no password
+DB_NAME=au_roadmap
+DB_PORT=3306
+JWT_SECRET=your_jwt_secret_here
+PORT=8080
+CORS_ORIGIN=http://localhost:5173
 ```
 
 Backend runs at `http://localhost:8080`
@@ -103,11 +127,13 @@ Frontend runs at `http://localhost:5173`
 
 ### Test Accounts (from seed data)
 
+All test account passwords: `11111111`
+
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | admin@adelaide.edu.au | admin123 |
-| Student | john.smith@student.adelaide.edu.au | student123 |
-| Prospective | emma.wilson@email.com | prospect123 |
+| Admin | admin@example.com | 11111111 |
+| Student | jialaoliu@adelaide.edu.au | 11111111 |
+| Prospective | prospect@example.com | 11111111 |
 
 ## Team
 

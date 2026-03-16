@@ -149,6 +149,12 @@ const router = createRouter({
           meta: { title: 'Alumni Network' },
         },
         {
+          path: 'discussion',
+          name: 'Discussion',
+          component: () => import('@/pages/level1/DiscussionPage.vue'),
+          meta: { title: 'Discussion' },
+        },
+        {
           path: 'resources',
           name: 'Resources',
           component: () => import('@/pages/level1/ResourcesPage.vue'),

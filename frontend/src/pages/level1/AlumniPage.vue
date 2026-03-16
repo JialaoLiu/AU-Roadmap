@@ -192,103 +192,63 @@ onMounted(fetchAlumni);
 }
 .section-title .material-symbols-outlined { font-size: 22px; color: var(--color-primary); }
 
-/* Featured */
 .featured-section { margin-bottom: var(--space-2xl); }
-
-.featured-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-lg);
-}
-
+.featured-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-lg); }
 .featured-card {
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-lg);
-  padding: var(--space-xl);
-  text-align: center;
-  cursor: pointer;
-  transition: all var(--transition-fast);
+  background: var(--color-white); border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg); padding: var(--space-xl);
+  text-align: center; cursor: pointer; transition: all var(--transition-fast);
 }
-
-.featured-card:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
-
-.featured-avatar {
-  width: 72px; height: 72px; border-radius: 50%;
-  margin: 0 auto var(--space-md); overflow: hidden;
-}
+.featured-card:hover { border-color: var(--color-primary); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.featured-avatar { width: 72px; height: 72px; border-radius: 50%; margin: 0 auto var(--space-md); overflow: hidden; }
 .featured-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
 .featured-avatar--initials {
   display: flex; align-items: center; justify-content: center;
   background: rgba(20, 15, 80, 0.08); color: var(--color-primary);
   font-size: var(--font-size-xl); font-weight: 700;
 }
-
 .featured-card h3 { font-size: var(--font-size-md); font-weight: 600; color: var(--color-text-primary); }
 .featured-role { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
 .featured-company { font-size: var(--font-size-sm); font-weight: 500; color: var(--color-primary); margin-bottom: var(--space-sm); }
 .featured-year { font-size: var(--font-size-xs); color: var(--color-text-light); }
 
-/* Alumni List */
 .alumni-list { display: flex; flex-direction: column; gap: var(--space-sm); }
-
 .alumni-card {
   display: flex; align-items: center; gap: var(--space-md);
   background: var(--color-white); border: 1px solid var(--color-border);
   border-radius: var(--border-radius-md); padding: var(--space-md) var(--space-lg);
   cursor: pointer; transition: all var(--transition-fast);
 }
-
 .alumni-card:hover { border-color: var(--color-primary); box-shadow: var(--shadow-sm); }
-
-.alumni-avatar {
-  width: 48px; height: 48px; border-radius: 50%;
-  flex-shrink: 0; overflow: hidden;
-}
+.alumni-avatar { width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0; overflow: hidden; }
 .alumni-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
 .alumni-avatar--initials {
   display: flex; align-items: center; justify-content: center;
   background: rgba(20, 15, 80, 0.08); color: var(--color-primary);
   font-size: var(--font-size-sm); font-weight: 700;
 }
-
 .alumni-info { flex: 1; }
 .alumni-info h3 { font-size: var(--font-size-sm); font-weight: 600; color: var(--color-text-primary); }
 .alumni-position { font-size: var(--font-size-xs); color: var(--color-text-secondary); }
-
-.alumni-meta {
-  display: flex; gap: var(--space-md); margin-top: 2px;
-  font-size: var(--font-size-xs); color: var(--color-text-light);
-}
+.alumni-meta { display: flex; gap: var(--space-md); margin-top: 2px; font-size: var(--font-size-xs); color: var(--color-text-light); }
 .alumni-meta span { display: flex; align-items: center; gap: 2px; }
 .alumni-meta .material-symbols-outlined { font-size: 14px; }
-
 .alumni-arrow { color: var(--color-text-light); font-size: 20px; }
 
-/* Modal */
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.5);
   display: flex; align-items: center; justify-content: center;
   z-index: 300; padding: var(--space-lg);
 }
-
 .modal-content {
   background: var(--color-white); border-radius: var(--border-radius-lg);
   max-width: 520px; width: 100%; max-height: 80vh;
   overflow-y: auto; box-shadow: var(--shadow-xl);
 }
-
 .modal-header {
   display: flex; justify-content: space-between; align-items: flex-start;
   padding: var(--space-lg) var(--space-xl); border-bottom: 1px solid var(--color-border);
 }
-
 .modal-header__profile { display: flex; align-items: center; gap: var(--space-md); }
 .modal-avatar { width: 56px; height: 56px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
 .modal-avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -297,44 +257,27 @@ onMounted(fetchAlumni);
   background: rgba(20, 15, 80, 0.08); color: var(--color-primary);
   font-size: var(--font-size-lg); font-weight: 700;
 }
-
 .modal-header h2 { font-size: var(--font-size-lg); font-weight: 700; color: var(--color-text-primary); }
 .modal-role { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
-
 .modal-close {
   background: none; border: none; cursor: pointer;
   color: var(--color-text-light); padding: var(--space-xs);
   border-radius: var(--border-radius-sm);
 }
 .modal-close:hover { background: var(--color-bg-tertiary); color: var(--color-text-primary); }
-
 .modal-body { padding: var(--space-lg) var(--space-xl); }
-
-.modal-info-grid {
-  display: flex; flex-wrap: wrap; gap: var(--space-lg); margin-bottom: var(--space-xl);
-}
-
-.modal-info-item {
-  display: flex; align-items: center; gap: var(--space-sm);
-}
+.modal-info-grid { display: flex; flex-wrap: wrap; gap: var(--space-lg); margin-bottom: var(--space-xl); }
+.modal-info-item { display: flex; align-items: center; gap: var(--space-sm); }
 .modal-info-item .material-symbols-outlined { font-size: 20px; color: var(--color-primary); }
 .info-label { display: block; font-size: var(--font-size-xs); color: var(--color-text-light); }
 .info-value { display: block; font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-primary); }
-
 .modal-section { margin-bottom: var(--space-lg); }
-.modal-section h3 {
-  font-size: var(--font-size-sm); font-weight: 600;
-  color: var(--color-text-primary); margin-bottom: var(--space-sm);
-}
-.modal-section p {
-  font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: 1.6;
-}
-
+.modal-section h3 { font-size: var(--font-size-sm); font-weight: 600; color: var(--color-text-primary); margin-bottom: var(--space-sm); }
+.modal-section p { font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: 1.6; }
 .success-story {
   background: var(--color-bg-secondary); padding: var(--space-md);
   border-radius: var(--border-radius-md); border-left: 3px solid var(--color-primary);
 }
-
 .linkedin-btn {
   display: inline-flex; align-items: center; gap: var(--space-xs);
   padding: var(--space-sm) var(--space-lg);
@@ -346,13 +289,11 @@ onMounted(fetchAlumni);
 .linkedin-btn:hover { background: var(--color-primary-light); }
 .linkedin-btn .material-symbols-outlined { font-size: 18px; }
 
-/* Transitions */
 .modal-enter-active, .modal-leave-active { transition: opacity 0.2s ease; }
 .modal-enter-active .modal-content, .modal-leave-active .modal-content { transition: transform 0.2s ease; }
 .modal-enter-from, .modal-leave-to { opacity: 0; }
 .modal-enter-from .modal-content, .modal-leave-to .modal-content { transform: scale(0.95); }
 
-/* Empty / Loading */
 .empty-state { display: flex; flex-direction: column; align-items: center; padding: var(--space-3xl); text-align: center; }
 .empty-icon { font-size: 48px; color: var(--color-text-light); margin-bottom: var(--space-md); }
 .empty-state h2 { color: var(--color-text-primary); margin-bottom: var(--space-sm); }
@@ -366,7 +307,5 @@ onMounted(fetchAlumni);
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-@media (max-width: 768px) {
-  .featured-grid { grid-template-columns: 1fr; }
-}
+@media (max-width: 768px) { .featured-grid { grid-template-columns: 1fr; } }
 </style>

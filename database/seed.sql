@@ -6,9 +6,9 @@ USE au_roadmap;
 
 -- Test Users (password: 11111111)
 INSERT INTO users (email, password_hash, first_name, last_name, role, student_id) VALUES
-('student@example.com', '$2b$10$8KzaNsXZQYLGPCj/CQVpDOvZr4bEqTR1yJwVd.EjGJkn2vkFpK3Sm', 'Alex', 'Chen', 'student', 'a1234567'),
-('prospect@example.com', '$2b$10$8KzaNsXZQYLGPCj/CQVpDOvZr4bEqTR1yJwVd.EjGJkn2vkFpK3Sm', 'Emily', 'Wang', 'prospective', NULL),
-('admin@example.com', '$2b$10$8KzaNsXZQYLGPCj/CQVpDOvZr4bEqTR1yJwVd.EjGJkn2vkFpK3Sm', 'Admin', 'User', 'admin', NULL);
+('jialaoliu@adelaide.edu.au', '$2b$10$gRRlccf5BYvcfJj4U3JDbuyiLrDuMwakSNS8RG6yMoFb5/U0N2J3W', 'Jialao', 'Liu', 'student', 'a1234567'),
+('prospect@example.com', '$2b$10$gRRlccf5BYvcfJj4U3JDbuyiLrDuMwakSNS8RG6yMoFb5/U0N2J3W', 'Emily', 'Wang', 'prospective', NULL),
+('admin@example.com', '$2b$10$gRRlccf5BYvcfJj4U3JDbuyiLrDuMwakSNS8RG6yMoFb5/U0N2J3W', 'Admin', 'User', 'admin', NULL);
 
 -- Programs
 INSERT INTO programs (code, name, level, duration_years, faculty, description, entry_requirements, atar_requirement, fees_domestic, fees_international) VALUES
@@ -165,3 +165,13 @@ INSERT INTO content_blocks (page_key, section_key, title, subtitle, body_html, c
  '<p>Our interactive Program Roadmap helps you navigate your academic journey with confidence.</p>', 'Explore Programs', '/explore', 1),
 ('home', 'stats', 'By the Numbers', NULL,
  '<ul><li>92% graduate employment rate</li><li>$75,000 median starting salary</li><li>50+ industry partners</li><li>100+ student clubs</li></ul>', NULL, NULL, 2);
+
+-- Discussion Threads
+INSERT INTO discussion_threads (program_id, user_id, title, content, reply_count, is_pinned) VALUES
+(1, 1, 'Tips for finding a software internship in Adelaide?', 'Hi everyone! I''m a second-year CS student looking for internship opportunities in Adelaide over the summer break. Any advice on where to look or how to prepare? Would love to hear from alumni who have been through the process.', 2, 0),
+(1, 3, 'Welcome to the Discussion Board!', 'This is a space for current students and alumni to connect, share advice, and discuss career paths. Feel free to start a conversation!', 0, 1);
+
+-- Discussion Replies
+INSERT INTO discussion_replies (thread_id, user_id, content) VALUES
+(1, 3, 'Great question! I''d recommend checking out the university careers portal and attending the Industry Research Partnership Forum in April. Networking events are a great way to meet potential employers.'),
+(1, 1, 'Thanks for the advice! I''ll definitely check out the careers portal and sign up for the forum.');

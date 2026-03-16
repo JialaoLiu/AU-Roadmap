@@ -11,6 +11,7 @@ const sidebarLinks = [
   { to: '/student/roadmap', label: 'My Roadmap', icon: 'route' },
   { to: '/student/industry', label: 'Industry', icon: 'business' },
   { to: '/student/alumni', label: 'Alumni', icon: 'group' },
+  { to: '/student/discussion', label: 'Discussion', icon: 'forum' },
   { to: '/student/resources', label: 'Resources', icon: 'menu_book' },
 ];
 </script>
