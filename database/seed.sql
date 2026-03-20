@@ -38,7 +38,7 @@ INSERT INTO programs (code, name, level, duration_years, faculty, description, e
  75.0, 34500.00, 46000.00);
 
 -- Update student user with program
-UPDATE users SET program_id = 1 WHERE email = 'student@example.com';
+UPDATE users SET program_id = 3 WHERE email = 'jialaoliu@adelaide.edu.au';
 
 -- Courses for Bachelor of Computer Science
 INSERT INTO courses (code, name, units, level, semester_offered, description, is_elective) VALUES
@@ -103,20 +103,101 @@ INSERT INTO program_industry (program_id, industry_partner_id, opportunity_descr
 (1, 4, 'Research placements in cybersecurity and AI for final-year students.'),
 (1, 5, 'Technology consulting graduate program with Adelaide office placements.');
 
--- Alumni
-INSERT INTO alumni (first_name, last_name, graduation_year, program_id, current_role, current_company, location, bio, success_story, is_featured) VALUES
-('Sarah', 'Mitchell', 2022, 1, 'Software Engineer', 'Google', 'Sydney, NSW',
- 'Graduated with First Class Honours and joined Google''s graduate program.',
- 'During my time at Adelaide University, I focused on AI and machine learning. The strong foundation in algorithms and data structures prepared me well for technical interviews. I completed an internship at Google in my third year, which led to a full-time offer.',
+-- Alumni (graduates from University of Adelaide and University of South Australia)
+INSERT INTO alumni (first_name, last_name, graduation_year, program_id, current_role, current_company, location, bio, success_story, linkedin_url, is_featured) VALUES
+('Rhaneela', 'Punitham', 2016, 1, 'Manager, Technology Advisory', 'KPMG', 'Adelaide, SA',
+ 'Graduate of University of Adelaide with a double degree in Health Sciences and Mathematical & Computer Sciences.',
+ 'My time at the University of Adelaide gave me a strong analytical foundation. I started as a Technology Risk and Cyber Security consultant at KPMG and have since advanced to Manager in Technology Advisory. The problem-solving skills I developed during my studies have been invaluable in my consulting career.',
+ 'https://www.linkedin.com/in/rhaneela-punitham/',
  TRUE),
-('James', 'Liu', 2023, 1, 'Full Stack Developer', 'Atlassian', 'Sydney, NSW',
- 'Passionate about web technologies and collaborative software development.',
- 'The Web and Database Computing course was a turning point for me. Building full-stack applications gave me the practical skills employers were looking for. I now work on Confluence at Atlassian.',
+('Menno', 'Van Der Zee', 2020, 1, 'Software Developer', 'ADVAM', 'Adelaide, SA',
+ 'Bachelor of Computer Science graduate from the University of Adelaide with a passion for building scalable software solutions.',
+ 'Studying Computer Science at Adelaide gave me hands-on experience with real projects. I joined ADVAM as a graduate developer and have been working on payment technology solutions. The practical lab work and industry connections through the university made the transition from study to work seamless.',
+ NULL,
  TRUE),
-('Priya', 'Sharma', 2021, 1, 'Data Engineer', 'Santos', 'Adelaide, SA',
- 'Combining computer science with data engineering to drive innovation in the energy sector.',
- 'Staying in Adelaide after graduation was important to me. Santos offered great opportunities to apply my database and programming skills to real-world energy data challenges.',
+('Helena', 'Wu', 2010, 1, 'Team Leader, New Development', 'Santos Ltd', 'Adelaide, SA',
+ 'University of South Australia graduate who has built a career in energy sector technology. Also serves as At Large Director for the Society of Petroleum Engineers International.',
+ 'After graduating from UniSA, I joined Santos and have grown into a leadership role in new development projects. The technical skills and business acumen I gained during my studies have been key to my career progression in the energy industry.',
+ NULL,
+ TRUE),
+('Josh', 'Carmichael', 2015, 1, 'Renewable Energy & Grid Specialist', 'Transdev', 'Adelaide, SA',
+ 'University of South Australia graduate with a Bachelor of Science and Bachelor of International Business.',
+ 'My double degree from UniSA gave me both the technical knowledge and business perspective needed for the renewable energy sector. I now work on grid and mobility solutions at Transdev, helping drive the transition to sustainable transport.',
+ NULL,
+ FALSE),
+('Jindou', 'Lee', 2012, 1, 'CEO and Co-Founder', 'HappyCo', 'Adelaide, SA',
+ 'University of South Australia Creative graduate who co-founded a successful property technology company.',
+ 'The entrepreneurial spirit I developed at UniSA led me to co-found HappyCo, a property technology platform. My studies taught me to think creatively about solving real-world problems, and that mindset has been the foundation of building a successful tech startup.',
+ NULL,
+ FALSE),
+('Andrew', 'Bullock', 2005, 1, 'Chief Executive Officer', '1834 Hotels', 'Adelaide, SA',
+ 'University of South Australia Business graduate with a Bachelor of Management in Tourism and Hospitality. Also serves as Chair of the South Australian Tourism Commission.',
+ 'My degree from UniSA in Tourism and Hospitality set the course for my entire career. From managing individual properties to now leading 1834 Hotels as CEO and chairing the SA Tourism Commission, the industry knowledge and leadership skills I gained at university have been foundational.',
+ NULL,
  FALSE);
+
+-- Courses for Master of Information Technology
+INSERT INTO courses (code, name, units, level, semester_offered, description, is_elective) VALUES
+-- Year 1
+('COMP5101', 'Software Architecture and Design', 3, 'postgrad', 'S1', 'Advanced software design patterns, architectural styles, and quality attributes. Design of large-scale distributed systems.', FALSE),
+('COMP5102', 'Data Science and Machine Learning', 3, 'postgrad', 'S1', 'Statistical modelling, supervised and unsupervised learning, neural networks, and practical applications of ML in industry.', FALSE),
+('COMP5103', 'IT Project Management', 3, 'postgrad', 'S2', 'Agile and traditional project management methodologies. Risk management, stakeholder communication, and project delivery.', FALSE),
+('COMP5104', 'Cloud Computing and DevOps', 3, 'postgrad', 'S2', 'Cloud platforms (AWS, Azure), containerisation, CI/CD pipelines, infrastructure as code, and microservices architecture.', FALSE),
+-- Year 2
+('COMP5201', 'Cybersecurity Fundamentals', 3, 'postgrad', 'S1', 'Security principles, threat modelling, cryptography, network security, and security governance frameworks.', FALSE),
+('COMP5800', 'Industry Research Project', 3, 'postgrad', 'S1', 'Collaborative industry research project addressing real-world challenges. Students work with industry partners to deliver practical solutions.', FALSE),
+('COMP5203', 'IT Research Methods', 3, 'postgrad', 'S2', 'Research methodologies for IT, literature review techniques, experimental design, and academic writing.', TRUE),
+('COMP5204', 'IT Masters Project', 6, 'postgrad', 'S1,S2', 'Capstone project applying advanced IT skills to a real-world problem in collaboration with industry partners.', FALSE);
+
+-- Program-Course Mapping for MIT
+INSERT INTO program_courses (program_id, course_id, year_level, semester, is_core, course_group, sort_order) VALUES
+(3, 13, 1, 1, TRUE, 'Core', 1),   -- COMP5101 Y1S1
+(3, 14, 1, 1, TRUE, 'Core', 2),   -- COMP5102 Y1S1
+(3, 15, 1, 2, TRUE, 'Core', 1),   -- COMP5103 Y1S2
+(3, 16, 1, 2, TRUE, 'Core', 2),   -- COMP5104 Y1S2
+(3, 17, 2, 1, TRUE, 'Core', 1),   -- COMP5201 Y2S1
+(3, 18, 2, 1, TRUE, 'Core', 2),   -- COMP5202 Y2S1
+(3, 19, 2, 2, FALSE, 'Elective', 1), -- COMP5203 Y2S2
+(3, 20, 2, 2, TRUE, 'Core', 2);   -- COMP5204 Y2S2
+
+-- Prerequisites for MIT
+INSERT INTO prerequisites (course_id, prerequisite_course_id, is_corequisite) VALUES
+(17, 13, FALSE),  -- Cybersecurity requires Software Architecture
+(18, 14, FALSE),  -- Advanced DB requires Data Science
+(19, 15, FALSE),  -- Research Methods requires IT Project Management
+(20, 13, FALSE),  -- Masters Project requires Software Architecture
+(20, 15, FALSE);  -- Masters Project requires IT Project Management
+
+-- Program-Industry Mapping for MIT
+INSERT INTO program_industry (program_id, industry_partner_id, opportunity_description) VALUES
+(3, 1, 'Cloud engineering and AI research graduate positions for postgraduate students.'),
+(3, 2, 'Senior developer and technical lead graduate pathways for Masters graduates.'),
+(3, 3, 'Data engineering and IT infrastructure roles at Adelaide headquarters.'),
+(3, 4, 'Cybersecurity research and analysis placements for postgraduate students.'),
+(3, 5, 'Technology consulting and digital transformation roles for MIT graduates.');
+
+-- Update some alumni to MIT program
+UPDATE alumni SET program_id = 3 WHERE last_name = 'Punitham';
+UPDATE alumni SET program_id = 3 WHERE last_name = 'Wu';
+
+-- Discussion Threads for MIT
+INSERT INTO discussion_threads (program_id, user_id, title, content, reply_count, is_pinned) VALUES
+(3, 1, 'Best cloud certifications to complement MIT degree?', 'I''m currently in my first year of the MIT program. Has anyone combined their studies with AWS or Azure certifications? Would love to hear what worked for you.', 0, 0),
+(3, 3, 'Welcome MIT Students!', 'This is the discussion space for Master of Information Technology students and alumni. Feel free to share advice, ask questions, and connect with your peers!', 0, 1);
+
+-- Career Outcomes for MIT
+INSERT INTO career_outcomes (program_id, year, employment_rate, median_salary, salary_range_low, salary_range_high, further_study_rate, satisfaction_rate, source) VALUES
+(3, 2024, 94.00, 85000.00, 70000.00, 110000.00, 8.00, 90.00, 'Graduate Outcomes Survey 2024'),
+(3, 2023, 92.00, 82000.00, 68000.00, 105000.00, 9.50, 88.00, 'Graduate Outcomes Survey 2023'),
+(3, 2022, 90.50, 78000.00, 65000.00, 100000.00, 10.00, 87.00, 'Graduate Outcomes Survey 2022');
+
+-- Career Paths for MIT
+INSERT INTO career_paths (program_id, job_title, description, average_salary, demand_level, industry_sector, sort_order) VALUES
+(3, 'Solutions Architect', 'Design and oversee the implementation of IT solutions aligned with business requirements.', 120000.00, 'high', 'Technology', 1),
+(3, 'Data Engineer', 'Build and maintain data pipelines, warehouses, and analytics infrastructure.', 105000.00, 'high', 'Technology', 2),
+(3, 'Cloud Engineer', 'Design, deploy, and manage cloud-based infrastructure and services.', 110000.00, 'high', 'Technology', 3),
+(3, 'IT Project Manager', 'Lead technology projects from planning through delivery, managing teams and stakeholders.', 100000.00, 'medium', 'Various', 4),
+(3, 'Cybersecurity Consultant', 'Assess and improve organisational security posture, conduct audits and penetration testing.', 105000.00, 'high', 'Technology/Consulting', 5);
 
 -- Career Outcomes
 INSERT INTO career_outcomes (program_id, year, employment_rate, median_salary, salary_range_low, salary_range_high, further_study_rate, satisfaction_rate, source) VALUES

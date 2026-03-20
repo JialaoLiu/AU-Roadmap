@@ -35,3 +35,7 @@ export function getProgramResources(id) {
 export function comparePrograms(ids) {
   return api.get('/programs/compare', { params: { ids: ids.join(',') } });
 }
+
+export function getFeaturedAlumni() {
+  return api.get('/programs/featured-alumni');
+}

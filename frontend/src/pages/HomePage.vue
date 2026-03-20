@@ -1,5 +1,39 @@
 <script setup>
+import { ref, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
+import { getProgramList, getFeaturedAlumni } from '@/api/programs';
+
+const programs = ref([]);
+const alumni = ref([]);
+
+async function fetchData() {
+  try {
+    const [programRes, alumniRes] = await Promise.all([
+      getProgramList({ limit: 4 }),
+      getFeaturedAlumni(),
+    ]);
+    programs.value = programRes.data.data;
+    alumni.value = alumniRes.data.data;
+  } catch (err) {
+    console.error('Failed to load homepage data:', err);
+  }
+}
+
+function getLevelLabel(level) {
+  const labels = { undergraduate: 'Undergraduate', postgraduate: 'Postgraduate', research: 'Research' };
+  return labels[level] || level;
+}
+
+function getDurationText(years) {
+  const y = parseFloat(years);
+  return y === 1 ? '1 year' : `${y} years`;
+}
+
+function getInitials(a) {
+  return (a.first_name?.[0] || '') + (a.last_name?.[0] || '');
+}
+
+onMounted(fetchData);
 </script>
 
 <template>
@@ -74,18 +108,22 @@ import { RouterLink } from 'vue-router';
           <p class="section-subtitle">Discover our most popular degree programs</p>
         </div>
         <div class="programs-grid">
-          <div class="program-card" v-for="i in 4" :key="i">
+          <RouterLink
+            v-for="p in programs"
+            :key="p.id"
+            :to="`/explore/programs/${p.id}`"
+            class="program-card"
+          >
             <div class="program-card-img"></div>
             <div class="program-card-body">
-              <span class="program-tag">Undergraduate</span>
-              <h4>Program Title</h4>
-              <p>Program description will appear here once data is loaded from the database.</p>
+              <span class="program-tag">{{ getLevelLabel(p.level) }}</span>
+              <h4>{{ p.name }}</h4>
+              <p>{{ p.description?.slice(0, 100) }}{{ p.description?.length > 100 ? '...' : '' }}</p>
               <div class="program-meta">
-                <span><span class="material-symbols-outlined">schedule</span> 3 years</span>
-                <span><span class="material-symbols-outlined">trending_up</span> 92% employed</span>
+                <span><span class="material-symbols-outlined">schedule</span> {{ getDurationText(p.duration_years) }}</span>
               </div>
             </div>
-          </div>
+          </RouterLink>
         </div>
         <div class="section-cta">
           <RouterLink to="/explore" class="btn btn-primary">
@@ -128,13 +166,18 @@ import { RouterLink } from 'vue-router';
           <p class="section-subtitle">Hear from our graduates about their journeys</p>
         </div>
         <div class="alumni-grid">
-          <div class="alumni-card" v-for="i in 3" :key="i">
-            <div class="alumni-avatar"></div>
-            <blockquote>"The strong foundation in algorithms and data structures prepared me well for my career."</blockquote>
+          <div class="alumni-card" v-for="a in alumni" :key="a.id">
+            <div class="alumni-avatar" v-if="a.photo_url">
+              <img :src="a.photo_url" :alt="a.first_name" />
+            </div>
+            <div class="alumni-avatar alumni-avatar--initials" v-else>
+              {{ getInitials(a) }}
+            </div>
+            <blockquote>"{{ a.success_story?.slice(0, 150) }}{{ a.success_story?.length > 150 ? '...' : '' }}"</blockquote>
             <div class="alumni-info">
-              <strong>Graduate Name</strong>
-              <span>Software Engineer at Company</span>
-              <span class="alumni-year">Class of 2024</span>
+              <strong>{{ a.first_name }} {{ a.last_name }}</strong>
+              <span>{{ a.current_role }} at {{ a.current_company }}</span>
+              <span class="alumni-year">Class of {{ a.graduation_year }}</span>
             </div>
           </div>
         </div>
@@ -337,11 +380,13 @@ import { RouterLink } from 'vue-router';
 }
 
 .program-card {
+  display: block;
   background: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius-lg);
   overflow: hidden;
   transition: all var(--transition-normal);
+  color: inherit;
 }
 
 .program-card:hover {
@@ -459,6 +504,23 @@ import { RouterLink } from 'vue-router';
   border-radius: var(--border-radius-full);
   background: var(--color-gray-200);
   margin: 0 auto var(--space-md);
+  overflow: hidden;
+}
+
+.alumni-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.alumni-avatar--initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 15, 80, 0.08);
+  color: var(--color-primary);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
 }
 
 .alumni-card blockquote {
