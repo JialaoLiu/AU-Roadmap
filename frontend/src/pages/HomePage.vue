@@ -1,39 +1,38 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { RouterLink } from 'vue-router';
-import { getProgramList, getFeaturedAlumni } from '@/api/programs';
+import { RouterLink } from "vue-router";
+import RPimg from "@/assets/images/Rhaneela Punitham.jpeg";
+import LKimg from "@/assets/images/Lasni Kumarasinghe.jpeg"
+import WMimg from "@/assets/images/Walter Marsh.jpeg"
+import DFimg from "@/assets/images/Dave Fletcher.jpg"
 
-const programs = ref([]);
-const alumni = ref([]);
+const alumni = [{
+name : "Rhaneela Punitham",
+job: "Technology Consultant at KPMG",
+year: "Class of 2024",
+blockquote: "The strong foundation in algorithms and data structures prepared me well for my career.",
+profile: RPimg}, {
+name : "Walter Marsh",
+job: "Historian and Writer",
+year: "Class of 2023",
+blockquote: "Humanities studies gave me are the tools, the confidence and the curiosity to make my own path.",
+profile: WMimg
 
-async function fetchData() {
-  try {
-    const [programRes, alumniRes] = await Promise.all([
-      getProgramList({ limit: 4 }),
-      getFeaturedAlumni(),
-    ]);
-    programs.value = programRes.data.data;
-    alumni.value = alumniRes.data.data;
-  } catch (err) {
-    console.error('Failed to load homepage data:', err);
-  }
+}, {
+name : "Dr Lasni Kumarasinghe",
+job: "Specialist Orthodontist",
+year: "Class of 2020",
+blockquote: "Learning from esteemed international lecturers through the program changed my life.",
+profile: LKimg
+},
+{
+name : "Dave Fletcher",
+job: "Winemaker",
+year: "Class of 2018",
+blockquote: "Having one of the top wine schools in the world made it a very easy decision.",
+profile: DFimg
 }
+]
 
-function getLevelLabel(level) {
-  const labels = { undergraduate: 'Undergraduate', postgraduate: 'Postgraduate', research: 'Research' };
-  return labels[level] || level;
-}
-
-function getDurationText(years) {
-  const y = parseFloat(years);
-  return y === 1 ? '1 year' : `${y} years`;
-}
-
-function getInitials(a) {
-  return (a.first_name?.[0] || '') + (a.last_name?.[0] || '');
-}
-
-onMounted(fetchData);
 </script>
 
 <template>
@@ -42,10 +41,10 @@ onMounted(fetchData);
     <section class="hero">
       <div class="hero-overlay"></div>
       <div class="container hero-content">
-        <h1>Find Your Path at<br/>Adelaide University</h1>
+        <h1>Find Your Path at<br />Adelaide University</h1>
         <p class="hero-subtitle">
-          Explore programs, plan your studies, and discover career opportunities
-          with our interactive Program Roadmap.
+          Explore programs, plan your studies, and discover career opportunities with our
+          interactive Program Roadmap.
         </p>
         <div class="hero-actions">
           <RouterLink to="/explore" class="btn btn-hero-primary">
@@ -108,22 +107,18 @@ onMounted(fetchData);
           <p class="section-subtitle">Discover our most popular degree programs</p>
         </div>
         <div class="programs-grid">
-          <RouterLink
-            v-for="p in programs"
-            :key="p.id"
-            :to="`/explore/programs/${p.id}`"
-            class="program-card"
-          >
+          <div class="program-card" v-for="i in 4" :key="i">
             <div class="program-card-img"></div>
             <div class="program-card-body">
-              <span class="program-tag">{{ getLevelLabel(p.level) }}</span>
-              <h4>{{ p.name }}</h4>
-              <p>{{ p.description?.slice(0, 100) }}{{ p.description?.length > 100 ? '...' : '' }}</p>
+              <span class="program-tag">Undergraduate</span>
+              <h4>Program Title</h4>
+              <p>Program description will appear here once data is loaded from the database.</p>
               <div class="program-meta">
-                <span><span class="material-symbols-outlined">schedule</span> {{ getDurationText(p.duration_years) }}</span>
+                <span><span class="material-symbols-outlined">schedule</span> 3 years</span>
+                <span><span class="material-symbols-outlined">trending_up</span> 92% employed</span>
               </div>
             </div>
-          </RouterLink>
+          </div>
         </div>
         <div class="section-cta">
           <RouterLink to="/explore" class="btn btn-primary">
@@ -165,22 +160,28 @@ onMounted(fetchData);
           <h2>Alumni Spotlight</h2>
           <p class="section-subtitle">Hear from our graduates about their journeys</p>
         </div>
-        <div class="alumni-grid">
-          <div class="alumni-card" v-for="a in alumni" :key="a.id">
-            <div class="alumni-avatar" v-if="a.photo_url">
-              <img :src="a.photo_url" :alt="a.first_name" />
-            </div>
-            <div class="alumni-avatar alumni-avatar--initials" v-else>
-              {{ getInitials(a) }}
-            </div>
-            <blockquote>"{{ a.success_story?.slice(0, 150) }}{{ a.success_story?.length > 150 ? '...' : '' }}"</blockquote>
-            <div class="alumni-info">
-              <strong>{{ a.first_name }} {{ a.last_name }}</strong>
-              <span>{{ a.current_role }} at {{ a.current_company }}</span>
-              <span class="alumni-year">Class of {{ a.graduation_year }}</span>
+
+        <!--carousel. -->
+
+        <div class = "carousel">
+          <div class = "alumni-group">
+            <div class="alumni-card" v-for=" (profile, index) in [...alumni, ...alumni]" :key="index">
+              <div class="alumni-avatar">
+                <img :src="profile.profile" alt="alumni profile">
+              </div>
+              <blockquote>
+                {{ profile.blockquote }}
+              </blockquote>
+              <div class="alumni-info">
+                <strong>{{profile.name}}</strong>
+                <span>{{profile .job}}</span>
+                <span class="alumni-year">{{profile.year}}</span>
+              </div>
             </div>
           </div>
         </div>
+
+
         <div class="section-cta">
           <RouterLink to="/student/alumni" class="btn btn-secondary">
             Meet More Alumni
@@ -196,6 +197,8 @@ onMounted(fetchData);
 /* ==========================================
    HERO
    ========================================== */
+
+
 .hero {
   position: relative;
   background: var(--color-primary);
@@ -207,7 +210,15 @@ onMounted(fetchData);
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 50%, var(--color-primary) 100%);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(20, 15, 80, 0.75) 0%,
+      rgba(30, 24, 112, 0.65) 50%,
+      rgba(20, 15, 80, 0.8)
+    ),
+    url("@/assets/images/hero-background.jpg");
   opacity: 0.95;
 }
 
@@ -282,12 +293,13 @@ onMounted(fetchData);
    ========================================== */
 .quick-access {
   padding: var(--space-2xl) 0;
-  margin-top: -48px;
+  margin-top: 32px;
+  margin-bottom: 0;
   position: relative;
   z-index: 2;
 }
 
-.access-grid {
+.access-flex {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-lg);
@@ -380,13 +392,11 @@ onMounted(fetchData);
 }
 
 .program-card {
-  display: block;
   background: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius-lg);
   overflow: hidden;
   transition: all var(--transition-normal);
-  color: inherit;
 }
 
 .program-card:hover {
@@ -479,15 +489,44 @@ onMounted(fetchData);
 /* ==========================================
    ALUMNI SPOTLIGHT
    ========================================== */
+
 .alumni-section {
   padding: var(--space-3xl) 0;
   background: var(--color-bg-secondary);
 }
 
-.alumni-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+.carousel {
+  overflow: hidden;
+  width: 100%;
+
+  display: flex;
+
+
+}
+
+@keyframes scrolling {
+  from{
+    transform: translateX(0%);
+  }
+
+  to{
+    transform: translateX(calc(-50% - 12px));
+  }
+
+}
+
+.alumni-group {
+  width: max-content;
+
+
+
+  display: flex;
   gap: var(--space-lg);
+  animation: scrolling 15s linear infinite;
+}
+
+.alumni-group:hover{
+  animation-play-state: paused;
 }
 
 .alumni-card {
@@ -496,31 +535,23 @@ onMounted(fetchData);
   border-radius: var(--border-radius-lg);
   padding: var(--space-lg);
   text-align: center;
-}
-
-.alumni-avatar {
-  width: 72px;
-  height: 72px;
-  border-radius: var(--border-radius-full);
-  background: var(--color-gray-200);
-  margin: 0 auto var(--space-md);
-  overflow: hidden;
+  flex: 0 0 270px;
 }
 
 .alumni-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  margin: 0 auto;
 }
 
-.alumni-avatar--initials {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(20, 15, 80, 0.08);
-  color: var(--color-primary);
-  font-size: var(--font-size-xl);
-  font-weight: 700;
+.alumni-avatar {
+  width: 75px;
+  height: 75px;
+  border-radius: var(--border-radius-full);
+  overflow: hidden;
+
+  margin: 0 auto var(--space-md);
 }
 
 .alumni-card blockquote {
@@ -556,17 +587,38 @@ onMounted(fetchData);
    RESPONSIVE
    ========================================== */
 @media (max-width: 768px) {
-  .hero h1 { font-size: 2rem; }
-  .hero-actions { flex-direction: column; align-items: center; }
-  .access-grid { grid-template-columns: 1fr; }
-  .programs-grid { grid-template-columns: repeat(2, 1fr); }
-  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-xl); }
-  .alumni-grid { grid-template-columns: 1fr; }
-  .quick-access { margin-top: 0; }
+  .hero h1 {
+    font-size: 2rem;
+  }
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  .access-grid {
+    grid-template-columns: 1fr;
+
+  }
+  .programs-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-xl);
+  }
+  .alumni-grid {
+    grid-template-columns: 1fr;
+  }
+  .quick-access {
+    margin-top: 0;
+  }
 }
 
 @media (max-width: 480px) {
-  .programs-grid { grid-template-columns: 1fr; }
-  .stats-grid { grid-template-columns: 1fr; }
+  .programs-grid {
+    grid-template-columns: 1fr;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
