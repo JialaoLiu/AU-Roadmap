@@ -183,7 +183,7 @@ UPDATE alumni SET program_id = 3 WHERE last_name = 'Wu';
 -- Discussion Threads for MIT
 INSERT INTO discussion_threads (program_id, user_id, title, content, reply_count, is_pinned) VALUES
 (3, 1, 'Best cloud certifications to complement MIT degree?', 'I''m currently in my first year of the MIT program. Has anyone combined their studies with AWS or Azure certifications? Would love to hear what worked for you.', 0, 0),
-(3, 3, 'Welcome MIT Students!', 'This is the discussion space for Master of Information Technology students and alumni. Feel free to share advice, ask questions, and connect with your peers!', 0, 1);
+(3, 3, 'Welcome to the Discussion Board!', 'This is a space for all Adelaide University students and alumni to connect, share advice, and discuss career paths. Feel free to start a conversation!', 0, 1);
 
 -- Career Outcomes for MIT
 INSERT INTO career_outcomes (program_id, year, employment_rate, median_salary, salary_range_low, salary_range_high, further_study_rate, satisfaction_rate, source) VALUES
