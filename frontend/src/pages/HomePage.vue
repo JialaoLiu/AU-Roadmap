@@ -1,5 +1,38 @@
 <script setup>
-import { RouterLink } from 'vue-router';
+import { RouterLink } from "vue-router";
+import RPimg from "@/assets/images/Rhaneela Punitham.jpeg";
+import LKimg from "@/assets/images/Lasni Kumarasinghe.jpeg"
+import WMimg from "@/assets/images/Walter Marsh.jpeg"
+import DFimg from "@/assets/images/Dave Fletcher.jpg"
+
+const alumni = [{
+name : "Rhaneela Punitham",
+job: "Technology Consultant at KPMG",
+year: "Class of 2024",
+blockquote: "The strong foundation in algorithms and data structures prepared me well for my career.",
+profile: RPimg}, {
+name : "Walter Marsh",
+job: "Historian and Writer",
+year: "Class of 2023",
+blockquote: "Humanities studies gave me are the tools, the confidence and the curiosity to make my own path.",
+profile: WMimg
+
+}, {
+name : "Dr Lasni Kumarasinghe",
+job: "Specialist Orthodontist",
+year: "Class of 2020",
+blockquote: "Learning from esteemed international lecturers through the program changed my life.",
+profile: LKimg
+},
+{
+name : "Dave Fletcher",
+job: "Winemaker",
+year: "Class of 2018",
+blockquote: "Having one of the top wine schools in the world made it a very easy decision.",
+profile: DFimg
+}
+]
+
 </script>
 
 <template>
@@ -8,10 +41,10 @@ import { RouterLink } from 'vue-router';
     <section class="hero">
       <div class="hero-overlay"></div>
       <div class="container hero-content">
-        <h1>Find Your Path at<br/>Adelaide University</h1>
+        <h1>Find Your Path at<br />Adelaide University</h1>
         <p class="hero-subtitle">
-          Explore programs, plan your studies, and discover career opportunities
-          with our interactive Program Roadmap.
+          Explore programs, plan your studies, and discover career opportunities with our
+          interactive Program Roadmap.
         </p>
         <div class="hero-actions">
           <RouterLink to="/explore" class="btn btn-hero-primary">
@@ -127,17 +160,28 @@ import { RouterLink } from 'vue-router';
           <h2>Alumni Spotlight</h2>
           <p class="section-subtitle">Hear from our graduates about their journeys</p>
         </div>
-        <div class="alumni-grid">
-          <div class="alumni-card" v-for="i in 3" :key="i">
-            <div class="alumni-avatar"></div>
-            <blockquote>"The strong foundation in algorithms and data structures prepared me well for my career."</blockquote>
-            <div class="alumni-info">
-              <strong>Graduate Name</strong>
-              <span>Software Engineer at Company</span>
-              <span class="alumni-year">Class of 2024</span>
+
+        <!--carousel. -->
+
+        <div class = "carousel">
+          <div class = "alumni-group">
+            <div class="alumni-card" v-for=" (profile, index) in [...alumni, ...alumni]" :key="index">
+              <div class="alumni-avatar">
+                <img :src="profile.profile" alt="alumni profile">
+              </div>
+              <blockquote>
+                {{ profile.blockquote }}
+              </blockquote>
+              <div class="alumni-info">
+                <strong>{{profile.name}}</strong>
+                <span>{{profile .job}}</span>
+                <span class="alumni-year">{{profile.year}}</span>
+              </div>
             </div>
           </div>
         </div>
+
+
         <div class="section-cta">
           <RouterLink to="/student/alumni" class="btn btn-secondary">
             Meet More Alumni
@@ -153,6 +197,8 @@ import { RouterLink } from 'vue-router';
 /* ==========================================
    HERO
    ========================================== */
+
+
 .hero {
   position: relative;
   background: var(--color-primary);
@@ -164,7 +210,15 @@ import { RouterLink } from 'vue-router';
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 50%, var(--color-primary) 100%);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(20, 15, 80, 0.75) 0%,
+      rgba(30, 24, 112, 0.65) 50%,
+      rgba(20, 15, 80, 0.8)
+    ),
+    url("@/assets/images/hero-background.jpg");
   opacity: 0.95;
 }
 
@@ -239,12 +293,13 @@ import { RouterLink } from 'vue-router';
    ========================================== */
 .quick-access {
   padding: var(--space-2xl) 0;
-  margin-top: -48px;
+  margin-top: 32px;
+  margin-bottom: 0;
   position: relative;
   z-index: 2;
 }
 
-.access-grid {
+.access-flex {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-lg);
@@ -434,15 +489,44 @@ import { RouterLink } from 'vue-router';
 /* ==========================================
    ALUMNI SPOTLIGHT
    ========================================== */
+
 .alumni-section {
   padding: var(--space-3xl) 0;
   background: var(--color-bg-secondary);
 }
 
-.alumni-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+.carousel {
+  overflow: hidden;
+  width: 100%;
+
+  display: flex;
+
+
+}
+
+@keyframes scrolling {
+  from{
+    transform: translateX(0%);
+  }
+
+  to{
+    transform: translateX(calc(-50% - 12px));
+  }
+
+}
+
+.alumni-group {
+  width: max-content;
+
+
+
+  display: flex;
   gap: var(--space-lg);
+  animation: scrolling 15s linear infinite;
+}
+
+.alumni-group:hover{
+  animation-play-state: paused;
 }
 
 .alumni-card {
@@ -451,13 +535,22 @@ import { RouterLink } from 'vue-router';
   border-radius: var(--border-radius-lg);
   padding: var(--space-lg);
   text-align: center;
+  flex: 0 0 270px;
+}
+
+.alumni-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  margin: 0 auto;
 }
 
 .alumni-avatar {
-  width: 72px;
-  height: 72px;
+  width: 75px;
+  height: 75px;
   border-radius: var(--border-radius-full);
-  background: var(--color-gray-200);
+  overflow: hidden;
+
   margin: 0 auto var(--space-md);
 }
 
@@ -494,17 +587,38 @@ import { RouterLink } from 'vue-router';
    RESPONSIVE
    ========================================== */
 @media (max-width: 768px) {
-  .hero h1 { font-size: 2rem; }
-  .hero-actions { flex-direction: column; align-items: center; }
-  .access-grid { grid-template-columns: 1fr; }
-  .programs-grid { grid-template-columns: repeat(2, 1fr); }
-  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-xl); }
-  .alumni-grid { grid-template-columns: 1fr; }
-  .quick-access { margin-top: 0; }
+  .hero h1 {
+    font-size: 2rem;
+  }
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  .access-grid {
+    grid-template-columns: 1fr;
+
+  }
+  .programs-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-xl);
+  }
+  .alumni-grid {
+    grid-template-columns: 1fr;
+  }
+  .quick-access {
+    margin-top: 0;
+  }
 }
 
 @media (max-width: 480px) {
-  .programs-grid { grid-template-columns: 1fr; }
-  .stats-grid { grid-template-columns: 1fr; }
+  .programs-grid {
+    grid-template-columns: 1fr;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
