@@ -1,38 +1,39 @@
 <script setup>
-import { RouterLink } from "vue-router";
-import RPimg from "@/assets/images/Rhaneela Punitham.jpeg";
-import LKimg from "@/assets/images/Lasni Kumarasinghe.jpeg"
-import WMimg from "@/assets/images/Walter Marsh.jpeg"
-import DFimg from "@/assets/images/Dave Fletcher.jpg"
+import { ref, onMounted } from 'vue';
+import { RouterLink } from 'vue-router';
+import { getProgramList } from '@/api/programs';
+import RPimg from '@/assets/images/Rhaneela Punitham.jpeg';
+import LKimg from '@/assets/images/Lasni Kumarasinghe.jpeg';
+import WMimg from '@/assets/images/Walter Marsh.jpeg';
+import DFimg from '@/assets/images/Dave Fletcher.jpg';
 
-const alumni = [{
-name : "Rhaneela Punitham",
-job: "Technology Consultant at KPMG",
-year: "Class of 2024",
-blockquote: "The strong foundation in algorithms and data structures prepared me well for my career.",
-profile: RPimg}, {
-name : "Walter Marsh",
-job: "Historian and Writer",
-year: "Class of 2023",
-blockquote: "Humanities studies gave me are the tools, the confidence and the curiosity to make my own path.",
-profile: WMimg
+const programs = ref([]);
 
-}, {
-name : "Dr Lasni Kumarasinghe",
-job: "Specialist Orthodontist",
-year: "Class of 2020",
-blockquote: "Learning from esteemed international lecturers through the program changed my life.",
-profile: LKimg
-},
-{
-name : "Dave Fletcher",
-job: "Winemaker",
-year: "Class of 2018",
-blockquote: "Having one of the top wine schools in the world made it a very easy decision.",
-profile: DFimg
+const alumni = [
+  { name: 'Rhaneela Punitham', job: 'Technology Consultant at KPMG', year: 'Class of 2024', blockquote: 'The strong foundation in algorithms and data structures prepared me well for my career.', profile: RPimg },
+  { name: 'Walter Marsh', job: 'Historian and Writer', year: 'Class of 2023', blockquote: 'Humanities studies gave me are the tools, the confidence and the curiosity to make my own path.', profile: WMimg },
+  { name: 'Dr Lasni Kumarasinghe', job: 'Specialist Orthodontist', year: 'Class of 2020', blockquote: 'Learning from esteemed international lecturers through the program changed my life.', profile: LKimg },
+  { name: 'Dave Fletcher', job: 'Winemaker', year: 'Class of 2018', blockquote: 'Having one of the top wine schools in the world made it a very easy decision.', profile: DFimg },
+];
+
+function getLevelLabel(level) {
+  const labels = { undergraduate: 'Undergraduate', postgraduate: 'Postgraduate', research: 'Research' };
+  return labels[level] || level;
 }
-]
 
+function getDurationText(years) {
+  const y = parseFloat(years);
+  return y === 1 ? '1 year' : `${y} years`;
+}
+
+onMounted(async () => {
+  try {
+    const res = await getProgramList({ limit: 4 });
+    programs.value = res.data.data;
+  } catch (err) {
+    console.error('Failed to load programs:', err);
+  }
+});
 </script>
 
 <template>
@@ -107,18 +108,17 @@ profile: DFimg
           <p class="section-subtitle">Discover our most popular degree programs</p>
         </div>
         <div class="programs-grid">
-          <div class="program-card" v-for="i in 4" :key="i">
+          <RouterLink v-for="p in programs" :key="p.id" :to="`/explore/programs/${p.id}`" class="program-card">
             <div class="program-card-img"></div>
             <div class="program-card-body">
-              <span class="program-tag">Undergraduate</span>
-              <h4>Program Title</h4>
-              <p>Program description will appear here once data is loaded from the database.</p>
+              <span class="program-tag">{{ getLevelLabel(p.level) }}</span>
+              <h4>{{ p.name }}</h4>
+              <p>{{ p.description?.slice(0, 100) }}{{ p.description?.length > 100 ? '...' : '' }}</p>
               <div class="program-meta">
-                <span><span class="material-symbols-outlined">schedule</span> 3 years</span>
-                <span><span class="material-symbols-outlined">trending_up</span> 92% employed</span>
+                <span><span class="material-symbols-outlined">schedule</span> {{ getDurationText(p.duration_years) }}</span>
               </div>
             </div>
-          </div>
+          </RouterLink>
         </div>
         <div class="section-cta">
           <RouterLink to="/explore" class="btn btn-primary">
@@ -392,11 +392,13 @@ profile: DFimg
 }
 
 .program-card {
+  display: block;
   background: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius-lg);
   overflow: hidden;
   transition: all var(--transition-normal);
+  color: inherit;
 }
 
 .program-card:hover {

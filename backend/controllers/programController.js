@@ -242,6 +242,17 @@ async function getFeaturedAlumni(req, res, next) {
   }
 }
 
+async function getAllAlumni(req, res, next) {
+  try {
+    const [alumni] = await pool.query(
+      'SELECT * FROM alumni WHERE is_active = TRUE ORDER BY is_featured DESC, graduation_year DESC'
+    );
+    return success(res, alumni);
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   listPrograms,
   getProgramDetail,
@@ -252,4 +263,5 @@ module.exports = {
   getProgramCareers,
   getProgramResources,
   getFeaturedAlumni,
+  getAllAlumni,
 };

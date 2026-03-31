@@ -10,10 +10,12 @@ const {
   getProgramCareers,
   getProgramResources,
   getFeaturedAlumni,
+  getAllAlumni,
 } = require('../controllers/programController');
 
 router.get('/', listPrograms);
 router.get('/featured-alumni', getFeaturedAlumni);
+router.get('/all-alumni', getAllAlumni);
 router.get('/:id', getProgramDetail);
 router.get('/:id/courses', getProgramCourses);
 router.get('/:id/roadmap', getProgramRoadmap);

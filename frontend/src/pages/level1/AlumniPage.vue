@@ -1,18 +1,14 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useAuthStore } from '@/stores/auth';
-import { getProgramAlumni } from '@/api/programs';
+import api from '@/api/axios';
 
-const authStore = useAuthStore();
 const loading = ref(true);
 const alumni = ref([]);
 const selectedAlumni = ref(null);
 
 async function fetchAlumni() {
-  const programId = authStore.user?.program_id;
-  if (!programId) { loading.value = false; return; }
   try {
-    const res = await getProgramAlumni(programId);
+    const res = await api.get('/programs/all-alumni');
     alumni.value = res.data.data;
   } catch (err) {
     console.error(err);
