@@ -11,6 +11,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isStudent = computed(() => user.value?.role === 'student');
   const isProspective = computed(() => user.value?.role === 'prospective');
   const isAdmin = computed(() => user.value?.role === 'admin');
+  const isAlumni = computed(() => user.value?.role === 'alumni');
   const userRole = computed(() => user.value?.role || null);
 
   async function login(credentials) {
@@ -63,6 +64,7 @@ export const useAuthStore = defineStore('auth', () => {
     isStudent,
     isProspective,
     isAdmin,
+    isAlumni,
     userRole,
     login,
     register,

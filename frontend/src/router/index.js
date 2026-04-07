@@ -143,17 +143,13 @@ const router = createRouter({
           meta: { title: 'Industry Connections' },
         },
         {
-          path: 'alumni',
-          name: 'Alumni',
-          component: () => import('@/pages/level1/AlumniPage.vue'),
-          meta: { title: 'Alumni Network' },
+          path: 'community',
+          name: 'Community',
+          component: () => import('@/pages/level1/CommunityHubPage.vue'),
+          meta: { title: 'Community Hub' },
         },
-        {
-          path: 'discussion',
-          name: 'Discussion',
-          component: () => import('@/pages/level1/DiscussionPage.vue'),
-          meta: { title: 'Discussion' },
-        },
+        { path: 'alumni', redirect: { name: 'Community' } },
+        { path: 'discussion', redirect: { name: 'Community' } },
         {
           path: 'resources',
           name: 'Resources',
@@ -248,6 +244,10 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.role && authStore.user?.role !== to.meta.role) {
+    // Allow alumni to access student pages (community hub)
+    if (to.meta.role === 'student' && authStore.user?.role === 'alumni') {
+      return next();
+    }
     if (authStore.isAdmin) return next({ name: 'AdminDashboard' });
     if (authStore.isStudent) return next({ name: 'StudentDashboard' });
     return next({ name: 'Home' });

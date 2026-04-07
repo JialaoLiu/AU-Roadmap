@@ -103,38 +103,57 @@ INSERT INTO program_industry (program_id, industry_partner_id, opportunity_descr
 (1, 4, 'Research placements in cybersecurity and AI for final-year students.'),
 (1, 5, 'Technology consulting graduate program with Adelaide office placements.');
 
--- Alumni (graduates from University of Adelaide and University of South Australia)
-INSERT INTO alumni (first_name, last_name, graduation_year, program_id, current_role, current_company, location, bio, success_story, linkedin_url, is_featured) VALUES
-('Rhaneela', 'Punitham', 2016, 1, 'Manager, Technology Advisory', 'KPMG', 'Adelaide, SA',
+-- Alumni Users (password: 11111111) - alumni are now real users
+INSERT INTO users (email, password_hash, first_name, last_name, role, avatar_url) VALUES
+('rhaneela.punitham@alumni.adelaide.edu.au', '$2b$10$gRRlccf5BYvcfJj4U3JDbuyiLrDuMwakSNS8RG6yMoFb5/U0N2J3W', 'Rhaneela', 'Punitham', 'alumni', '/alumni/rhaneela-punitham.jpeg'),
+('menno.vanderzee@alumni.adelaide.edu.au', '$2b$10$gRRlccf5BYvcfJj4U3JDbuyiLrDuMwakSNS8RG6yMoFb5/U0N2J3W', 'Menno', 'Van Der Zee', 'alumni', NULL),
+('helena.wu@alumni.adelaide.edu.au', '$2b$10$gRRlccf5BYvcfJj4U3JDbuyiLrDuMwakSNS8RG6yMoFb5/U0N2J3W', 'Helena', 'Wu', 'alumni', NULL),
+('josh.carmichael@alumni.adelaide.edu.au', '$2b$10$gRRlccf5BYvcfJj4U3JDbuyiLrDuMwakSNS8RG6yMoFb5/U0N2J3W', 'Josh', 'Carmichael', 'alumni', NULL),
+('jindou.lee@alumni.adelaide.edu.au', '$2b$10$gRRlccf5BYvcfJj4U3JDbuyiLrDuMwakSNS8RG6yMoFb5/U0N2J3W', 'Jindou', 'Lee', 'alumni', NULL),
+('andrew.bullock@alumni.adelaide.edu.au', '$2b$10$gRRlccf5BYvcfJj4U3JDbuyiLrDuMwakSNS8RG6yMoFb5/U0N2J3W', 'Andrew', 'Bullock', 'alumni', NULL),
+('walter.marsh@alumni.adelaide.edu.au', '$2b$10$gRRlccf5BYvcfJj4U3JDbuyiLrDuMwakSNS8RG6yMoFb5/U0N2J3W', 'Walter', 'Marsh', 'alumni', '/alumni/walter-marsh.jpeg'),
+('lasni.kumarasinghe@alumni.adelaide.edu.au', '$2b$10$gRRlccf5BYvcfJj4U3JDbuyiLrDuMwakSNS8RG6yMoFb5/U0N2J3W', 'Lasni', 'Kumarasinghe', 'alumni', '/alumni/lasni-kumarasinghe.jpeg'),
+('dave.fletcher@alumni.adelaide.edu.au', '$2b$10$gRRlccf5BYvcfJj4U3JDbuyiLrDuMwakSNS8RG6yMoFb5/U0N2J3W', 'Dave', 'Fletcher', 'alumni', '/alumni/dave-fletcher.jpg');
+
+-- Alumni Profiles (user IDs depend on insert order; in a fresh DB with 3 test users, alumni start at ID 4)
+INSERT INTO alumni_profiles (user_id, graduation_year, program_id, current_role, current_company, location, bio, success_story, linkedin_url, is_featured) VALUES
+(4, 2016, 3, 'Manager, Technology Advisory', 'KPMG', 'Adelaide, SA',
  'Graduate of University of Adelaide with a double degree in Health Sciences and Mathematical & Computer Sciences.',
- 'My time at the University of Adelaide gave me a strong analytical foundation. I started as a Technology Risk and Cyber Security consultant at KPMG and have since advanced to Manager in Technology Advisory. The problem-solving skills I developed during my studies have been invaluable in my consulting career.',
+ 'My time at the University of Adelaide gave me a strong analytical foundation. I started as a Technology Risk and Cyber Security consultant at KPMG and have since advanced to Manager in Technology Advisory.',
  'https://www.linkedin.com/in/rhaneela-punitham/',
  TRUE),
-('Menno', 'Van Der Zee', 2020, 1, 'Software Developer', 'ADVAM', 'Adelaide, SA',
+(5, 2020, 1, 'Software Developer', 'ADVAM', 'Adelaide, SA',
  'Bachelor of Computer Science graduate from the University of Adelaide with a passion for building scalable software solutions.',
- 'Studying Computer Science at Adelaide gave me hands-on experience with real projects. I joined ADVAM as a graduate developer and have been working on payment technology solutions. The practical lab work and industry connections through the university made the transition from study to work seamless.',
- NULL,
- TRUE),
-('Helena', 'Wu', 2010, 1, 'Team Leader, New Development', 'Santos Ltd', 'Adelaide, SA',
- 'University of South Australia graduate who has built a career in energy sector technology. Also serves as At Large Director for the Society of Petroleum Engineers International.',
- 'After graduating from UniSA, I joined Santos and have grown into a leadership role in new development projects. The technical skills and business acumen I gained during my studies have been key to my career progression in the energy industry.',
- NULL,
- TRUE),
-('Josh', 'Carmichael', 2015, 1, 'Renewable Energy & Grid Specialist', 'Transdev', 'Adelaide, SA',
+ 'Studying Computer Science at Adelaide gave me hands-on experience with real projects. I joined ADVAM as a graduate developer and have been working on payment technology solutions.',
+ NULL, TRUE),
+(6, 2010, 3, 'Team Leader, New Development', 'Santos Ltd', 'Adelaide, SA',
+ 'University of South Australia graduate who has built a career in energy sector technology.',
+ 'After graduating from UniSA, I joined Santos and have grown into a leadership role in new development projects.',
+ NULL, TRUE),
+(7, 2015, 1, 'Renewable Energy & Grid Specialist', 'Transdev', 'Adelaide, SA',
  'University of South Australia graduate with a Bachelor of Science and Bachelor of International Business.',
- 'My double degree from UniSA gave me both the technical knowledge and business perspective needed for the renewable energy sector. I now work on grid and mobility solutions at Transdev, helping drive the transition to sustainable transport.',
- NULL,
- FALSE),
-('Jindou', 'Lee', 2012, 1, 'CEO and Co-Founder', 'HappyCo', 'Adelaide, SA',
+ 'My double degree from UniSA gave me both the technical knowledge and business perspective needed for the renewable energy sector.',
+ NULL, FALSE),
+(8, 2012, 1, 'CEO and Co-Founder', 'HappyCo', 'Adelaide, SA',
  'University of South Australia Creative graduate who co-founded a successful property technology company.',
- 'The entrepreneurial spirit I developed at UniSA led me to co-found HappyCo, a property technology platform. My studies taught me to think creatively about solving real-world problems, and that mindset has been the foundation of building a successful tech startup.',
- NULL,
- FALSE),
-('Andrew', 'Bullock', 2005, 1, 'Chief Executive Officer', '1834 Hotels', 'Adelaide, SA',
- 'University of South Australia Business graduate with a Bachelor of Management in Tourism and Hospitality. Also serves as Chair of the South Australian Tourism Commission.',
- 'My degree from UniSA in Tourism and Hospitality set the course for my entire career. From managing individual properties to now leading 1834 Hotels as CEO and chairing the SA Tourism Commission, the industry knowledge and leadership skills I gained at university have been foundational.',
- NULL,
- FALSE);
+ 'The entrepreneurial spirit I developed at UniSA led me to co-found HappyCo, a property technology platform.',
+ NULL, FALSE),
+(9, 2005, 1, 'Chief Executive Officer', '1834 Hotels', 'Adelaide, SA',
+ 'University of South Australia Business graduate. Also serves as Chair of the South Australian Tourism Commission.',
+ 'My degree from UniSA in Tourism and Hospitality set the course for my entire career.',
+ NULL, FALSE),
+(10, 2023, 1, 'Historian and Writer', 'Independent', 'Adelaide, SA',
+ 'University of Adelaide graduate and acclaimed historian.',
+ 'My studies at Adelaide gave me the analytical and research skills to pursue a career in historical writing.',
+ NULL, FALSE),
+(11, 2020, 3, 'Specialist Orthodontist', 'Private Practice', 'Adelaide, SA',
+ 'University of Adelaide graduate with advanced qualifications in orthodontics.',
+ 'The rigorous academic environment at Adelaide prepared me for specialist practice.',
+ NULL, FALSE),
+(12, 2018, 1, 'Winemaker', 'Penfolds', 'Barossa Valley, SA',
+ 'University of Adelaide oenology graduate with a passion for premium wine production.',
+ 'My degree in oenology from Adelaide gave me the scientific foundation for a career in winemaking.',
+ NULL, FALSE);
 
 -- Courses for Master of Information Technology
 INSERT INTO courses (code, name, units, level, semester_offered, description, is_elective) VALUES
@@ -176,14 +195,10 @@ INSERT INTO program_industry (program_id, industry_partner_id, opportunity_descr
 (3, 4, 'Cybersecurity research and analysis placements for postgraduate students.'),
 (3, 5, 'Technology consulting and digital transformation roles for MIT graduates.');
 
--- Update some alumni to MIT program
-UPDATE alumni SET program_id = 3 WHERE last_name = 'Punitham';
-UPDATE alumni SET program_id = 3 WHERE last_name = 'Wu';
-
 -- Discussion Threads for MIT
-INSERT INTO discussion_threads (program_id, user_id, title, content, reply_count, is_pinned) VALUES
-(3, 1, 'Best cloud certifications to complement MIT degree?', 'I''m currently in my first year of the MIT program. Has anyone combined their studies with AWS or Azure certifications? Would love to hear what worked for you.', 0, 0),
-(3, 3, 'Welcome to the Discussion Board!', 'This is a space for all Adelaide University students and alumni to connect, share advice, and discuss career paths. Feel free to start a conversation!', 0, 1);
+INSERT INTO discussion_threads (program_id, user_id, title, content, category, reply_count, is_pinned) VALUES
+(3, 1, 'Best cloud certifications to complement MIT degree?', 'I''m currently in my first year of the MIT program. Has anyone combined their studies with AWS or Azure certifications? Would love to hear what worked for you.', 'career', 0, 0),
+(NULL, 3, 'Welcome to the Community!', 'This is a space for all Adelaide University students and alumni to connect, share advice, and discuss career paths. Feel free to start a conversation!', 'general', 0, 1);
 
 -- Career Outcomes for MIT
 INSERT INTO career_outcomes (program_id, year, employment_rate, median_salary, salary_range_low, salary_range_high, further_study_rate, satisfaction_rate, source) VALUES
@@ -248,11 +263,26 @@ INSERT INTO content_blocks (page_key, section_key, title, subtitle, body_html, c
  '<ul><li>92% graduate employment rate</li><li>$75,000 median starting salary</li><li>50+ industry partners</li><li>100+ student clubs</li></ul>', NULL, NULL, 2);
 
 -- Discussion Threads
-INSERT INTO discussion_threads (program_id, user_id, title, content, reply_count, is_pinned) VALUES
-(1, 1, 'Tips for finding a software internship in Adelaide?', 'Hi everyone! I''m a second-year CS student looking for internship opportunities in Adelaide over the summer break. Any advice on where to look or how to prepare? Would love to hear from alumni who have been through the process.', 2, 0),
-(1, 3, 'Welcome to the Discussion Board!', 'This is a space for current students and alumni to connect, share advice, and discuss career paths. Feel free to start a conversation!', 0, 1);
+INSERT INTO discussion_threads (program_id, user_id, title, content, category, reply_count, is_pinned) VALUES
+(1, 1, 'Tips for finding a software internship in Adelaide?', 'Hi everyone! I''m a second-year CS student looking for internship opportunities in Adelaide over the summer break. Any advice on where to look or how to prepare? Would love to hear from alumni who have been through the process.', 'career', 2, 0),
+(1, 3, 'Welcome to the Discussion Board!', 'This is a space for current students and alumni to connect, share advice, and discuss career paths. Feel free to start a conversation!', 'general', 0, 1);
 
 -- Discussion Replies
 INSERT INTO discussion_replies (thread_id, user_id, content) VALUES
 (1, 3, 'Great question! I''d recommend checking out the university careers portal and attending the Industry Research Partnership Forum in April. Networking events are a great way to meet potential employers.'),
 (1, 1, 'Thanks for the advice! I''ll definitely check out the careers portal and sign up for the forum.');
+
+-- Sample User Connections (user IDs: 1=Jialao, 4=Rhaneela, 5=Menno, 6=Helena)
+INSERT INTO user_connections (requester_id, receiver_id, status) VALUES
+(1, 4, 'accepted'),
+(1, 5, 'accepted'),
+(1, 6, 'pending'),
+(4, 5, 'accepted');
+
+-- Sample Messages
+INSERT INTO messages (sender_id, receiver_id, content, is_read) VALUES
+(1, 4, 'Hi Rhaneela! I''m a current MIT student. Would love to hear about your experience at KPMG.', TRUE),
+(4, 1, 'Hi Jialao! Happy to chat. I started in the Technology Risk team after graduation. What area are you interested in?', TRUE),
+(1, 4, 'I''m particularly interested in cloud computing and cybersecurity consulting. Any advice?', FALSE),
+(1, 5, 'Hey Menno! How did you find the transition from uni to working at ADVAM?', TRUE),
+(5, 1, 'It was pretty smooth actually. The practical projects we did in the CS program really helped prepare me for the real world.', FALSE);

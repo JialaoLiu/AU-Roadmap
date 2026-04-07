@@ -11,7 +11,7 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
-    role ENUM('student', 'prospective', 'admin') NOT NULL DEFAULT 'prospective',
+    role ENUM('student', 'prospective', 'admin', 'alumni') NOT NULL DEFAULT 'prospective',
     avatar_url VARCHAR(500),
     student_id VARCHAR(50),
     program_id INT,
@@ -236,13 +236,67 @@ CREATE TABLE campus_highlights (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 15. DISCUSSION THREADS
+-- 15. ALUMNI PROFILES (linked to users with role='alumni')
+CREATE TABLE alumni_profiles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE,
+    graduation_year INT NOT NULL,
+    program_id INT NOT NULL,
+    current_role VARCHAR(255),
+    current_company VARCHAR(255),
+    location VARCHAR(255),
+    bio TEXT,
+    success_story TEXT,
+    linkedin_url VARCHAR(500),
+    is_featured BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE,
+    INDEX idx_user (user_id),
+    INDEX idx_program (program_id),
+    INDEX idx_featured (is_featured)
+);
+
+-- 16. USER CONNECTIONS (follow/friend system)
+CREATE TABLE user_connections (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    requester_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_connection (requester_id, receiver_id),
+    INDEX idx_requester (requester_id),
+    INDEX idx_receiver (receiver_id),
+    INDEX idx_status (status)
+);
+
+-- 17. MESSAGES (private messaging)
+CREATE TABLE messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    content TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_sender (sender_id),
+    INDEX idx_receiver (receiver_id),
+    INDEX idx_conversation (sender_id, receiver_id)
+);
+
+-- 18. DISCUSSION THREADS
 CREATE TABLE discussion_threads (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    program_id INT NOT NULL,
+    program_id INT,
     user_id INT NOT NULL,
     title VARCHAR(200) NOT NULL,
     content TEXT NOT NULL,
+    category VARCHAR(50) DEFAULT 'general',
     reply_count INT DEFAULT 0,
     is_pinned TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -250,10 +304,11 @@ CREATE TABLE discussion_threads (
     FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_program (program_id),
-    INDEX idx_user (user_id)
+    INDEX idx_user (user_id),
+    INDEX idx_category (category)
 );
 
--- 16. DISCUSSION REPLIES
+-- 19. DISCUSSION REPLIES
 CREATE TABLE discussion_replies (
     id INT AUTO_INCREMENT PRIMARY KEY,
     thread_id INT NOT NULL,
