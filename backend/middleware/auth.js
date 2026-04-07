@@ -17,4 +17,17 @@ function authenticate(req, res, next) {
   }
 }
 
-module.exports = authenticate;
+function optionalAuth(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    try {
+      const token = authHeader.split(' ')[1];
+      req.user = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      // Token invalid — continue as unauthenticated
+    }
+  }
+  next();
+}
+
+module.exports = { authenticate, optionalAuth };

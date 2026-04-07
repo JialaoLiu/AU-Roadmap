@@ -171,7 +171,13 @@ async function getProgramAlumni(req, res, next) {
   try {
     const { id } = req.params;
     const [alumni] = await pool.query(
-      'SELECT * FROM alumni WHERE program_id = ? AND is_active = TRUE ORDER BY graduation_year DESC',
+      `SELECT u.id, u.first_name, u.last_name, u.avatar_url AS photo_url,
+              ap.graduation_year, ap.current_role, ap.current_company, ap.location,
+              ap.bio, ap.success_story, ap.linkedin_url, ap.is_featured
+       FROM users u
+       JOIN alumni_profiles ap ON u.id = ap.user_id
+       WHERE ap.program_id = ? AND u.role = 'alumni'
+       ORDER BY ap.graduation_year DESC`,
       [id]
     );
     return success(res, alumni);
@@ -234,7 +240,13 @@ async function getProgramResources(req, res, next) {
 async function getFeaturedAlumni(req, res, next) {
   try {
     const [alumni] = await pool.query(
-      'SELECT * FROM alumni WHERE is_featured = TRUE AND is_active = TRUE ORDER BY graduation_year DESC LIMIT 3'
+      `SELECT u.id, u.first_name, u.last_name, u.avatar_url AS photo_url,
+              ap.graduation_year, ap.current_role, ap.current_company, ap.location,
+              ap.bio, ap.success_story, ap.linkedin_url, ap.is_featured
+       FROM users u
+       JOIN alumni_profiles ap ON u.id = ap.user_id
+       WHERE u.role = 'alumni' AND ap.is_featured = TRUE
+       ORDER BY ap.graduation_year DESC LIMIT 3`
     );
     return success(res, alumni);
   } catch (err) {
@@ -245,7 +257,13 @@ async function getFeaturedAlumni(req, res, next) {
 async function getAllAlumni(req, res, next) {
   try {
     const [alumni] = await pool.query(
-      'SELECT * FROM alumni WHERE is_active = TRUE ORDER BY is_featured DESC, graduation_year DESC'
+      `SELECT u.id, u.first_name, u.last_name, u.avatar_url AS photo_url,
+              ap.graduation_year, ap.current_role, ap.current_company, ap.location,
+              ap.bio, ap.success_story, ap.linkedin_url, ap.is_featured
+       FROM users u
+       JOIN alumni_profiles ap ON u.id = ap.user_id
+       WHERE u.role = 'alumni'
+       ORDER BY ap.is_featured DESC, ap.graduation_year DESC`
     );
     return success(res, alumni);
   } catch (err) {

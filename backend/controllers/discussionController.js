@@ -1,7 +1,36 @@
 const pool = require('../config/db');
 const { success, error } = require('../utils/response');
 
-// GET threads for a program
+// GET all threads (supports optional program_id and category filters)
+async function getAllThreads(req, res, next) {
+  try {
+    const { category, program_id } = req.query;
+    let query = `
+      SELECT t.*, u.first_name, u.last_name, u.role AS user_role, u.avatar_url
+      FROM discussion_threads t
+      JOIN users u ON t.user_id = u.id
+      WHERE 1=1
+    `;
+    const params = [];
+
+    if (program_id) {
+      query += ' AND t.program_id = ?';
+      params.push(program_id);
+    }
+    if (category && category !== 'all') {
+      query += ' AND t.category = ?';
+      params.push(category);
+    }
+
+    query += ' ORDER BY t.is_pinned DESC, t.updated_at DESC';
+    const [threads] = await pool.query(query, params);
+    return success(res, threads);
+  } catch (err) {
+    next(err);
+  }
+}
+
+// GET threads for a program (legacy route)
 async function getThreads(req, res, next) {
   try {
     const { programId } = req.params;
@@ -54,13 +83,13 @@ async function getThread(req, res, next) {
 // POST create thread
 async function createThread(req, res, next) {
   try {
-    const { programId } = req.params;
-    const { title, content } = req.body;
+    const programId = req.params.programId || req.body.program_id || null;
+    const { title, content, category } = req.body;
     const userId = req.user.id;
 
     const [result] = await pool.query(
-      'INSERT INTO discussion_threads (program_id, user_id, title, content) VALUES (?, ?, ?, ?)',
-      [programId, userId, title, content]
+      'INSERT INTO discussion_threads (program_id, user_id, title, content, category) VALUES (?, ?, ?, ?, ?)',
+      [programId, userId, title, content, category || 'general']
     );
 
     const [rows] = await pool.query(
@@ -165,4 +194,4 @@ async function deleteReply(req, res, next) {
   }
 }
 
-module.exports = { getThreads, getThread, createThread, createReply, deleteThread, deleteReply };
+module.exports = { getAllThreads, getThreads, getThread, createThread, createReply, deleteThread, deleteReply };

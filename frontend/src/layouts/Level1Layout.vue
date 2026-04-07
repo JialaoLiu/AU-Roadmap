@@ -10,8 +10,7 @@ const sidebarLinks = [
   { to: '/student', label: 'Dashboard', icon: 'dashboard', exact: true },
   { to: '/student/roadmap', label: 'My Roadmap', icon: 'route' },
   { to: '/student/industry', label: 'Industry', icon: 'business' },
-  { to: '/student/alumni', label: 'Alumni', icon: 'group' },
-  { to: '/student/discussion', label: 'Discussion', icon: 'forum' },
+  { to: '/student/community', label: 'Community', icon: 'groups' },
   { to: '/student/resources', label: 'Resources', icon: 'menu_book' },
 ];
 </script>
