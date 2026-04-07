@@ -137,6 +137,12 @@ const router = createRouter({
           meta: { title: 'My Roadmap' },
         },
         {
+          path: 'timetable',
+          name: 'Timetable',
+          component: () => import('@/pages/level1/TimetablePage.vue'),
+          meta: { title: 'My Timetable' },
+        },
+        {
           path: 'industry',
           name: 'Industry',
           component: () => import('@/pages/level1/IndustryPage.vue'),
