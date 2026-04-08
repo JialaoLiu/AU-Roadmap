@@ -55,8 +55,7 @@ onMounted(fetchData);
       90deg,
       rgba(20, 15, 80, 0.75) 0%,
       rgba(0,0,0,0) 100%
-
-    ), url(${program.image})` }">
+    ), url(${program.banner_url})` }">
         <div class="hero-inner">
           <div class="hero-meta">
             <button class="back-btn" @click="router.push('/explore')">

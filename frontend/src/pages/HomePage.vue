@@ -113,8 +113,7 @@ onMounted(async () => {
       0deg,
       rgba(20, 15, 80, 0.35) 0%,
       rgba(0,0,0,0) 100%
-
-    ), url(${p.image})` }"></div>
+    ), url(${p.banner_url})` }"></div>
             <div class="program-card-body">
               <span class="program-tag">{{ getLevelLabel(p.level) }}</span>
               <h4>{{ p.name }}</h4>
