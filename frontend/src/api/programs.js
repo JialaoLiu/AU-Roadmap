@@ -39,3 +39,4 @@ export function comparePrograms(ids) {
 export function getFeaturedAlumni() {
   return api.get('/programs/featured-alumni');
 }
+

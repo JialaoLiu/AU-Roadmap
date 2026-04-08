@@ -157,35 +157,46 @@ INSERT INTO alumni_profiles (user_id, graduation_year, program_id, current_role,
 
 -- Courses for Master of Information Technology
 INSERT INTO courses (code, name, units, level, semester_offered, description, is_elective) VALUES
--- Year 1
-('COMP5101', 'Software Architecture and Design', 3, 'postgrad', 'S1', 'Advanced software design patterns, architectural styles, and quality attributes. Design of large-scale distributed systems.', FALSE),
-('COMP5102', 'Data Science and Machine Learning', 3, 'postgrad', 'S1', 'Statistical modelling, supervised and unsupervised learning, neural networks, and practical applications of ML in industry.', FALSE),
-('COMP5103', 'IT Project Management', 3, 'postgrad', 'S2', 'Agile and traditional project management methodologies. Risk management, stakeholder communication, and project delivery.', FALSE),
-('COMP5104', 'Cloud Computing and DevOps', 3, 'postgrad', 'S2', 'Cloud platforms (AWS, Azure), containerisation, CI/CD pipelines, infrastructure as code, and microservices architecture.', FALSE),
--- Year 2
-('COMP5201', 'Cybersecurity Fundamentals', 3, 'postgrad', 'S1', 'Security principles, threat modelling, cryptography, network security, and security governance frameworks.', FALSE),
+-- Year 1 S1
+('COMP SCI7207', 'Web and Database Computing', 3, 'postgrad', 'S1', 'Full-stack web development, relational databases, SQL, RESTful APIs, and modern web frameworks.', FALSE),
+('COMP SCI7210', 'Foundations of Computer Science A', 3, 'postgrad', 'S1', 'Core theoretical foundations of computer science including logic, sets, algorithms, and computational thinking.', FALSE),
+('COMP SCI7211', 'Foundations of Computer Science B', 3, 'postgrad', 'S1', 'Advanced theoretical concepts in computer science including complexity, formal languages, and abstract computation.', FALSE),
+('PROJMGNT5021', 'Project Management Fundamentals', 3, 'postgrad', 'S1', 'Introduction to project management methodologies, planning, scheduling, risk management, and team coordination.', FALSE),
+-- Year 1 S2
+('COMP SCI7064', 'Operating Systems', 3, 'postgrad', 'S2', 'Process management, memory management, file systems, scheduling, and concurrent programming.', FALSE),
+('COMP SCI7081', 'Computer Systems', 3, 'postgrad', 'S2', 'Computer architecture, hardware-software interfaces, low-level programming, and system-level design.', FALSE),
+('COMP SCI7201', 'Algorithm & Data Structure Analysis', 3, 'postgrad', 'S2', 'Advanced algorithm design and analysis, complexity theory, sorting, searching, graphs, and dynamic programming.', FALSE),
+('COMP SCI7212', 'Human and Ethical Factors in Computer Science', 3, 'postgrad', 'S2', 'Ethics in computing, human-computer interaction, accessibility, privacy, and societal impact of technology.', FALSE),
+('COMP SCI7307', 'Secure Programming', 3, 'postgrad', 'S2', 'Secure coding practices, common vulnerabilities (OWASP), input validation, authentication, and secure software design.', FALSE),
+-- Year 2 S1
 ('COMP5800', 'Industry Research Project', 3, 'postgrad', 'S1', 'Collaborative industry research project addressing real-world challenges. Students work with industry partners to deliver practical solutions.', FALSE),
+('INFO6003', 'Security Architecture and Engineering', 3, 'postgrad', 'S1', 'Security architecture frameworks, threat modelling, enterprise security design, and engineering secure systems.', FALSE),
+('COMP6025', 'Stakeholders Engagement', 3, 'postgrad', 'S1', 'Strategies for effective stakeholder identification, communication, and management throughout the software project lifecycle.', FALSE),
+-- Year 2 S2
 ('COMP5203', 'IT Research Methods', 3, 'postgrad', 'S2', 'Research methodologies for IT, literature review techniques, experimental design, and academic writing.', TRUE),
 ('COMP5204', 'IT Masters Project', 6, 'postgrad', 'S1,S2', 'Capstone project applying advanced IT skills to a real-world problem in collaboration with industry partners.', FALSE);
 
 -- Program-Course Mapping for MIT
+-- Note: course IDs 13-26 in a fresh DB (9 Y1 + 3 Y2S1 + 2 Y2S2)
 INSERT INTO program_courses (program_id, course_id, year_level, semester, is_core, course_group, sort_order) VALUES
-(3, 13, 1, 1, TRUE, 'Core', 1),   -- COMP5101 Y1S1
-(3, 14, 1, 1, TRUE, 'Core', 2),   -- COMP5102 Y1S1
-(3, 15, 1, 2, TRUE, 'Core', 1),   -- COMP5103 Y1S2
-(3, 16, 1, 2, TRUE, 'Core', 2),   -- COMP5104 Y1S2
-(3, 17, 2, 1, TRUE, 'Core', 1),   -- COMP5201 Y2S1
-(3, 18, 2, 1, TRUE, 'Core', 2),   -- COMP5202 Y2S1
-(3, 19, 2, 2, FALSE, 'Elective', 1), -- COMP5203 Y2S2
-(3, 20, 2, 2, TRUE, 'Core', 2);   -- COMP5204 Y2S2
-
--- Prerequisites for MIT
-INSERT INTO prerequisites (course_id, prerequisite_course_id, is_corequisite) VALUES
-(17, 13, FALSE),  -- Cybersecurity requires Software Architecture
-(18, 14, FALSE),  -- Advanced DB requires Data Science
-(19, 15, FALSE),  -- Research Methods requires IT Project Management
-(20, 13, FALSE),  -- Masters Project requires Software Architecture
-(20, 15, FALSE);  -- Masters Project requires IT Project Management
+-- Y1S1
+(3, 13, 1, 1, TRUE, 'Core', 1),   -- COMP SCI7207
+(3, 14, 1, 1, TRUE, 'Core', 2),   -- COMP SCI7210
+(3, 15, 1, 1, TRUE, 'Core', 3),   -- COMP SCI7211
+(3, 16, 1, 1, TRUE, 'Core', 4),   -- PROJMGNT5021
+-- Y1S2
+(3, 17, 1, 2, TRUE, 'Core', 1),   -- COMP SCI7064
+(3, 18, 1, 2, TRUE, 'Core', 2),   -- COMP SCI7081
+(3, 19, 1, 2, TRUE, 'Core', 3),   -- COMP SCI7201
+(3, 20, 1, 2, TRUE, 'Core', 4),   -- COMP SCI7212
+(3, 21, 1, 2, TRUE, 'Core', 5),   -- COMP SCI7307
+-- Y2S1
+(3, 22, 2, 1, TRUE, 'Core', 1),   -- COMP5800
+(3, 23, 2, 1, TRUE, 'Core', 2),   -- INFO6003
+(3, 24, 2, 1, TRUE, 'Core', 3),   -- COMP6025
+-- Y2S2
+(3, 25, 2, 2, FALSE, 'Elective', 1), -- COMP5203
+(3, 26, 2, 2, TRUE, 'Core', 2);   -- COMP5204
 
 -- Program-Industry Mapping for MIT
 INSERT INTO program_industry (program_id, industry_partner_id, opportunity_description) VALUES
