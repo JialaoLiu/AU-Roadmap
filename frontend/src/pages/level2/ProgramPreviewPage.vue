@@ -51,13 +51,21 @@ onMounted(fetchData);
 
     <template v-else-if="program">
       <!-- Hero Banner -->
-      <div class="preview-hero">
+      <div class="preview-hero" :style="{ backgroundImage: `linear-gradient(
+      90deg,
+      rgba(20, 15, 80, 0.75) 0%,
+      rgba(0,0,0,0) 100%
+
+    ), url(${program.image})` }">
         <div class="hero-inner">
-          <button class="back-btn" @click="router.push('/explore')">
+          <div class="hero-meta">
+            <button class="back-btn" @click="router.push('/explore')">
             <span class="material-symbols-outlined">arrow_back</span>
             Back to Programs
           </button>
           <span class="hero-level">{{ program.level }}</span>
+          </div>
+
           <h1>{{ program.name }}</h1>
           <p class="hero-code">{{ program.code }}</p>
           <div class="hero-stats">
@@ -77,6 +85,14 @@ onMounted(fetchData);
               <span class="material-symbols-outlined">school</span>
               {{ totalUnits }} units
             </div>
+          </div>
+
+          <div class="hero-cta">
+            <button class="cta-btn" @click="router.push('/explore/apply')">
+                Apply Now
+            </button>
+            <a href="" >Learn More</a>
+
           </div>
         </div>
       </div>
@@ -241,11 +257,21 @@ onMounted(fetchData);
 
 /* Hero */
 .preview-hero {
-  background: var(--color-primary); color: var(--color-white);
+  background: var(--color-primary);
+  color: var(--color-white);
+  background-size: cover;
+  background-position:center 40%;
+  height:80vh;
+
   padding: var(--space-xl) var(--space-lg) var(--space-2xl);
 }
 
 .hero-inner { max-width: 1200px; margin: 0 auto; }
+.hero-meta {
+  display:flex;
+  justify-items: center;
+  gap:16px;
+}
 
 .back-btn {
   display: inline-flex; align-items: center; gap: 4px;
@@ -258,9 +284,13 @@ onMounted(fetchData);
 .back-btn .material-symbols-outlined { font-size: 16px; }
 
 .hero-level {
-  display: inline-block; padding: 2px 10px; border-radius: var(--border-radius-full);
-  background: rgba(255,255,255,0.2); font-size: 11px; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: var(--space-sm);
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,0.15); border: none; color: var(--color-white);
+   padding: var(--space-xs) var(--space-md); border-radius: var(--border-radius-md);
+  font-size: var(--font-size-xs); font-family: inherit; cursor: pointer;
+  margin-bottom: var(--space-lg); transition: background var(--transition-fast);
+  text-transform: uppercase;
+  font-weight: 600;
 }
 
 .preview-hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: var(--space-xs); }
@@ -269,6 +299,39 @@ onMounted(fetchData);
 .hero-stats { display: flex; gap: var(--space-xl); flex-wrap: wrap; }
 .hero-stat { display: flex; align-items: center; gap: var(--space-xs); font-size: var(--font-size-sm); opacity: 0.9; }
 .hero-stat .material-symbols-outlined { font-size: 20px; }
+
+.hero-cta {
+  display: flex;
+  align-items: center;
+  gap:var(--space-2xl);
+  margin-top: var(--space-3xl);
+
+}
+
+.hero-cta a{
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  border: 1px solid #fff;
+  color: #ffff;
+  border-radius: var(--border-radius-md);
+  padding: var(--space-md) var(--space-xl);
+  font-size: var(--font-size-md);
+  font-weight: 600;
+
+}
+
+
+
+.cta-btn {
+  line-height: 1;
+  background-color:white;
+  color: rgb(20, 15, 80);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-md) var(--space-xl);
+  font-size: var(--font-size-md);
+  font-weight: 600;
+}
 
 /* Tabs */
 .tabs-container {

@@ -109,7 +109,12 @@ onMounted(async () => {
         </div>
         <div class="programs-grid">
           <RouterLink v-for="p in programs" :key="p.id" :to="`/explore/programs/${p.id}`" class="program-card">
-            <div class="program-card-img"></div>
+            <div class="program-card-img" :style="{ backgroundImage: `linear-gradient(
+      0deg,
+      rgba(20, 15, 80, 0.35) 0%,
+      rgba(0,0,0,0) 100%
+
+    ), url(${p.image})` }"></div>
             <div class="program-card-body">
               <span class="program-tag">{{ getLevelLabel(p.level) }}</span>
               <h4>{{ p.name }}</h4>
@@ -299,6 +304,7 @@ onMounted(async () => {
   z-index: 2;
 }
 
+
 .access-flex {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -408,7 +414,14 @@ onMounted(async () => {
 
 .program-card-img {
   height: 160px;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  background-size: cover;
+  background-position:center;
+
+
+}
+
+.program-card-img img {
+  object-fit: cover;
 }
 
 .program-card-body {
