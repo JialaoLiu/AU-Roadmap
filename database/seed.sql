@@ -11,31 +11,31 @@ INSERT INTO users (email, password_hash, first_name, last_name, role, student_id
 ('admin@example.com', '$2b$10$gRRlccf5BYvcfJj4U3JDbuyiLrDuMwakSNS8RG6yMoFb5/U0N2J3W', 'Admin', 'User', 'admin', NULL);
 
 -- Programs
-INSERT INTO programs (code, name, level, duration_years, faculty, description, entry_requirements, atar_requirement, fees_domestic, fees_international) VALUES
+INSERT INTO programs (code, name, level, duration_years, faculty, description, entry_requirements, atar_requirement, fees_domestic, fees_international, banner_url) VALUES
 ('BCOMP', 'Bachelor of Computer Science', 'undergraduate', 3.0, 'Sciences, Engineering and Technology',
  'The Bachelor of Computer Science provides a comprehensive education in computing fundamentals, software development, algorithms, and modern technologies. Students gain hands-on experience through projects and industry placements.',
  'Completion of SACE or equivalent with a minimum ATAR. Prerequisites: Mathematical Methods.',
- 80.0, 34500.00, 46000.00),
+ 80.0, 34500.00, 46000.00, '/program/hero-banner-computer-science.jpg'),
 
 ('BENG-SW', 'Bachelor of Engineering (Software)', 'undergraduate', 4.0, 'Sciences, Engineering and Technology',
  'The Bachelor of Engineering (Software) combines core engineering principles with software development expertise. This accredited program prepares graduates for professional engineering roles in the software industry.',
  'Completion of SACE or equivalent with a minimum ATAR. Prerequisites: Specialist Mathematics, Physics.',
- 85.0, 37000.00, 48000.00),
+ 85.0, 37000.00, 48000.00, '/program/hero-banner-software-engineer.jpg'),
 
 ('MIT', 'Master of Information Technology', 'postgraduate', 2.0, 'Sciences, Engineering and Technology',
  'The Master of Information Technology is designed for graduates looking to transition into IT or deepen their technical expertise. Covers advanced topics in software engineering, data science, and cybersecurity.',
  'Bachelor degree with minimum GPA 5.0/7.0 or equivalent.',
- NULL, 38000.00, 50000.00),
+ NULL, 38000.00, 50000.00, '/program/hero-banner-software-engineer.jpg'),
 
 ('BDS', 'Bachelor of Data Science', 'undergraduate', 3.0, 'Sciences, Engineering and Technology',
  'The Bachelor of Data Science equips students with skills in statistics, machine learning, data engineering, and visualization. Graduates are prepared for the growing demand in data-driven industries.',
  'Completion of SACE or equivalent. Prerequisites: Mathematical Methods.',
- 78.0, 34500.00, 46000.00),
+ 78.0, 34500.00, 46000.00, '/program/hero-banner-data-science.jpg'),
 
 ('BCYBER', 'Bachelor of Cybersecurity', 'undergraduate', 3.0, 'Sciences, Engineering and Technology',
  'The Bachelor of Cybersecurity prepares students to protect digital systems and networks. Covers network security, digital forensics, ethical hacking, and security governance.',
  'Completion of SACE or equivalent with a minimum ATAR.',
- 75.0, 34500.00, 46000.00);
+ 75.0, 34500.00, 46000.00, '/program/hero-banner-cyber-security.jpg');
 
 -- Update student user with program
 UPDATE users SET program_id = 3 WHERE email = 'jialaoliu@adelaide.edu.au';
