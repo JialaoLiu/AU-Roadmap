@@ -7,6 +7,17 @@ const props = defineProps({
   roadmap: { type: Array, required: true },
 });
 
+// Build a flat id → course map for prerequisite name lookup
+const courseMap = computed(() => {
+  const map = {};
+  props.roadmap.forEach(year => {
+    year.semesters.forEach(sem => {
+      sem.courses.forEach(c => { map[c.id] = c; });
+    });
+  });
+  return map;
+});
+
 const emit = defineEmits(['course-select']);
 
 const hoveredCourse = ref(null);
@@ -129,7 +140,10 @@ function getTotalUnits(courses) {
             <ul class="prereq-list">
               <li v-for="prereq in selectedCourse.prerequisites" :key="prereq.course_id">
                 <span class="prereq-dot prereq-dot--required"></span>
-                Course ID: {{ prereq.course_id }}
+                <span v-if="courseMap[prereq.course_id]">
+                  {{ courseMap[prereq.course_id].code }} — {{ courseMap[prereq.course_id].name }}
+                </span>
+                <span v-else>Course {{ prereq.course_id }}</span>
                 <span v-if="prereq.is_corequisite" class="coreq-badge">Corequisite</span>
               </li>
             </ul>
@@ -143,7 +157,10 @@ function getTotalUnits(courses) {
             <ul class="prereq-list">
               <li v-for="depId in selectedCourse.prerequisite_for" :key="depId">
                 <span class="prereq-dot prereq-dot--dependent"></span>
-                Course ID: {{ depId }}
+                <span v-if="courseMap[depId]">
+                  {{ courseMap[depId].code }} — {{ courseMap[depId].name }}
+                </span>
+                <span v-else>Course {{ depId }}</span>
               </li>
             </ul>
           </div>

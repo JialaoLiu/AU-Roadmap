@@ -1,0 +1,140 @@
+bug记录
+
+// FIXED
+
+1. Searchbar 页面需要权限
+   搜索结果直接跳转到登录页
+   原因：navigateToResult 函数将结果跳转到 /student/alumni、/student/industry
+         这些路由设置了 requiresAuth: true，未登录用户触发导航守卫被重定向到登录页
+   解决：改为跳转公开路由 /research/connect、/research/connect#partner，
+         无需登录即可访问
+
+2. 标题颜色不清晰
+   原因：深色背景上使用了默认文字颜色，对比度不足，影响可读性
+   解决：调整标题 color 使用高对比度颜色或白色，确保符合 WCAG 可读性标准
+
+3. .env 数据库配置问题
+   原因：.env 文件中 DB_HOST / DB_USER / DB_PASSWORD / DB_NAME 配置项
+         与本地 MySQL 实际参数不匹配，或 .env 文件未被正确加载
+   解决：核对 .env 文件各项参数与本地数据库一致，
+         确认 server.js 顶部已调用 require('dotenv').config()
+
+4. 数据库导入报错
+   ERROR 1050 Table 'users' already exists
+   ERROR 1062 Duplicate entry
+   原因：重复执行 schema.sql 导致表已存在冲突；
+         重复执行 seed.sql 导致主键/唯一键重复插入
+   解决：schema.sql 改用 CREATE TABLE IF NOT EXISTS；
+         seed.sql 执行前先 TRUNCATE 相关表，或使用 INSERT IGNORE
+
+5. 登录失败（Invalid email or password 401）
+   原因：seed.sql 中密码字段为明文字符串，
+         但 auth controller 使用 bcrypt.compare() 做验证，明文无法匹配
+   解决：将 seed.sql 中所有密码改为对应的 bcrypt hash 值
+         （如密码 11111111 对应 $2b$10$gRRlcc...）
+
+6. 控制台警告：The next() callback in navigation guards is deprecated
+   原因：router/index.js 的 beforeEach 使用了 Vue Router 3 风格的 next() 回调，
+         Vue Router 4 中该方式已弃用
+   解决：将 next({ name: 'Login' }) 等写法改为 return { name: 'Login' }，
+         使用 return 值代替 next() 回调
+
+
+// 0318 → 0414 FIXED
+
+7. Roadmap 页面 popup menu 显示课程 ID 而非课程名
+   原因：RoadmapTimeline.vue 中 Prerequisites 和 Required For 列表直接渲染
+         prereq.course_id / depId 数字，未做 ID → 课程名映射
+   解决：在 RoadmapTimeline.vue 中新增 courseMap computed，
+         将 roadmap prop 中所有课程展平为 { id: course } 映射表，
+         渲染时改为 courseMap[id].code + courseMap[id].name，
+         找不到时降级显示 Course {id}
+
+8. Search bar 搜索跳转课程后显示空白
+   原因：navigateToResult 对 courses 类型执行 router.push('/explore/programs/${item.id}')，
+         item.id 是课程 ID 而非 program_id，导致跳转到不存在的 program 页面显示空白；
+         同时 searchController.js 的 courses 查询未返回 program_id 字段
+   解决：searchController.js 的 courses 查询 LEFT JOIN program_courses，
+         返回 MIN(pc.program_id) AS program_id；
+         SearchBar.vue navigateToResult 改为使用 item.program_id 跳转，
+         无 program_id 时降级跳转到 /explore
+
+// FIXED（后续修复）
+
+9. Homepage 的 alumni 和 alumni 页面信息不同步
+   原因：两处分别使用不同 API 端点或不同数据表，数据来源不一致
+   解决：统一使用同一 API 接口，确保两个页面从同一数据源获取
+
+10. Merge 后主页 alumni 变为静态数据
+    原因：Merge 后 programController.js 中 getFeaturedAlumni 等函数
+          仍查询旧的 alumni 表，而新架构已将其替换为 users + alumni_profiles
+    解决：更新三个函数改为 JOIN users + alumni_profiles，
+          并添加 u.avatar_url AS photo_url 字段别名保持前端兼容
+
+
+// 0401 FIXED
+
+11. 执行数据库迁移脚本时报错，ALTER TABLE 无法运行
+    原因：MySQL 不支持 ALTER TABLE ADD COLUMN IF NOT EXISTS 语法（PostgreSQL 支持）
+    解决：改为先查询 information_schema.columns 判断字段是否已存在，
+          再决定是否执行 ALTER TABLE
+
+12. Community 调用私信会话列表 API 时 MySQL 返回错误
+    原因：MySQL 默认开启 only_full_group_by 模式，
+          SELECT 中 m.content、m.created_at 未出现在 GROUP BY 或聚合函数中，执行被拒绝
+    解决：重构 SQL，用子查询先找出每组对话的 MAX(id)，
+          再 JOIN 回 messages 表取完整字段
+
+13. 修改 auth.js 新增 optionalAuth 后，后台多个路由全部报错
+    原因：原导出方式 module.exports = authenticate（直接导出函数），
+          改为 module.exports = { authenticate, optionalAuth }（对象导出）后，
+          原有 const authenticate = require('../middleware/auth') 引用失效
+    影响：routes/auth.js、routes/discussions.js、routes/admin.js 共 3 个文件
+    解决：将三处 import 改为解构形式
+          const { authenticate } = require('../middleware/auth')
+
+14. Alumni 用户 ID 与 seed.sql 预期不一致
+    原因：seed.sql 假设 alumni 用户 ID 为 4-12，
+          但线上数据库因已有数据存在 ID 空缺，实际插入后变为 10-18
+    解决：线上 DB 手动使用正确 ID（10-18）插入 alumni_profiles；
+          seed.sql 保留 4-12（适用于全新数据库初始化时）
+
+15. Program 图片无法显示（HomePage program-card-img + ProgramPreviewPage hero banner）
+    原因：ProgramPreviewPage.vue 和 HomePage.vue 使用 program.image 字段，
+          但数据库字段名为 banner_url，且所有 program 的 banner_url 均为 NULL
+    解决：数据库为 5 个 program 写入正确图片路径（/program/hero-banner-*.jpg）；
+          前端两处改为 program.banner_url / p.banner_url；
+          seed.sql programs INSERT 补充 banner_url 字段
+
+16. 添加课程默认归属 CS，数据库中无对应记录
+    原因：待补充
+    解决：待修复
+
+
+// 0414 FIXED
+
+17. MIT Roadmap Y1 显示占位课程（COMP5101 等），与学生实际课程不符
+    原因：seed.sql 中 MIT Year 1 使用虚构课程代码，未对应真实 AdelaideU 课程
+    解决：替换为真实课程（COMP SCI7207/7210/7211/7064/7081/7201/7212/7307、PROJMGNT5021），
+          同步更新数据库 program_courses 映射
+
+18. MIT Roadmap Y2S1 显示 COMP5201 Cybersecurity Fundamentals，学生未选该课
+    原因：seed.sql 中 COMP5201 被错误映射到 MIT Y2S1
+    解决：从数据库 program_courses 和 seed.sql 中删除该映射
+
+19. Community Hub getConversations API 报错（MySQL only_full_group_by）
+    原因：GROUP BY 查询中 SELECT 包含非聚合字段，MySQL strict 模式拒绝执行
+    解决：改用子查询先取 MAX(id)，再 JOIN 回 messages 表获取完整数据
+
+20. 修改 auth.js 导出方式后，三个路由文件全部报错
+    原因：从 module.exports = authenticate 改为对象导出后，原有引用方式失效
+    影响文件：routes/auth.js、routes/discussions.js、routes/admin.js
+    解决：三处改为解构导入 const { authenticate } = require('../middleware/auth')
+
+21. ALTER TABLE 迁移脚本报错，ADD COLUMN IF NOT EXISTS 不支持
+    原因：MySQL 不支持该语法（仅 PostgreSQL 支持）
+    解决：先查 information_schema.columns 判断字段是否存在，再执行 ALTER TABLE
+
+22. Alumni 用户 ID 在 live DB 与 seed.sql 不一致
+    原因：live DB 已有数据导致 auto_increment ID 跳号，alumni 实际 ID 为 10-18 而非 4-12
+    解决：live DB 手动以正确 ID 插入 alumni_profiles；seed.sql 保留 4-12 适用于全新建库

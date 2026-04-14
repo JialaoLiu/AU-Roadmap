@@ -42,14 +42,17 @@ async function search(req, res, next) {
     if (type === 'all' || type === 'courses') {
       searches.push(
         pool.query(
-          `SELECT id, code, name, units, level, semester_offered, is_elective,
-                  SUBSTRING(description, 1, 150) AS description
-           FROM courses
-           WHERE is_active = TRUE
-             AND (name LIKE ? OR code LIKE ? OR description LIKE ?)
+          `SELECT c.id, c.code, c.name, c.units, c.level, c.semester_offered, c.is_elective,
+                  SUBSTRING(c.description, 1, 150) AS description,
+                  MIN(pc.program_id) AS program_id
+           FROM courses c
+           LEFT JOIN program_courses pc ON c.id = pc.course_id
+           WHERE c.is_active = TRUE
+             AND (c.name LIKE ? OR c.code LIKE ? OR c.description LIKE ?)
+           GROUP BY c.id
            ORDER BY CASE
-             WHEN code LIKE ? THEN 1
-             WHEN name LIKE ? THEN 2
+             WHEN c.code LIKE ? THEN 1
+             WHEN c.name LIKE ? THEN 2
              ELSE 3
            END
            LIMIT ?`,
