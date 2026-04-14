@@ -543,16 +543,21 @@ onUnmounted(() => {
 
 /* line below the button whe trigger */
 .nav-trigger:hover::after, .nav-trigger.active::after {
+  background-color: var(--color-primary);
+  width:70%;
+  transition: all var(--transition-slow);
+  
+}
+
+.nav-trigger::after {
   position: absolute;
   content: "";
   height: 2px ;
-  background-color: var(--color-primary);
-  width:70%;
+  background-color: transparent;
+  width:0%;
   left:50%;
   transform: translateX(-50%);
   bottom : -4px;
-  
-
 }
 
 .nav-arrow { font-size: 20px; }
@@ -567,7 +572,7 @@ onUnmounted(() => {
   color: var(--color-white);
   box-shadow: var(--shadow-xl);
   z-index: 200;
-  animation: megaSlideIn 0.2s ease;
+  animation: megaSlideIn 0.35s ease;
 }
 
 @keyframes megaSlideIn {
@@ -657,7 +662,7 @@ onUnmounted(() => {
 
 .mega-link:hover {
   color: var(--color-white);
-  padding-left: 6px;
+  transform: translateX(6px);
 }
 
 .external-icon { font-size: 14px; opacity: 0.5; }

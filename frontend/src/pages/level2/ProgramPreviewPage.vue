@@ -114,8 +114,15 @@ onMounted(fetchData);
           <div v-if="latestOutcome.employment_rate" class="info-col">
               <span>Employment Rate</span>
                   <strong>{{ latestOutcome.employment_rate }}%</strong>
+          </div>
+           <div v-if="latestOutcome.median_salary" class="info-col">
+                  <span>Median Salary</span>
+                  <strong>{{ formatCurrency(latestOutcome.median_salary) }}</strong>
+                  
                 </div>
         </div>
+
+       
         
 
       </div>
@@ -285,7 +292,7 @@ onMounted(fetchData);
   color: var(--color-white);
   background-size: cover;
   background-position:center 40%;
-  height:95vh;
+  height:80vh;
 
   padding: var(--space-xl) var(--space-lg) var(--space-2xl);
 }
@@ -377,11 +384,17 @@ onMounted(fetchData);
   grid-template-columns: repeat(3, 1fr);
   z-index: 999;
   box-shadow:  var(--shadow-xl);
-  transform: translateY(-128px);
-  border-radius: var(--border-radius-sm);
-  padding: var(--space-lg) var(--space-xl);
+  transform: translateY(-64px);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-xl) var(--space-2xl);
+  text-align: center;
 
 
+}
+
+.info-card-container span {
+  color:var(#1e1870);
+  margin-bottom: var(--space-xs);
 }
 
 .info-col { display: flex; flex-direction:column; justify-content: space-between; padding: var(--space-xs) 0; font-size: var(--font-size-sm); }
@@ -410,7 +423,7 @@ onMounted(fetchData);
 .tab-content { max-width: 1200px; margin: 0 auto; padding: var(--space-xl) var(--space-lg); }
 
 /* Overview */
-.overview-grid { display: grid; grid-template-columns: 1fr 340px; gap: var(--space-2xl); }
+/* .overview-grid { display: grid; grid-template-columns: 1fr 340px; gap: var(--space-2xl); } */
 
 .section { margin-bottom: var(--space-2xl); }
 .section h2 { font-size: var(--font-size-lg); font-weight: 700; color: var(--color-text-primary); margin-bottom: var(--space-md); }
