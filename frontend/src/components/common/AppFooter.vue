@@ -6,7 +6,7 @@
     <div class="footer-main">
       <div class="footer-container">
         <div class="footer-brand">
-          <img src="@/assets/images/adelaide-university-logo.png" alt="Adelaide University" class="footer-logo-img" />
+          <img src="@/assets/images/adelaide-university-footer-logo.png" alt="Adelaide University" class="footer-logo-img" />
           <p>Adelaide University Program Roadmap - helping students navigate their academic journey with confidence.</p>
         </div>
 
@@ -78,7 +78,7 @@
 }
 
 .footer-logo-img {
-  height: 36px;
+  height: 58px;
   width: auto;
   margin-bottom: var(--space-md);
   filter: brightness(0) invert(1);

@@ -96,6 +96,30 @@ onMounted(fetchData);
         </div>
       </div>
 
+      <!-- info card -->
+       <div class="info-card-container">
+        <div class="info-card-left">
+        
+                <div class="info-col"><span>Faculty</span><strong>{{ program.faculty }}</strong></div>
+                <div class="info-col"><span>Duration</span><strong>{{ program.duration_years }} years</strong></div>
+                <div v-if="program.atar_requirement" class="info-col"><span>ATAR</span><strong>{{ program.atar_requirement }}</strong></div>
+        </div>
+
+        <div class="info-card-middle">
+          <div v-if="program.fees_domestic" class="info-col"><span>Domestic Fees</span><strong>{{ formatCurrency(program.fees_domestic) }}/yr</strong></div>
+          <div v-if="program.fees_international" class="info-col"><span>International Fees</span><strong>{{ formatCurrency(program.fees_international) }}/yr</strong></div>
+        </div>
+
+        <div class = "info-card-right">
+          <div v-if="latestOutcome.employment_rate" class="info-col">
+              <span>Employment Rate</span>
+                  <strong>{{ latestOutcome.employment_rate }}%</strong>
+                </div>
+        </div>
+        
+
+      </div>
+
       <!-- Tabs -->
       <div class="tabs-container">
         <div class="tabs">
@@ -120,7 +144,7 @@ onMounted(fetchData);
                 <p>{{ program.entry_requirements }}</p>
               </div>
             </div>
-            <div class="overview-sidebar">
+            <!-- <div class="overview-sidebar">
               <div class="info-card">
                 <h3>Key Information</h3>
                 <div class="info-row"><span>Faculty</span><strong>{{ program.faculty }}</strong></div>
@@ -144,10 +168,11 @@ onMounted(fetchData);
                 <span class="material-symbols-outlined">edit_note</span>
                 How to Apply
               </button>
-            </div>
+            </div> -->
           </div>
         </div>
 
+    
         <!-- Courses -->
         <div v-if="activeTab === 'courses'" class="courses-tab">
           <div class="course-summary">
@@ -260,7 +285,7 @@ onMounted(fetchData);
   color: var(--color-white);
   background-size: cover;
   background-position:center 40%;
-  height:80vh;
+  height:95vh;
 
   padding: var(--space-xl) var(--space-lg) var(--space-2xl);
 }
@@ -317,9 +342,12 @@ onMounted(fetchData);
   padding: var(--space-md) var(--space-xl);
   font-size: var(--font-size-md);
   font-weight: 600;
-
 }
 
+.hero-cta a:hover {
+  border-color: var(--color-white);
+  background: rgba(255, 255, 255, 0.1);
+}
 
 
 .cta-btn {
@@ -331,6 +359,32 @@ onMounted(fetchData);
   font-size: var(--font-size-md);
   font-weight: 600;
 }
+
+.cta-btn:hover {
+  background: var(--color-gray-100);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+
+/* Info cards */ 
+.info-card-container{
+  background: var(--color-white);
+  margin: 0 auto;
+  width:100%;
+  max-width:var(--max-content-width);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  z-index: 999;
+  box-shadow:  var(--shadow-xl);
+  transform: translateY(-128px);
+  border-radius: var(--border-radius-sm);
+  padding: var(--space-lg) var(--space-xl);
+
+
+}
+
+.info-col { display: flex; flex-direction:column; justify-content: space-between; padding: var(--space-xs) 0; font-size: var(--font-size-sm); }
 
 /* Tabs */
 .tabs-container {
