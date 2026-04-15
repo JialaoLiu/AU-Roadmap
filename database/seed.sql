@@ -253,12 +253,6 @@ INSERT INTO discussion_threads (program_id, user_id, title, content, category, r
 (3, 1, 'Best cloud certifications to complement MIT degree?', 'I''m currently in my first year of the MIT program. Has anyone combined their studies with AWS or Azure certifications? Would love to hear what worked for you.', 'career', 0, 0),
 (NULL, 3, 'Welcome to the Community!', 'This is a space for all Adelaide University students and alumni to connect, share advice, and discuss career paths. Feel free to start a conversation!', 'general', 0, 1);
 
--- Career Outcomes for MIT
-INSERT INTO career_outcomes (program_id, year, employment_rate, median_salary, salary_range_low, salary_range_high, further_study_rate, satisfaction_rate, source) VALUES
-(3, 2024, 94.00, 85000.00, 70000.00, 110000.00, 8.00, 90.00, 'Graduate Outcomes Survey 2024'),
-(3, 2023, 92.00, 82000.00, 68000.00, 105000.00, 9.50, 88.00, 'Graduate Outcomes Survey 2023'),
-(3, 2022, 90.50, 78000.00, 65000.00, 100000.00, 10.00, 87.00, 'Graduate Outcomes Survey 2022');
-
 -- Career Paths for MIT
 INSERT INTO career_paths (program_id, job_title, description, average_salary, demand_level, industry_sector, sort_order) VALUES
 (3, 'Solutions Architect', 'Design and oversee the implementation of IT solutions aligned with business requirements.', 120000.00, 'high', 'Technology', 1),
