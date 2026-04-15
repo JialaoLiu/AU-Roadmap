@@ -53,7 +53,7 @@ function clearFilters() {
 }
 
 function getLevelLabel(level) {
-  return { undergraduate: 'Undergraduate', postgraduate: 'Postgraduate', research: 'Research' }[level] || level;
+  return { undergraduate: 'Undergraduate', postgraduate: 'Postgraduate', research: 'Research', online: 'Online' }[level] || level;
 }
 
 onMounted(fetchPrograms);
@@ -83,6 +83,7 @@ onMounted(fetchPrograms);
             <option value="undergraduate">Undergraduate</option>
             <option value="postgraduate">Postgraduate</option>
             <option value="research">Research</option>
+            <option value="online">Online</option>
           </select>
         </div>
         <div class="filter-group">
