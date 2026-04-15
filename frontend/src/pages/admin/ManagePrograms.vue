@@ -13,6 +13,7 @@ const emptyForm = {
   code: '', name: '', level: 'undergraduate', duration_years: 3,
   faculty: '', description: '', entry_requirements: '',
   atar_requirement: '', fees_domestic: '', fees_international: '',
+  banner_url: '',
 };
 const form = ref({ ...emptyForm });
 
@@ -42,6 +43,7 @@ function openEdit(p) {
     description: p.description || '', entry_requirements: p.entry_requirements || '',
     atar_requirement: p.atar_requirement || '',
     fees_domestic: p.fees_domestic || '', fees_international: p.fees_international || '',
+    banner_url: p.banner_url || '',
   };
   showForm.value = true;
 }
@@ -149,6 +151,10 @@ onMounted(fetchPrograms);
               <div class="form-group form-group--full">
                 <label>Entry Requirements</label>
                 <textarea v-model="form.entry_requirements" rows="2" placeholder="Entry requirements..."></textarea>
+              </div>
+              <div class="form-group form-group--full">
+                <label>Banner Image Path</label>
+                <input v-model="form.banner_url" placeholder="e.g. /program/hero-banner-computer-science.jpg" />
               </div>
             </div>
             <div class="modal-actions">
