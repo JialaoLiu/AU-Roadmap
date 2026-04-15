@@ -26,7 +26,7 @@ CREATE TABLE programs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     code VARCHAR(20) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
-    level ENUM('undergraduate', 'postgraduate', 'research') NOT NULL,
+    level ENUM('undergraduate', 'postgraduate', 'research', 'online') NOT NULL,
     duration_years DECIMAL(3,1) NOT NULL,
     faculty VARCHAR(255) NOT NULL,
     description TEXT,
