@@ -1,8 +1,10 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useToast } from 'vue-toastification';
+
+const TURNSTILE_SITE_KEY = '0x4AAAAAABdkinnD2a45uxc0';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -17,10 +19,39 @@ const form = ref({
   role: 'prospective',
 });
 const showPassword = ref(false);
+const captchaToken = ref('');
+const turnstileContainer = ref(null);
+let widgetId = null;
+
+onMounted(() => {
+  const script = document.createElement('script');
+  script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+  script.async = true;
+  script.defer = true;
+  script.onload = () => {
+    widgetId = window.turnstile.render(turnstileContainer.value, {
+      sitekey: TURNSTILE_SITE_KEY,
+      callback: (token) => { captchaToken.value = token; },
+      'expired-callback': () => { captchaToken.value = ''; },
+    });
+  };
+  document.head.appendChild(script);
+});
+
+onUnmounted(() => {
+  if (widgetId !== null && window.turnstile) {
+    window.turnstile.remove(widgetId);
+  }
+});
 
 async function handleRegister() {
   if (form.value.password !== form.value.confirm_password) {
     toast.error('Passwords do not match');
+    return;
+  }
+
+  if (!captchaToken.value) {
+    toast.error('Please complete the CAPTCHA');
     return;
   }
 
@@ -31,6 +62,7 @@ async function handleRegister() {
       email: form.value.email,
       password: form.value.password,
       role: form.value.role,
+      captcha: captchaToken.value,
     });
     toast.success('Registration successful');
 
@@ -41,6 +73,10 @@ async function handleRegister() {
     }
   } catch (error) {
     toast.error(error.response?.data?.error?.message || 'Registration failed');
+    captchaToken.value = '';
+    if (widgetId !== null && window.turnstile) {
+      window.turnstile.reset(widgetId);
+    }
   }
 }
 </script>
@@ -149,7 +185,9 @@ async function handleRegister() {
           />
         </div>
 
-        <button type="submit" class="btn btn-primary btn-full" :disabled="authStore.loading">
+        <div ref="turnstileContainer" class="turnstile-widget"></div>
+
+        <button type="submit" class="btn btn-primary btn-full" :disabled="authStore.loading || !captchaToken">
           {{ authStore.loading ? 'Creating account...' : 'Create Account' }}
         </button>
       </form>
@@ -268,6 +306,12 @@ async function handleRegister() {
 
 .role-label .material-symbols-outlined {
   font-size: 20px;
+}
+
+.turnstile-widget {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-xs);
 }
 
 .btn-full {

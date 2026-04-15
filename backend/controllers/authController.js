@@ -5,9 +5,30 @@ const { success, error } = require('../utils/response');
 
 const SALT_ROUNDS = 10;
 
+async function verifyTurnstile(token) {
+  const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      secret: process.env.TURNSTILE_SECRET_KEY,
+      response: token,
+    }),
+  });
+  const data = await res.json();
+  return data.success === true;
+}
+
 async function register(req, res, next) {
   try {
-    const { first_name, last_name, email, password, role } = req.body;
+    const { first_name, last_name, email, password, role, captcha } = req.body;
+
+    if (!captcha) {
+      return error(res, 'Please complete the CAPTCHA', 400, 'CAPTCHA_REQUIRED');
+    }
+    const captchaOk = await verifyTurnstile(captcha);
+    if (!captchaOk) {
+      return error(res, 'CAPTCHA verification failed', 400, 'CAPTCHA_FAILED');
+    }
 
     // Check if email already exists
     const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
@@ -45,7 +66,15 @@ async function register(req, res, next) {
 
 async function login(req, res, next) {
   try {
-    const { email, password } = req.body;
+    const { email, password, captcha } = req.body;
+
+    if (!captcha) {
+      return error(res, 'Please complete the CAPTCHA', 400, 'CAPTCHA_REQUIRED');
+    }
+    const captchaOk = await verifyTurnstile(captcha);
+    if (!captchaOk) {
+      return error(res, 'CAPTCHA verification failed', 400, 'CAPTCHA_FAILED');
+    }
 
     // Find user
     const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);

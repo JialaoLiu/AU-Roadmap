@@ -1,4 +1,4 @@
-<script setup>
+cd ..<script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -13,7 +13,7 @@ const mobileMenuOpen = ref(false);
 const megaMenuItems = [
   {
     id: 'study',
-    label: 'Study at Adelaide',
+    label: 'Study',
     columns: [
       {
         type: 'featured',
@@ -23,40 +23,33 @@ const megaMenuItems = [
       },
       {
         type: 'links',
-        title: 'Undergraduate',
+        title: 'Course Types',
         links: [
-          { label: 'Undergraduate Degrees', to: '/explore?level=undergraduate' },
-          { label: 'How To Apply', to: '/explore/apply' },
-          { label: 'Entry Pathways', to: '/explore/apply#pathways' },
-          { label: 'Why Study At Adelaide?', to: '/explore/campus-life' },
-          { label: 'Careers & Employability', to: '/explore/careers' },
-        ],
-      },
-      {
-        type: 'links',
-        title: 'Postgraduate',
-        links: [
-          { label: 'Postgraduate Coursework', to: '/explore?level=postgraduate' },
+          { label: 'Undegraduate Degree', to: '/explore?level=undergraduate' },
+          {label: 'Postgraduate Coursework', to: '/explore?level=postgraduate' },
           { label: 'Postgraduate Research', to: '/explore?level=research' },
-          { label: 'Online Study', to: '/explore?mode=online' },
         ],
       },
       {
         type: 'links',
-        title: 'International',
+        title: 'International Students',
         links: [
-          { label: 'Find Your Degree', to: '/explore?audience=international' },
+          { label: 'How To Apply', to: '/explore/apply' },
           { label: 'Life In Adelaide', to: '/explore/campus-life' },
-          { label: 'Admissions', to: '/explore/apply#admissions' },
-          { label: 'Apply', to: '/explore/apply' },
-          { label: 'Scholarships', to: '/explore/apply#scholarships' },
         ],
       },
+      {
+        type: 'links',
+        title: 'Careers',
+        links: [
+          { label: 'Career Outcomes', to: '/explore/careers' }
+        ],
+      }
     ],
   },
   {
     id: 'research',
-    label: 'Research & Innovation',
+    label: 'Research',
     columns: [
       {
         type: 'featured',
@@ -69,10 +62,8 @@ const megaMenuItems = [
         title: 'Our Research',
         links: [
           { label: 'Our Performance', to: '/research#performance' },
-          { label: 'Find A Researcher', to: '/research#researchers' },
           { label: 'Research Institutes', to: '/research/institutes' },
-          { label: 'Research Centres', to: '/research#centres' },
-          { label: 'Research Facilities & Precincts', to: '/research#facilities' },
+          { label: 'Research Impact', to: '/research/impact' },
         ],
       },
       {
@@ -80,8 +71,6 @@ const megaMenuItems = [
         title: 'Connect',
         links: [
           { label: 'Partner With Us', to: '/research/connect' },
-          { label: 'Research Impact', to: '/research/impact' },
-          { label: 'Career Outcomes', to: '/explore/careers' },
           { label: 'Research Events', to: '/research/events' },
         ],
       },
@@ -89,8 +78,7 @@ const megaMenuItems = [
         type: 'links',
         title: 'Research Support',
         links: [
-          { label: 'Graduate Research School', to: '/research/support#graduate-school' },
-          { label: 'Research Technology Support', to: '/research/support#tech' },
+          { label: 'Graduate Research School', to: '/research/support#graduate-school' }
         ],
       },
     ],
@@ -486,7 +474,8 @@ onUnmounted(() => {
    ========================================== */
 .main-nav-bar {
   background: var(--color-white);
-  border-bottom: 3px solid var(--color-primary);
+  /* border-bottom: 3px solid var(--color-primary); */
+  box-shadow: var(--shadow-md);
   height: 64px;
 }
 
@@ -498,6 +487,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  
 }
 
 .header-logo {
@@ -541,13 +531,33 @@ onUnmounted(() => {
   cursor: pointer;
   font-family: inherit;
   transition: all var(--transition-fast);
-  border-bottom: 3px solid transparent;
+  /* border-bottom: 3px solid transparent; */
   margin-bottom: -3px;
 }
 
 .nav-trigger:hover, .nav-trigger.active {
+  position: relative;
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
+}
+
+/* line below the button whe trigger */
+.nav-trigger:hover::after, .nav-trigger.active::after {
+  background-color: var(--color-primary);
+  width:70%;
+  transition: all var(--transition-slow);
+  
+}
+
+.nav-trigger::after {
+  position: absolute;
+  content: "";
+  height: 2px ;
+  background-color: transparent;
+  width:0%;
+  left:50%;
+  transform: translateX(-50%);
+  bottom : -4px;
 }
 
 .nav-arrow { font-size: 20px; }
@@ -557,12 +567,12 @@ onUnmounted(() => {
   position: fixed;
   top: var(--header-height);
   right: 10%;
-  width: 860px;
+  width: 950px;
   background: var(--color-primary);
   color: var(--color-white);
   box-shadow: var(--shadow-xl);
   z-index: 200;
-  animation: megaSlideIn 0.2s ease;
+  animation: megaSlideIn 0.35s ease;
 }
 
 @keyframes megaSlideIn {
@@ -572,13 +582,14 @@ onUnmounted(() => {
 
 .mega-menu-inner {
   display: flex;
+  justify-content: space-between;
   gap: var(--space-2xl);
   padding: var(--space-xl) var(--space-2xl);
 }
 
 .mega-column {
   min-width: 150px;
-  flex: 1;
+  flex: none;
 }
 
 /* Featured column (left, with CTA) */
@@ -639,6 +650,7 @@ onUnmounted(() => {
 }
 
 .mega-link {
+  white-space: nowrap;
   color: rgba(255, 255, 255, 0.85);
   font-size: var(--font-size-sm);
   padding: 5px 0;
@@ -650,7 +662,7 @@ onUnmounted(() => {
 
 .mega-link:hover {
   color: var(--color-white);
-  padding-left: 6px;
+  transform: translateX(6px);
 }
 
 .external-icon { font-size: 14px; opacity: 0.5; }

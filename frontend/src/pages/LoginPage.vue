@@ -1,8 +1,10 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useToast } from 'vue-toastification';
+
+const TURNSTILE_SITE_KEY = '0x4AAAAAABdkinnD2a45uxc0';
 
 const router = useRouter();
 const route = useRoute();
@@ -14,10 +16,38 @@ const form = ref({
   password: '',
 });
 const showPassword = ref(false);
+const captchaToken = ref('');
+const turnstileContainer = ref(null);
+let widgetId = null;
+
+onMounted(() => {
+  const script = document.createElement('script');
+  script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+  script.async = true;
+  script.defer = true;
+  script.onload = () => {
+    widgetId = window.turnstile.render(turnstileContainer.value, {
+      sitekey: TURNSTILE_SITE_KEY,
+      callback: (token) => { captchaToken.value = token; },
+      'expired-callback': () => { captchaToken.value = ''; },
+    });
+  };
+  document.head.appendChild(script);
+});
+
+onUnmounted(() => {
+  if (widgetId !== null && window.turnstile) {
+    window.turnstile.remove(widgetId);
+  }
+});
 
 async function handleLogin() {
+  if (!captchaToken.value) {
+    toast.error('Please complete the CAPTCHA');
+    return;
+  }
   try {
-    await authStore.login(form.value);
+    await authStore.login({ ...form.value, captcha: captchaToken.value });
     toast.success('Login successful');
 
     const redirect = route.query.redirect;
@@ -32,6 +62,10 @@ async function handleLogin() {
     }
   } catch (error) {
     toast.error(error.response?.data?.error?.message || 'Login failed');
+    captchaToken.value = '';
+    if (widgetId !== null && window.turnstile) {
+      window.turnstile.reset(widgetId);
+    }
   }
 }
 </script>
@@ -82,7 +116,9 @@ async function handleLogin() {
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-full" :disabled="authStore.loading">
+        <div ref="turnstileContainer" class="turnstile-widget"></div>
+
+        <button type="submit" class="btn btn-primary btn-full" :disabled="authStore.loading || !captchaToken">
           {{ authStore.loading ? 'Signing in...' : 'Sign In' }}
         </button>
       </form>
@@ -160,6 +196,12 @@ async function handleLogin() {
 
 .password-toggle .material-symbols-outlined {
   font-size: 20px;
+}
+
+.turnstile-widget {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-xs);
 }
 
 .btn-full {
