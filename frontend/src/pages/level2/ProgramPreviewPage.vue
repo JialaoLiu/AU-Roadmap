@@ -51,11 +51,9 @@ onMounted(fetchData);
 
     <template v-else-if="program">
       <!-- Hero Banner -->
-      <div class="preview-hero" :style="{ backgroundImage: `linear-gradient(
-      90deg,
-      rgba(20, 15, 80, 0.75) 0%,
-      rgba(0,0,0,0) 100%
-    ), url(${program.banner_url})` }">
+      <div class="preview-hero" :style="{ backgroundImage: program.banner_url
+        ? `linear-gradient(90deg, rgba(20, 15, 80, 0.75) 0%, rgba(0,0,0,0) 100%), url(${program.banner_url})`
+        : `linear-gradient(135deg, rgba(20, 15, 80, 1) 0%, rgba(30, 24, 112, 1) 100%)` }">
         <div class="hero-inner">
           <div class="hero-meta">
             <button class="back-btn" @click="router.push('/explore')">
@@ -111,14 +109,14 @@ onMounted(fetchData);
         </div>
 
         <div class = "info-card-right">
-          <div v-if="latestOutcome.employment_rate" class="info-col">
+          <div v-if="latestOutcome && latestOutcome.employment_rate" class="info-col">
               <span>Employment Rate</span>
                   <strong>{{ latestOutcome.employment_rate }}%</strong>
           </div>
-           <div v-if="latestOutcome.median_salary" class="info-col">
+           <div v-if="latestOutcome && latestOutcome.median_salary" class="info-col">
                   <span>Median Salary</span>
                   <strong>{{ formatCurrency(latestOutcome.median_salary) }}</strong>
-                  
+
                 </div>
         </div>
 
