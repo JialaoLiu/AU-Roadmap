@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
 const { success, error } = require('../utils/response');
 
-const SALT_ROUNDS = 10;
+const SALT_ROUNDS = 12;
 
 async function verifyTurnstile(token) {
   const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
