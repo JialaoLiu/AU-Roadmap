@@ -1,7 +1,10 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { getAdminStats } from '@/api/admin';
+import { Bar } from 'vue-chartjs';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip } from 'chart.js';
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
 const router = useRouter();
 const loading = ref(true);
@@ -26,6 +29,30 @@ async function fetchStats() {
     loading.value = false;
   }
 }
+
+const statsChartData = computed(() => ({
+  labels: ['Programs', 'Courses', 'Users', 'Alumni', 'Partners', 'Resources'],
+  datasets: [{
+    data: stats.value ? [
+      stats.value.programs, stats.value.courses, stats.value.users,
+      stats.value.alumni, stats.value.partners, stats.value.resources,
+    ] : [],
+    backgroundColor: ['#140f5022', '#1976d222', '#2e7d3222', '#e6510022', '#6a1b9a22', '#00838f22'],
+    borderColor: ['#140f50', '#1976d2', '#2e7d32', '#e65100', '#6a1b9a', '#00838f'],
+    borderWidth: 2,
+    borderRadius: 6,
+  }],
+}));
+
+const statsChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { tooltip: { callbacks: { label: ctx => ` ${ctx.raw}` } } },
+  scales: {
+    y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 }, grid: { color: '#f0f0f0' } },
+    x: { grid: { display: false } },
+  },
+};
 
 onMounted(fetchStats);
 </script>
@@ -60,6 +87,19 @@ onMounted(fetchStats);
             <span class="stat-card__label">{{ card.label }}</span>
           </div>
           <span class="material-symbols-outlined stat-card__arrow">chevron_right</span>
+        </div>
+      </div>
+
+      <!-- Platform Overview Chart -->
+      <div class="chart-section">
+        <h2 class="section-title">
+          <span class="material-symbols-outlined">bar_chart</span>
+          Platform Overview
+        </h2>
+        <div class="chart-card">
+          <div class="chart-wrap">
+            <Bar :data="statsChartData" :options="statsChartOptions" />
+          </div>
         </div>
       </div>
 
@@ -179,6 +219,22 @@ onMounted(fetchStats);
   margin-left: auto;
   color: var(--color-text-light);
   font-size: 20px;
+}
+
+/* Chart */
+.chart-section {
+  margin-bottom: var(--space-2xl);
+}
+
+.chart-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-lg);
+}
+
+.chart-wrap {
+  height: 220px;
 }
 
 /* Quick Actions */

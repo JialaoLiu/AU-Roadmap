@@ -55,38 +55,44 @@ function getCategoryColor(cat) {
 
 <template>
   <div class="campus-page">
-    <!-- Hero -->
     <div class="campus-hero">
       <div class="hero-inner">
+        <span class="hero-eyebrow">Student Experience</span>
         <h1>Life at Adelaide University</h1>
-        <p>Experience a vibrant campus community in one of the world's most liveable cities.</p>
+        <p>Experience campus facilities, student communities, and city life that support study, connection, and personal development.</p>
       </div>
     </div>
 
-    <!-- Stats -->
-    <div class="stats-bar">
-      <div v-for="s in stats" :key="s.label" class="stat-item">
+    <div class="summary-grid">
+      <div v-for="s in stats" :key="s.label" class="summary-card">
         <span class="material-symbols-outlined">{{ s.icon }}</span>
-        <div>
-          <span class="stat-value">{{ s.value }}</span>
-          <span class="stat-label">{{ s.label }}</span>
+        <div class="summary-copy">
+          <span class="summary-value">{{ s.value }}</span>
+          <span class="summary-label">{{ s.label }}</span>
         </div>
       </div>
     </div>
 
-    <!-- Highlights Grid -->
     <div class="campus-content">
-      <div class="highlights-grid">
-        <div v-for="h in highlights" :key="h.title" class="highlight-card">
-          <div class="highlight-icon" :style="{ background: getCategoryColor(h.category) + '12', color: getCategoryColor(h.category) }">
-            <span class="material-symbols-outlined">{{ h.icon }}</span>
-          </div>
-          <h3>{{ h.title }}</h3>
-          <p>{{ h.description }}</p>
+      <section class="section-shell">
+        <div class="section-heading">
+          <span class="section-eyebrow">Campus Highlights</span>
+          <h2>Explore Student Life</h2>
+          <p>Review the spaces, services, communities, and city experiences that shape everyday life at Adelaide University.</p>
         </div>
-      </div>
 
-      <!-- CTA -->
+        <div class="highlights-grid">
+          <div v-for="h in highlights" :key="h.title" class="highlight-card">
+            <div class="highlight-icon" :style="{ background: getCategoryColor(h.category) + '12', color: getCategoryColor(h.category) }">
+              <span class="material-symbols-outlined">{{ h.icon }}</span>
+            </div>
+            <span class="highlight-category">{{ h.category }}</span>
+            <h3>{{ h.title }}</h3>
+            <p>{{ h.description }}</p>
+          </div>
+        </div>
+      </section>
+
       <div class="cta-section">
         <h2>Ready to Join Us?</h2>
         <p>Start your journey at Adelaide University today.</p>
@@ -100,27 +106,135 @@ function getCategoryColor(cat) {
 </template>
 
 <style scoped>
-.campus-page { min-height: 100vh; }
-
-.campus-hero { background: var(--color-primary); color: var(--color-white); padding: var(--space-3xl) var(--space-lg); }
-.hero-inner { max-width: 720px; margin: 0 auto; text-align: center; }
-.hero-inner h1 { font-size: 2rem; font-weight: 700; margin-bottom: var(--space-sm); }
-.hero-inner p { font-size: var(--font-size-md); opacity: 0.8; }
-
-/* Stats */
-.stats-bar {
-  display: flex; justify-content: center; gap: var(--space-2xl);
-  padding: var(--space-xl) var(--space-lg);
-  background: var(--color-white); border-bottom: 1px solid var(--color-border);
+.campus-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(20, 15, 80, 0.06), transparent 34%),
+    linear-gradient(180deg, #f7f8fc 0%, #f3f5fb 100%);
 }
 
-.stat-item { display: flex; align-items: center; gap: var(--space-sm); }
-.stat-item .material-symbols-outlined { font-size: 28px; color: var(--color-primary); }
-.stat-value { display: block; font-size: var(--font-size-xl); font-weight: 700; color: var(--color-text-primary); line-height: 1; }
-.stat-label { display: block; font-size: var(--font-size-xs); color: var(--color-text-light); }
+.campus-hero {
+  background: linear-gradient(135deg, #140f50 0%, #1e1870 55%, #314191 100%);
+  color: var(--color-white);
+  padding: 5.5rem var(--space-lg) 5rem;
+}
 
-/* Content */
-.campus-content { max-width: 1200px; margin: 0 auto; padding: var(--space-2xl) var(--space-lg); }
+.hero-inner {
+  max-width: 50rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  margin-bottom: var(--space-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.hero-inner h1 {
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+}
+
+.hero-inner p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.summary-grid {
+  max-width: 1100px;
+  margin: 1rem auto 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-md);
+}
+
+.summary-card {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 18px 38px rgba(20, 15, 80, 0.1);
+  padding: 1.15rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.summary-card .material-symbols-outlined {
+  font-size: 1.8rem;
+  color: var(--color-primary);
+  background: rgba(20, 15, 80, 0.07);
+  border-radius: 16px;
+  padding: 0.7rem;
+}
+
+.summary-copy {
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #171b33;
+  line-height: 1.1;
+}
+
+.summary-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #70779a;
+}
+
+.campus-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.25rem 1rem var(--space-3xl);
+}
+
+.section-shell {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 16px 36px rgba(20, 15, 80, 0.08);
+  padding: 1.5rem;
+  margin-bottom: var(--space-3xl);
+}
+
+.section-heading {
+  margin-bottom: var(--space-xl);
+}
+
+.section-eyebrow {
+  display: inline-flex;
+  margin-bottom: 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6b7394;
+}
+
+.section-heading h2 {
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 0.55rem;
+}
+
+.section-heading p {
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
 
 .highlights-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);
@@ -128,8 +242,9 @@ function getCategoryColor(cat) {
 }
 
 .highlight-card {
-  background: var(--color-white); border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-lg); padding: var(--space-xl);
+  background: var(--color-white); border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 22px; padding: var(--space-xl);
+  box-shadow: 0 12px 28px rgba(20, 15, 80, 0.06);
   transition: all var(--transition-fast);
 }
 
@@ -142,13 +257,24 @@ function getCategoryColor(cat) {
 }
 .highlight-icon .material-symbols-outlined { font-size: 28px; }
 
+.highlight-category {
+  display: inline-flex;
+  margin-bottom: var(--space-sm);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7394;
+}
+
 .highlight-card h3 { font-size: var(--font-size-md); font-weight: 600; color: var(--color-text-primary); margin-bottom: var(--space-sm); }
 .highlight-card p { font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: 1.6; }
 
-/* CTA */
 .cta-section {
   text-align: center; padding: var(--space-3xl);
-  background: rgba(20,15,80,0.03); border-radius: var(--border-radius-lg);
+  background: linear-gradient(180deg, rgba(20, 15, 80, 0.05), rgba(49, 65, 145, 0.08));
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 24px;
 }
 .cta-section h2 { font-size: var(--font-size-2xl); font-weight: 700; color: var(--color-text-primary); margin-bottom: var(--space-sm); }
 .cta-section p { font-size: var(--font-size-md); color: var(--color-text-secondary); margin-bottom: var(--space-xl); }
@@ -157,7 +283,7 @@ function getCategoryColor(cat) {
 
 .cta-btn {
   display: inline-flex; align-items: center; gap: var(--space-sm);
-  padding: var(--space-md) var(--space-xl); border-radius: var(--border-radius-md);
+  padding: var(--space-md) var(--space-xl); border-radius: 999px;
   font-size: var(--font-size-sm); font-weight: 600; transition: all var(--transition-fast);
 }
 .cta-btn--primary { background: var(--color-primary); color: var(--color-white); }
@@ -166,7 +292,10 @@ function getCategoryColor(cat) {
 .cta-btn--secondary:hover { background: rgba(20,15,80,0.04); }
 
 @media (max-width: 768px) {
-  .stats-bar { flex-wrap: wrap; gap: var(--space-lg); }
+  .summary-grid {
+    width: calc(100% - 1.5rem);
+  }
   .highlights-grid { grid-template-columns: 1fr; }
+  .cta-buttons { flex-direction: column; }
 }
 </style>

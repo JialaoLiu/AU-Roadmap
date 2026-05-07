@@ -8,6 +8,13 @@ import WMimg from '@/assets/images/Walter Marsh.jpeg';
 import DFimg from '@/assets/images/Dave Fletcher.jpg';
 
 const programs = ref([]);
+const featuredProgramCodes = ['BCOMP', 'BENG-SW', 'BDS', 'BCYBER'];
+const demoProgramBanners = {
+  BCOMP: '/program/hero-banner-computer-science.jpg',
+  'BENG-SW': '/program/hero-banner-software-engineer.jpg',
+  BDS: '/program/hero-banner-data-science.jpg',
+  BCYBER: '/program/hero-banner-cyber-security.jpg',
+};
 
 const alumni = [
   { name: 'Rhaneela Punitham', job: 'Technology Consultant at KPMG', year: 'Class of 2024', blockquote: 'The strong foundation in algorithms and data structures prepared me well for my career.', profile: RPimg },
@@ -26,10 +33,17 @@ function getDurationText(years) {
   return y === 1 ? '1 year' : `${y} years`;
 }
 
+function getProgramBanner(program) {
+  return program.banner_url || demoProgramBanners[program.code] || '';
+}
+
 onMounted(async () => {
   try {
-    const res = await getProgramList({ limit: 4 });
-    programs.value = res.data.data;
+    const res = await getProgramList({ limit: 100 });
+    const fetchedPrograms = res.data.data || [];
+    programs.value = featuredProgramCodes
+      .map((code) => fetchedPrograms.find((program) => program.code === code))
+      .filter(Boolean);
   } catch (err) {
     console.error('Failed to load programs:', err);
   }
@@ -113,7 +127,7 @@ onMounted(async () => {
       0deg,
       rgba(20, 15, 80, 0.35) 0%,
       rgba(0,0,0,0) 100%
-    ), url(${p.banner_url})` }"></div>
+    )${getProgramBanner(p) ? `, url(${getProgramBanner(p)})` : ''}` }"></div>
             <div class="program-card-body">
               <span class="program-tag">{{ getLevelLabel(p.level) }}</span>
               <h4>{{ p.name }}</h4>

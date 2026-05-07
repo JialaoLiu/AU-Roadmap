@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
 const { authenticate } = require('../middleware/auth');
-const { register, login, getMe } = require('../controllers/authController');
+const { register, login, getMe, updateProfile, uploadAvatarHandler } = require('../controllers/authController');
 
 // Validation middleware
 const registerValidation = [
@@ -20,5 +20,7 @@ const loginValidation = [
 router.post('/register', registerValidation, register);
 router.post('/login', loginValidation, login);
 router.get('/me', authenticate, getMe);
+router.put('/profile', authenticate, updateProfile);
+router.post('/avatar', authenticate, uploadAvatarHandler);
 
 module.exports = router;

@@ -3,6 +3,9 @@ import { ref, onMounted, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 import { getProgramDetail, getProgramRoadmap } from '@/api/programs';
+import { Doughnut } from 'vue-chartjs';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -24,6 +27,8 @@ const upcomingDates = computed(() => {
     .filter(d => new Date(d.date) >= now)
     .slice(0, 4);
 });
+
+const nextMilestone = computed(() => upcomingDates.value[0] || null);
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-AU', {
@@ -50,6 +55,76 @@ const quickLinks = [
   { label: 'Alumni Network', icon: 'group', to: '/student/alumni', desc: 'Connect with graduates' },
   { label: 'Student Resources', icon: 'menu_book', to: '/student/resources', desc: 'Academic support & tools' },
 ];
+
+const dashboardSummary = computed(() => [
+  {
+    label: 'Program Duration',
+    value: `${program.value?.duration_years ?? 0} years`,
+    icon: 'calendar_today',
+  },
+  {
+    label: 'Total Courses',
+    value: totalCourses.value,
+    icon: 'menu_book',
+  },
+  {
+    label: 'Total Units',
+    value: totalUnits.value,
+    icon: 'school',
+  },
+]);
+
+const roadmapYears = computed(() => roadmapSummary.value?.roadmap || []);
+
+const currentSemesterLabel = computed(() => {
+  const month = new Date().getMonth();
+  return month >= 6 ? 'Semester 2' : 'Semester 1';
+});
+
+const roadmapSpan = computed(() => {
+  if (!roadmapYears.value.length) return 'Roadmap unavailable';
+  return `Year 1 - Year ${roadmapYears.value.length}`;
+});
+
+const focusSemester = computed(() => {
+  if (!roadmapYears.value.length) return null;
+
+  const currentSemesterNumber = currentSemesterLabel.value === 'Semester 2' ? 2 : 1;
+  const firstYear = roadmapYears.value[0];
+
+  return (
+    firstYear?.semesters?.find((semester) => semester.semester_number === currentSemesterNumber) ||
+    firstYear?.semesters?.[0] ||
+    null
+  );
+});
+
+const focusSemesterLabel = computed(() => {
+  if (!focusSemester.value) return currentSemesterLabel.value;
+  return `Year 1 · Semester ${focusSemester.value.semester_number}`;
+});
+
+const roadmapSnapshot = computed(() => {
+  if (!program.value || !roadmapYears.value.length) return null;
+
+  return {
+    stageTitle: focusSemesterLabel.value,
+    stageDetail: focusSemester.value
+      ? `${focusSemester.value.courses.length} courses mapped in this study stage`
+      : 'Roadmap structure is ready to explore',
+    nextMilestone: nextMilestone.value
+      ? `${nextMilestone.value.title} · ${formatDate(nextMilestone.value.date)}`
+      : 'No upcoming milestone yet',
+    roadmapSpan: roadmapSpan.value,
+    progressNote: `${coreCourses.value} core and ${electiveCourses.value} elective courses across your program`,
+  };
+});
+
+function getInitials() {
+  const f = authStore.user?.first_name?.[0] || '';
+  const l = authStore.user?.last_name?.[0] || '';
+  return (f + l).toUpperCase();
+}
 
 async function fetchDashboardData() {
   const programId = authStore.user?.program_id;
@@ -86,56 +161,154 @@ const totalUnits = computed(() => {
   return units;
 });
 
+const coreCourses = computed(() => {
+  if (!roadmapSummary.value) return 0;
+  let count = 0;
+  roadmapSummary.value.roadmap.forEach(y => y.semesters.forEach(s => s.courses.forEach(c => { if (c.is_core) count++; })));
+  return count;
+});
+
+const electiveCourses = computed(() => totalCourses.value - coreCourses.value);
+
+const programChartData = computed(() => ({
+  labels: ['Core', 'Elective'],
+  datasets: [{
+    data: [coreCourses.value, electiveCourses.value],
+    backgroundColor: ['#140f50', '#e65100'],
+    borderWidth: 0,
+    hoverOffset: 4,
+  }],
+}));
+
+const programChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+    tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}` } },
+  },
+  cutout: '60%',
+};
+
 onMounted(fetchDashboardData);
 </script>
 
 <template>
   <div class="dashboard">
-    <!-- Welcome Section -->
-    <div class="welcome-section">
-      <div class="welcome-text">
-        <h1>Welcome back, {{ authStore.user?.first_name || 'Student' }}</h1>
-        <p v-if="program">{{ program.code }} - {{ program.name }}</p>
-        <p v-else class="welcome-no-program">No program assigned yet</p>
-      </div>
-    </div>
-
     <!-- Loading -->
     <div v-if="loading" class="loading-state">
       <div class="loading-spinner"></div>
     </div>
 
     <template v-else>
-      <!-- Program Overview Cards -->
-      <div v-if="program" class="overview-cards">
-        <div class="overview-card">
-          <span class="material-symbols-outlined card-icon">calendar_today</span>
-          <div class="card-data">
-            <span class="card-value">{{ program.duration_years }} years</span>
-            <span class="card-label">Program Duration</span>
+      <section class="dashboard-hero">
+        <div class="dashboard-hero__copy">
+          <div class="hero-eyebrow">Program Overview</div>
+          <div class="hero-profile">
+            <div v-if="authStore.user?.avatar_url" class="hero-avatar">
+              <img :src="authStore.user.avatar_url" :alt="authStore.user?.first_name || 'Student'" />
+            </div>
+            <div v-else class="hero-avatar hero-avatar--initials">{{ getInitials() }}</div>
+            <div>
+              <h1>Welcome back, {{ authStore.user?.first_name || 'Student' }}</h1>
+              <p class="hero-caption">Overview of your program roadmap and key milestones.</p>
+            </div>
+          </div>
+          <p v-if="program" class="hero-subtitle">{{ program.code }} - {{ program.name }}</p>
+          <p v-else class="welcome-no-program">
+            <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">info</span>
+            No program assigned yet — please contact your administrator.
+          </p>
+        </div>
+
+        <div v-if="program" class="hero-summary">
+          <div class="summary-grid">
+            <div v-for="item in dashboardSummary" :key="item.label" class="summary-card">
+              <span class="material-symbols-outlined summary-icon">{{ item.icon }}</span>
+              <div>
+                <span class="summary-value">{{ item.value }}</span>
+                <span class="summary-label">{{ item.label }}</span>
+              </div>
+            </div>
+            <button class="summary-card summary-card--cta" @click="router.push('/student/roadmap')">
+              <span class="material-symbols-outlined summary-icon">route</span>
+              <div>
+                <span class="summary-value">View Roadmap</span>
+                <span class="summary-label">See your full plan</span>
+              </div>
+              <span class="material-symbols-outlined card-arrow">arrow_forward</span>
+            </button>
           </div>
         </div>
-        <div class="overview-card">
-          <span class="material-symbols-outlined card-icon">menu_book</span>
-          <div class="card-data">
-            <span class="card-value">{{ totalCourses }}</span>
-            <span class="card-label">Total Courses</span>
+      </section>
+
+      <section v-if="roadmapSnapshot" class="roadmap-snapshot">
+        <div class="roadmap-snapshot__copy">
+          <p class="roadmap-snapshot__eyebrow">Program Progress</p>
+          <h2>Roadmap Overview</h2>
+          <p class="roadmap-snapshot__text">
+            Review your current study stage here, then open your full roadmap for the detailed course-by-course plan.
+          </p>
+          <div class="roadmap-snapshot__chips">
+            <span class="snapshot-chip">
+              <span class="material-symbols-outlined">calendar_today</span>
+              {{ roadmapSnapshot.stageTitle }}
+            </span>
+            <span class="snapshot-chip">
+              <span class="material-symbols-outlined">timeline</span>
+              {{ roadmapSnapshot.roadmapSpan }}
+            </span>
           </div>
         </div>
-        <div class="overview-card">
-          <span class="material-symbols-outlined card-icon">school</span>
-          <div class="card-data">
-            <span class="card-value">{{ totalUnits }}</span>
-            <span class="card-label">Total Units</span>
+
+        <div class="roadmap-snapshot__panel">
+          <div class="snapshot-panel__row">
+            <span class="snapshot-panel__label">Current focus</span>
+            <strong>{{ roadmapSnapshot.stageTitle }}</strong>
+            <p>{{ roadmapSnapshot.stageDetail }}</p>
           </div>
+          <div class="snapshot-panel__row">
+            <span class="snapshot-panel__label">Next milestone</span>
+            <strong>{{ roadmapSnapshot.nextMilestone }}</strong>
+          </div>
+          <div class="snapshot-panel__row">
+            <span class="snapshot-panel__label">Roadmap mix</span>
+            <strong>{{ roadmapSnapshot.progressNote }}</strong>
+          </div>
+          <button class="snapshot-panel__cta" @click="router.push('/student/roadmap')">
+            <span class="material-symbols-outlined">route</span>
+            Open full roadmap
+          </button>
         </div>
-        <div class="overview-card overview-card--cta" @click="router.push('/student/roadmap')">
-          <span class="material-symbols-outlined card-icon">route</span>
-          <div class="card-data">
-            <span class="card-value">View Roadmap</span>
-            <span class="card-label">See your full plan</span>
+      </section>
+
+      <!-- Program Chart -->
+      <div v-if="program && totalCourses > 0" class="program-chart-section">
+        <h2 class="section-title">
+          <span class="material-symbols-outlined">donut_large</span>
+          Program Structure
+        </h2>
+        <div class="program-chart-card">
+          <div class="program-chart-wrap">
+            <Doughnut :data="programChartData" :options="programChartOptions" />
           </div>
-          <span class="material-symbols-outlined card-arrow">arrow_forward</span>
+          <div class="program-chart-stats">
+            <div class="chart-stat">
+              <span class="chart-stat-dot" style="background:#140f50"></span>
+              <span class="chart-stat-label">Core Courses</span>
+              <span class="chart-stat-value">{{ coreCourses }}</span>
+            </div>
+            <div class="chart-stat">
+              <span class="chart-stat-dot" style="background:#e65100"></span>
+              <span class="chart-stat-label">Elective Courses</span>
+              <span class="chart-stat-value">{{ electiveCourses }}</span>
+            </div>
+            <div class="chart-stat chart-stat--total">
+              <span class="chart-stat-dot" style="background:transparent"></span>
+              <span class="chart-stat-label">Total Units</span>
+              <span class="chart-stat-value">{{ totalUnits }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -193,91 +366,177 @@ onMounted(fetchDashboardData);
   padding: var(--space-lg);
 }
 
-/* Welcome */
-.welcome-section {
+/* Hero */
+.dashboard-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: var(--space-lg);
+  padding: 24px;
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 247, 251, 0.96));
+  box-shadow: 0 18px 32px rgba(20, 15, 80, 0.08);
   margin-bottom: var(--space-xl);
 }
 
-.welcome-text h1 {
+.dashboard-hero__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hero-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(20, 15, 80, 0.06);
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.hero-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(20, 15, 80, 0.1);
+  background: rgba(20, 15, 80, 0.08);
+  flex-shrink: 0;
+}
+
+.hero-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-avatar--initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.dashboard-hero__copy h1 {
   font-size: var(--font-size-2xl);
   font-weight: 700;
   color: var(--color-text-primary);
+  line-height: 1.08;
 }
 
-.welcome-text p {
+.hero-caption {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+.hero-subtitle {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-  margin-top: 2px;
+  margin-top: 10px;
 }
 
 .welcome-no-program {
   color: var(--color-text-light);
 }
 
-/* Overview Cards */
-.overview-cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-md);
-  margin-bottom: var(--space-xl);
+.hero-summary {
+  min-width: 0;
 }
 
-.overview-card {
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.summary-card {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
+  gap: 12px;
   background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-lg);
-  padding: var(--space-md) var(--space-lg);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 18px;
+  padding: 14px 16px;
+  box-shadow: 0 10px 20px rgba(20, 15, 80, 0.05);
 }
 
-.overview-card--cta {
+.summary-card--cta {
   cursor: pointer;
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+  text-align: left;
+  font-family: inherit;
   transition: all var(--transition-fast);
+  width: 100%;
+  background: linear-gradient(135deg, #140f50, #221b68);
+  border-color: rgba(20, 15, 80, 0.2);
 }
 
-.overview-card--cta:hover {
-  background: var(--color-primary-light);
+.summary-card--cta:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 16px 28px rgba(20, 15, 80, 0.16);
 }
 
-.overview-card--cta .card-icon,
-.overview-card--cta .card-value,
-.overview-card--cta .card-label {
+.summary-card--cta .summary-icon,
+.summary-card--cta .summary-value,
+.summary-card--cta .summary-label,
+.summary-card--cta .card-arrow {
   color: var(--color-white);
 }
 
-.overview-card--cta .card-label {
-  color: rgba(255, 255, 255, 0.7);
+.summary-card--cta .summary-label {
+  color: rgba(255, 255, 255, 0.74);
 }
 
-.card-icon {
-  font-size: 28px;
+.summary-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
   color: var(--color-primary);
+  background: rgba(20, 15, 80, 0.06);
+  flex-shrink: 0;
 }
 
-.card-value {
+.summary-card--cta .summary-icon {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.summary-value {
   display: block;
-  font-size: var(--font-size-lg);
+  font-size: 20px;
   font-weight: 700;
   color: var(--color-text-primary);
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
-.card-label {
+.summary-label {
   display: block;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-light);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-top: 3px;
 }
 
 .card-arrow {
   margin-left: auto;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 18px;
 }
 
 /* Dashboard Grid */
@@ -285,6 +544,128 @@ onMounted(fetchDashboardData);
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-xl);
+}
+
+.roadmap-snapshot {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  gap: 20px;
+  margin-bottom: var(--space-xl);
+  padding: 22px 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(242, 245, 251, 0.98));
+  box-shadow: 0 14px 28px rgba(20, 15, 80, 0.06);
+}
+
+.roadmap-snapshot__copy h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--color-text-primary);
+}
+
+.roadmap-snapshot__eyebrow {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+.roadmap-snapshot__text {
+  margin: 10px 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  max-width: 56ch;
+}
+
+.roadmap-snapshot__chips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.snapshot-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 999px;
+  background: rgba(20, 15, 80, 0.06);
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.snapshot-chip .material-symbols-outlined {
+  font-size: 16px;
+}
+
+.roadmap-snapshot__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(20, 15, 80, 0.04);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+}
+
+.snapshot-panel__row {
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(20, 15, 80, 0.08);
+}
+
+.snapshot-panel__row:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.snapshot-panel__label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-light);
+  margin-bottom: 6px;
+}
+
+.snapshot-panel__row strong {
+  display: block;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+}
+
+.snapshot-panel__row p {
+  margin: 6px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.snapshot-panel__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-top: 4px;
+  border: none;
+  border-radius: 16px;
+  background: #140f50;
+  color: var(--color-white);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.snapshot-panel__cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(20, 15, 80, 0.18);
 }
 
 .section-title {
@@ -315,15 +696,16 @@ onMounted(fetchDashboardData);
   gap: var(--space-md);
   padding: var(--space-md);
   background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-md);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 10px 20px rgba(20, 15, 80, 0.05);
   transition: all var(--transition-fast);
 }
 
 .quick-link:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-sm);
-  transform: translateX(4px);
+  border-color: rgba(20, 15, 80, 0.16);
+  box-shadow: 0 16px 28px rgba(20, 15, 80, 0.08);
+  transform: translateY(-2px);
 }
 
 .quick-link-icon {
@@ -364,8 +746,9 @@ onMounted(fetchDashboardData);
   gap: var(--space-md);
   padding: var(--space-md);
   background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-md);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 10px 20px rgba(20, 15, 80, 0.05);
 }
 
 .date-icon-wrap {
@@ -423,14 +806,102 @@ onMounted(fetchDashboardData);
   to { transform: rotate(360deg); }
 }
 
+/* Program Chart */
+.program-chart-section {
+  margin-bottom: var(--space-xl);
+}
+
+.program-chart-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xl);
+  background: var(--color-white);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 22px;
+  padding: var(--space-lg) var(--space-xl);
+  box-shadow: 0 14px 26px rgba(20, 15, 80, 0.06);
+}
+
+.program-chart-wrap {
+  width: 180px;
+  height: 180px;
+  flex-shrink: 0;
+}
+
+.program-chart-stats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  flex: 1;
+}
+
+.chart-stat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.chart-stat-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chart-stat-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  flex: 1;
+}
+
+.chart-stat-value {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.chart-stat--total {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-md);
+  margin-top: var(--space-xs);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
-  .overview-cards {
-    grid-template-columns: repeat(2, 1fr);
+  .dashboard {
+    padding: var(--space-md);
+  }
+
+  .dashboard-hero {
+    grid-template-columns: 1fr;
+    padding: 20px 18px;
+  }
+
+  .hero-profile {
+    align-items: flex-start;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
   }
 
   .dashboard-grid {
     grid-template-columns: 1fr;
+  }
+
+  .roadmap-snapshot {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+
+  .program-chart-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .program-chart-wrap {
+    width: 150px;
+    height: 150px;
   }
 }
 </style>

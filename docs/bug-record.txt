@@ -138,3 +138,72 @@ bug记录
 22. Alumni 用户 ID 在 live DB 与 seed.sql 不一致
     原因：live DB 已有数据导致 auto_increment ID 跳号，alumni 实际 ID 为 10-18 而非 4-12
     解决：live DB 手动以正确 ID 插入 alumni_profiles；seed.sql 保留 4-12 适用于全新建库
+
+
+// 0428 FIXED
+
+23. 控制台警告：The next() callback in navigation guards is deprecated
+    原因：router/index.js 的 beforeEach 使用了旧式 next() 回调，Vue Router 4 已弃用
+    解决：所有 next({...}) 改为 return {...}，next() 改为隐式 return，移除 next 参数
+
+24. ProgramPreviewPage crash（TypeError: Cannot read properties of undefined 'employment_rate'）
+    原因：programs 2-5 无 career_outcomes 数据，latestOutcome 为 undefined，
+          v-if 直接访问 latestOutcome.employment_rate 导致报错
+    解决：v-if 加空值守卫 latestOutcome && latestOutcome.employment_rate
+
+25. Dashboard / Resources 无 program 时显示空白
+    原因：authStore.user.program_id 为 null 时页面无任何提示，用户不知道原因
+    解决：两页面均添加"No program assigned"提示，引导用户联系管理员
+
+26. seed.sql 重复插入 MIT career_outcomes 导致 Duplicate entry 报错
+    原因：seed.sql 同时存在两个 career_outcomes INSERT，均包含 (program_id=3, year=2023)
+    解决：删除旧的 MIT 专用 INSERT 块（lines 256-260），保留统一的全 program INSERT
+
+27. 头像上传成功后图片短暂显示破损图标（刷新后正常）
+    原因：uploadAvatarHandler 将文件保存到 frontend/public/avatar/，
+          前端 handleAvatarUpload 上传成功后将 avatarPreview 从 blob URL 切换为服务器路径
+          /avatar/user_x_xxx.jpg，但 Vite dev server 尚未服务该新文件，导致图片加载失败
+    解决：移除 avatarPreview.value = res.data.data.avatar_url 这行，
+          保持上传前 onFileChange 创建的 blob URL 作为预览，
+          仅更新 authStore.user.avatar_url 为服务器路径供后续使用
+
+
+// 0507 FIXED
+
+28. Student 端页面错误显示顶部白色主导航栏
+    原因：AppHeader.vue 未区分 public 页面与 /student/* 门户页面，
+          main-nav-bar 在 student portal 中仍被统一渲染，造成导航冗余
+    解决：在 AppHeader.vue 中基于当前路由判断，
+          /student/* 下隐藏白色 main-nav-bar，仅保留 portal 所需顶部信息栏
+
+29. Sidebar 折叠后导航 icon 视觉不居中
+    原因：侧边栏 collapsed 状态下 sidebar-link 仍沿用展开态 padding 和对齐方式，
+          导致 icon 整体偏右
+    解决：为 collapsed 状态单独设置 sidebar-nav / sidebar-link / icon 的居中规则，
+          确保折叠后导航图标水平居中
+
+30. Timetable 在阿德莱德时区下“今天”显示错误
+    原因：TimetablePage.vue 使用 toISOString().slice(0, 10) 生成 todayStr 和 dateStr，
+          该写法按 UTC 截日期，导致 Australia/Adelaide 本地日期被偏移
+    解决：改为统一按 Australia/Adelaide 时区生成日期 key，
+          并据此计算 today 高亮和周标题显示
+
+31. My Profile 错误提供姓名/邮箱可编辑表单
+    原因：Profile 页面将学生姓名和学校邮箱作为可编辑字段展示，
+          与学生主数据通常由学校系统维护的业务规则不一致，造成误导
+    解决：改为只读账户信息展示，
+          保留头像上传，移除姓名/邮箱编辑表单及 Program ID 展示
+
+32. MIT Roadmap 错误显示会计/农业/航空等非 IT 课程
+    原因：seed.sql 中 MIT 的 program_courses 映射仍写死为 course_id 13-26，
+          但这些 ID 实际已被 ACCT / AGRI / EDUC / AERO / BUSI 等课程占用；
+          真正的 MIT 课程在当前 seed 顺序下是 57-70
+    解决：修正 seed.sql 中 MIT 的 program_courses 映射为正确 course_id，
+          并同步更新本地数据库中 program_id = 3 的课程映射记录
+
+33. Homepage Featured Programs 图片不显示
+    原因：HomePage.vue 依赖 programs.banner_url 渲染 program-card-img，
+          但当前数据库 programs.banner_url 全部为 NULL；
+          同时首页直接取按名称排序后的前 4 个 program，无法保证命中已有本地 banner 的专业
+    解决：首页 Featured Programs 改为固定展示 4 个 demo program，
+          并为其提供本地 banner fallback；ProgramPreviewPage 同步增加 banner fallback
