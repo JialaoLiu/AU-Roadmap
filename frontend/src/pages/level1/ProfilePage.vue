@@ -9,6 +9,7 @@ const toast = useToast();
 const uploading = ref(false);
 const avatarPreview = ref(authStore.user?.avatar_url || null);
 const fileInput = ref(null);
+const selectedFile = ref(null);
 
 const profileDetails = computed(() => [
   {
@@ -41,12 +42,13 @@ function getInitials() {
 
 function onFileChange(e) {
   const file = e.target.files[0];
+  selectedFile.value = file || null;
   if (!file) return;
   avatarPreview.value = URL.createObjectURL(file);
 }
 
 async function handleAvatarUpload() {
-  const file = fileInput.value?.files[0];
+  const file = selectedFile.value;
   if (!file) return;
 
   uploading.value = true;
@@ -100,7 +102,7 @@ async function handleAvatarUpload() {
             Choose Photo
           </button>
           <button
-            v-if="fileInput?.files?.[0]"
+            v-if="selectedFile"
             class="btn btn-primary btn-sm"
             :disabled="uploading"
             @click="handleAvatarUpload"

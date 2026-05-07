@@ -18,11 +18,12 @@ function error(res, message, statusCode = 400, code = 'ERROR', details = null) {
 }
 
 function paginated(res, data, page, limit, total) {
+  const safeLimit = Math.max(1, parseInt(limit, 10) || 1);
   return success(res, data, 200, {
     page: parseInt(page),
-    limit: parseInt(limit),
+    limit: safeLimit,
     total,
-    totalPages: Math.ceil(total / limit),
+    totalPages: Math.ceil(total / safeLimit),
   });
 }
 

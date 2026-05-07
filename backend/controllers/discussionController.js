@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { validationResult } = require('express-validator');
 const { success, error } = require('../utils/response');
 
 // GET all threads (supports optional program_id and category filters)
@@ -83,6 +84,11 @@ async function getThread(req, res, next) {
 // POST create thread
 async function createThread(req, res, next) {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return error(res, errors.array()[0].msg, 400, 'VALIDATION_ERROR');
+    }
+
     const programId = req.params.programId || req.body.program_id || null;
     const { title, content, category } = req.body;
     const userId = req.user.id;
@@ -109,6 +115,11 @@ async function createThread(req, res, next) {
 // POST create reply
 async function createReply(req, res, next) {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return error(res, errors.array()[0].msg, 400, 'VALIDATION_ERROR');
+    }
+
     const { threadId } = req.params;
     const { content } = req.body;
     const userId = req.user.id;

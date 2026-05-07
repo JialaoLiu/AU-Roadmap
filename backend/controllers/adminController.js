@@ -140,17 +140,36 @@ async function listCourses(req, res, next) {
 }
 
 async function createCourse(req, res, next) {
+  let connection;
   try {
     const {
       code, name, units, level, semester_offered, description,
       learning_outcomes, assessment_summary, is_elective,
+      program_id, year_level, semester, course_group, sort_order,
     } = req.body;
 
     if (!code || !name || !level || !semester_offered) {
       return error(res, 'Code, name, level, and semester_offered are required', 400, 'VALIDATION_ERROR');
     }
 
-    const [result] = await pool.query(
+    const hasProgramMapping =
+      program_id !== undefined && program_id !== null && program_id !== '' &&
+      year_level !== undefined && year_level !== null && year_level !== '' &&
+      semester !== undefined && semester !== null && semester !== '';
+
+    if (!hasProgramMapping && (program_id || year_level || semester)) {
+      return error(
+        res,
+        'program_id, year_level, and semester are all required when assigning a course to a program',
+        400,
+        'VALIDATION_ERROR'
+      );
+    }
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    const [result] = await connection.query(
       `INSERT INTO courses (code, name, units, level, semester_offered, description,
         learning_outcomes, assessment_summary, is_elective)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -158,10 +177,31 @@ async function createCourse(req, res, next) {
        learning_outcomes || null, assessment_summary || null, is_elective || false]
     );
 
+    if (hasProgramMapping) {
+      await connection.query(
+        `INSERT INTO program_courses (program_id, course_id, year_level, semester, is_core, course_group, sort_order)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          program_id,
+          result.insertId,
+          year_level,
+          semester,
+          is_elective ? false : true,
+          course_group || null,
+          sort_order || 0,
+        ]
+      );
+    }
+
+    await connection.commit();
+
     const [created] = await pool.query('SELECT * FROM courses WHERE id = ?', [result.insertId]);
     return success(res, created[0], 201);
   } catch (err) {
+    if (connection) await connection.rollback();
     next(err);
+  } finally {
+    if (connection) connection.release();
   }
 }
 

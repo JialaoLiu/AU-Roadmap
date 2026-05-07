@@ -96,8 +96,13 @@ async function sendConnectionRequest(req, res, next) {
   try {
     const { receiver_id } = req.body;
     const requesterId = req.user.id;
+    const normalizedReceiverId = Number(receiver_id);
 
-    if (requesterId === receiver_id) {
+    if (!Number.isInteger(normalizedReceiverId) || normalizedReceiverId <= 0) {
+      return error(res, 'receiver_id is required', 400, 'VALIDATION_ERROR');
+    }
+
+    if (Number(requesterId) === normalizedReceiverId) {
       return error(res, 'Cannot connect with yourself', 400);
     }
 
@@ -105,7 +110,7 @@ async function sendConnectionRequest(req, res, next) {
     const [existing] = await pool.query(
       `SELECT * FROM user_connections
        WHERE (requester_id = ? AND receiver_id = ?) OR (requester_id = ? AND receiver_id = ?)`,
-      [requesterId, receiver_id, receiver_id, requesterId]
+      [requesterId, normalizedReceiverId, normalizedReceiverId, requesterId]
     );
 
     if (existing.length > 0) {
@@ -114,7 +119,7 @@ async function sendConnectionRequest(req, res, next) {
 
     await pool.query(
       'INSERT INTO user_connections (requester_id, receiver_id, status) VALUES (?, ?, ?)',
-      [requesterId, receiver_id, 'pending']
+      [requesterId, normalizedReceiverId, 'pending']
     );
 
     return success(res, { message: 'Connection request sent' }, 201);
@@ -127,6 +132,10 @@ async function respondToConnection(req, res, next) {
   try {
     const { id } = req.params;
     const { action } = req.body; // 'accept' or 'reject'
+
+    if (!['accept', 'reject'].includes(action)) {
+      return error(res, "action must be 'accept' or 'reject'", 400, 'VALIDATION_ERROR');
+    }
 
     const [connections] = await pool.query(
       'SELECT * FROM user_connections WHERE id = ? AND receiver_id = ?',
@@ -257,6 +266,11 @@ async function sendMessage(req, res, next) {
   try {
     const senderId = req.user.id;
     const { receiver_id, content } = req.body;
+    const normalizedReceiverId = Number(receiver_id);
+
+    if (!Number.isInteger(normalizedReceiverId) || normalizedReceiverId <= 0) {
+      return error(res, 'receiver_id is required', 400, 'VALIDATION_ERROR');
+    }
 
     if (!content || !content.trim()) {
       return error(res, 'Message content is required', 400);
@@ -264,7 +278,7 @@ async function sendMessage(req, res, next) {
 
     const [result] = await pool.query(
       'INSERT INTO messages (sender_id, receiver_id, content) VALUES (?, ?, ?)',
-      [senderId, receiver_id, content.trim()]
+      [senderId, normalizedReceiverId, content.trim()]
     );
 
     const [msg] = await pool.query(
