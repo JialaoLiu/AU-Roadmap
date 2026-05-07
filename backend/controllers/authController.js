@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { validationResult } = require('express-validator');
 const pool = require('../config/db');
 const { success, error } = require('../utils/response');
 const multer = require('multer');
@@ -41,6 +42,11 @@ async function verifyTurnstile(token) {
 
 async function register(req, res, next) {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return error(res, errors.array()[0].msg, 400, 'VALIDATION_ERROR');
+    }
+
     const { first_name, last_name, email, password, role, captcha } = req.body;
 
     if (!captcha) {
@@ -87,6 +93,11 @@ async function register(req, res, next) {
 
 async function login(req, res, next) {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return error(res, errors.array()[0].msg, 400, 'VALIDATION_ERROR');
+    }
+
     const { email, password, captcha } = req.body;
 
     if (!captcha) {
@@ -191,7 +202,9 @@ async function uploadAvatarHandler(req, res, next) {
         const oldPath = path.join(avatarDir, path.basename(oldUrl));
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
       }
-    } catch {}
+    } catch (cleanupErr) {
+      console.warn('Old avatar cleanup failed:', cleanupErr.message);
+    }
 
     await pool.query('UPDATE users SET avatar_url = ? WHERE id = ?', [avatarUrl, req.user.id]);
 

@@ -16,7 +16,7 @@ const statCards = [
   { key: 'users', label: 'Users', icon: 'manage_accounts', route: '/admin/users', color: '#2e7d32' },
   { key: 'alumni', label: 'Alumni', icon: 'group', route: '/admin/alumni', color: '#e65100' },
   { key: 'partners', label: 'Industry Partners', icon: 'business', route: '/admin/industry', color: '#6a1b9a' },
-  { key: 'resources', label: 'Resources', icon: 'menu_book', route: '/admin/careers', color: '#00838f' },
+  { key: 'resources', label: 'Resources', icon: 'menu_book', route: '/admin/programs', color: '#00838f' },
 ];
 
 async function fetchStats() {

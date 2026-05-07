@@ -19,6 +19,9 @@ export const markAsRead = (userId) => api.put(`/community/messages/read/${userId
 // Discussions (feed)
 export const getAllThreads = (params) => api.get('/discussions/all', { params });
 export const getThread = (threadId) => api.get(`/discussions/thread/${threadId}`);
+export const uploadPostImage = (formData) => api.post('/discussions/upload-image', formData, {
+  headers: { 'Content-Type': 'multipart/form-data' },
+});
 export const createThread = (data) => api.post('/discussions/create', data);
 export const createReply = (threadId, content) => api.post(`/discussions/thread/${threadId}/reply`, { content });
 export const deleteThread = (threadId) => api.delete(`/discussions/thread/${threadId}`);

@@ -107,8 +107,11 @@ bug记录
           seed.sql programs INSERT 补充 banner_url 字段
 
 16. 添加课程默认归属 CS，数据库中无对应记录
-    原因：待补充
-    解决：待修复
+    原因：Admin 新增课程流程只创建 courses 记录，未同步写入 program_courses；
+          前端表单也没有显式的 program roadmap 绑定字段，造成“像是默认属于某个 program，但数据库无映射”的误解
+    解决：ManageCourses 新增可选 Program Assignment 字段；
+          createCourse 支持在创建课程时可选同步写入 program_courses，
+          由管理员明确指定 year_level / semester / course_group / sort_order
 
 
 // 0414 FIXED
@@ -207,3 +210,77 @@ bug记录
           同时首页直接取按名称排序后的前 4 个 program，无法保证命中已有本地 banner 的专业
     解决：首页 Featured Programs 改为固定展示 4 个 demo program，
           并为其提供本地 banner fallback；ProgramPreviewPage 同步增加 banner fallback
+
+34. Auth 注册 / 登录校验规则未真正生效
+    原因：routes/auth.js 虽挂载 express-validator 中间件，
+          但 authController.js 的 register / login 未调用 validationResult(req) 读取校验结果
+    解决：在 register / login 开头显式检查 validationResult(req)，
+          校验失败时直接返回 400 VALIDATION_ERROR，阻止无效请求继续进入 bcrypt 和数据库逻辑
+
+35. Discussion 发帖 / 回复校验规则未真正生效
+    原因：routes/discussions.js 已挂载 threadValidation / replyValidation，
+          但 discussionController.js 的 createThread / createReply 未读取 validationResult(req)
+    解决：在 createThread / createReply 开头显式检查 validationResult(req)，
+          空标题 / 空内容请求直接返回 400 VALIDATION_ERROR
+
+36. Community 私信发送时缺少 receiver_id 校验
+    原因：communityController.js 的 sendMessage 仅校验 content，
+          未校验 receiver_id 是否存在且为合法用户 ID，错误请求会直接落到 messages 表外键约束
+    解决：sendMessage 中新增 receiver_id 必填与数值合法性校验，
+          不合法时返回 400 VALIDATION_ERROR，避免 DB 层 500
+
+37. Community 连接请求可因类型不一致绕过“不能连接自己”校验
+    原因：sendConnectionRequest 中 requesterId 来自 JWT 为 number，
+          receiver_id 来自 req.body 可能为 string，严格相等比较可能失效
+    解决：对 receiver_id 做 Number() 归一化与合法性校验，
+          再用数值比较判断是否为 self-connect
+
+38. Community 连接请求响应 action 无效时会被静默当成 reject
+    原因：respondToConnection 使用 action === 'accept' ? 'accepted' : 'rejected'，
+          任何拼写错误、大小写错误或缺失字段都会被当成拒绝
+    解决：仅允许 action 为 accept / reject，
+          其余情况返回 400 VALIDATION_ERROR，避免误拒绝待处理请求
+
+39. Auth store 在任意 fetchUser 错误下都会强制登出
+    原因：frontend/src/stores/auth.js 的 fetchUser catch 中无条件调用 logout()，
+          临时网络错误或 5xx 也会清空本地 token
+    解决：仅在响应状态码为 401 时执行 logout()，
+          其余错误保留 token，避免瞬时后端故障导致用户被动退出
+
+40. Student sidebar 的 Dashboard 在所有子页面都被高亮
+    原因：Level1Layout.vue 使用 .router-link-active 作为完整高亮样式，
+          而 /student 是所有 /student/* 路由的前缀，导致 Dashboard 始终处于 active 状态
+    解决：将完整高亮样式改为 .router-link-exact-active，
+          普通 .router-link-active 仅保留轻量文字提示
+
+41. Admin Dashboard 的 Resources 卡片跳转到错误页面
+    原因：AdminDashboard.vue 中 Resources stat card 的 route 配置为 /admin/careers，
+          点击后会进入职业数据管理页而非资源相关页
+    解决：将 Resources 卡片跳转暂时调整为 /admin/programs，
+          作为更接近资源管理上下文的临时入口
+
+42. My Profile 头像上传按钮依赖非响应式 FileList
+    原因：Upload 按钮通过 fileInput?.files?.[0] 判断显示，
+          DOM FileList 非 Vue 响应式数据，文件清空或取消选择时按钮状态可能不同步
+    解决：新增 selectedFile 响应式 ref 统一管理选中的文件，
+          Upload 按钮改为基于 selectedFile 显示
+
+43. 分页响应在 limit=0 时返回无效 totalPages
+    原因：backend/utils/response.js 中 paginated 直接计算 Math.ceil(total / limit)，
+          当 limit=0 时会得到 Infinity
+    解决：对 limit 做最小值保护，
+          使用 safeLimit = Math.max(1, parseInt(limit) || 1) 计算 totalPages
+
+44. 头像上传清理旧文件时空 catch 吞掉错误
+    原因：authController.js 的 uploadAvatarHandler 在清理旧头像文件时使用空 catch，
+          文件系统或 DB 查询异常会被完全吞掉，后续排查困难
+    解决：将空 catch 改为输出 warning 日志，
+          至少保留 cleanupErr.message 供后续定位
+
+45. Community 发帖上传图片后未刷新页面时显示裂图
+    原因：CommunityHubPage.vue 发帖成功后先将本地 blob 预览图复用到新帖子，
+          但随后 clearThreadImage() 立即对该 blob URL 执行 URL.revokeObjectURL()，
+          导致帖子中的本地图片地址被提前销毁
+    解决：发帖成功后若新帖子仍使用本地预览图，
+          清空表单时不立即 revoke 该 blob URL，仅重置 input 和状态；
+          刷新页面后再自然回到服务器 /posts/... 图片路径

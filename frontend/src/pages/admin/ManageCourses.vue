@@ -1,9 +1,11 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { getProgramList } from '@/api/programs';
 import { listCourses, createCourse, updateCourse, deleteCourse } from '@/api/admin';
 
 const loading = ref(true);
 const courses = ref([]);
+const programs = ref([]);
 const search = ref('');
 const showForm = ref(false);
 const editing = ref(null);
@@ -12,6 +14,7 @@ const saving = ref(false);
 const emptyForm = {
   code: '', name: '', units: 3, level: '1000',
   semester_offered: 'S1', description: '', is_elective: false,
+  program_id: '', year_level: 1, semester: 1, course_group: '', sort_order: 0,
 };
 const form = ref({ ...emptyForm });
 
@@ -24,6 +27,15 @@ async function fetchCourses() {
     console.error(err);
   } finally {
     loading.value = false;
+  }
+}
+
+async function fetchPrograms() {
+  try {
+    const res = await getProgramList({ limit: 100 });
+    programs.value = res.data.data;
+  } catch (err) {
+    console.error(err);
   }
 }
 
@@ -46,10 +58,25 @@ function openEdit(c) {
 async function handleSubmit() {
   saving.value = true;
   try {
+    const payload = { ...form.value };
     if (editing.value) {
-      await updateCourse(editing.value, form.value);
+      delete payload.program_id;
+      delete payload.year_level;
+      delete payload.semester;
+      delete payload.course_group;
+      delete payload.sort_order;
+    } else if (!payload.program_id) {
+      delete payload.program_id;
+      delete payload.year_level;
+      delete payload.semester;
+      delete payload.course_group;
+      delete payload.sort_order;
+    }
+
+    if (editing.value) {
+      await updateCourse(editing.value, payload);
     } else {
-      await createCourse(form.value);
+      await createCourse(payload);
     }
     showForm.value = false;
     await fetchCourses();
@@ -74,7 +101,9 @@ function handleSearch() {
   fetchCourses();
 }
 
-onMounted(fetchCourses);
+onMounted(async () => {
+  await Promise.all([fetchCourses(), fetchPrograms()]);
+});
 </script>
 
 <template>
@@ -156,6 +185,40 @@ onMounted(fetchCourses);
                 <label>Description</label>
                 <textarea v-model="form.description" rows="3" placeholder="Course description..."></textarea>
               </div>
+
+              <template v-if="!editing">
+                <div class="form-group form-group--full">
+                  <label>Program Assignment (Optional)</label>
+                  <select v-model="form.program_id">
+                    <option value="">Create course only</option>
+                    <option v-for="program in programs" :key="program.id" :value="program.id">
+                      {{ program.code }} - {{ program.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <template v-if="form.program_id">
+                  <div class="form-group">
+                    <label>Roadmap Year *</label>
+                    <input v-model.number="form.year_level" type="number" min="1" required />
+                  </div>
+                  <div class="form-group">
+                    <label>Roadmap Semester *</label>
+                    <select v-model.number="form.semester" required>
+                      <option :value="1">Semester 1</option>
+                      <option :value="2">Semester 2</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Course Group</label>
+                    <input v-model="form.course_group" placeholder="e.g. Core Stream A" />
+                  </div>
+                  <div class="form-group">
+                    <label>Sort Order</label>
+                    <input v-model.number="form.sort_order" type="number" min="0" />
+                  </div>
+                </template>
+              </template>
             </div>
             <div class="modal-actions">
               <button type="button" class="btn btn-secondary" @click="showForm = false">Cancel</button>

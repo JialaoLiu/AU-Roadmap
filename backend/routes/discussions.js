@@ -3,7 +3,7 @@ const router = express.Router();
 const { body } = require('express-validator');
 const { authenticate } = require('../middleware/auth');
 const {
-  getAllThreads, getThreads, getThread, createThread, createReply, deleteThread, deleteReply,
+  getAllThreads, getThreads, getThread, createThread, createReply, deleteThread, deleteReply, uploadPostImage,
 } = require('../controllers/discussionController');
 
 const threadValidation = [
@@ -23,6 +23,7 @@ router.get('/:programId', getThreads);
 router.get('/thread/:threadId', getThread);
 
 // Auth required: create & delete
+router.post('/upload-image', authenticate, uploadPostImage);
 router.post('/create', authenticate, threadValidation, createThread);
 router.post('/:programId', authenticate, threadValidation, createThread);
 router.post('/thread/:threadId/reply', authenticate, replyValidation, createReply);

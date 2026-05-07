@@ -33,7 +33,6 @@ const sidebarLinks = [
             :key="link.to"
             :to="link.to"
             class="sidebar-link"
-            :class="{ 'exact-active': link.exact }"
           >
             <span class="material-symbols-outlined">{{ link.icon }}</span>
             <span v-if="uiStore.sidebarOpen" class="link-label">{{ link.label }}</span>
@@ -118,6 +117,10 @@ const sidebarLinks = [
 }
 
 .sidebar-link.router-link-active {
+  color: var(--color-primary);
+}
+
+.sidebar-link.router-link-exact-active {
   background: var(--color-primary);
   color: var(--color-white);
 }
