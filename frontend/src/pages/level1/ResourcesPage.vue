@@ -27,6 +27,12 @@ const uniqueCategories = computed(() => {
   return [...cats];
 });
 
+const summaryStats = computed(() => [
+  { label: 'Available Resources', value: resources.value.length, icon: 'menu_book' },
+  { label: 'Categories', value: uniqueCategories.value.length, icon: 'apps' },
+  { label: 'Current Filter', value: filterCategory.value ? (categories[filterCategory.value]?.label || filterCategory.value) : 'All', icon: 'tune' },
+]);
+
 async function fetchResources() {
   const programId = authStore.user?.program_id;
   if (!programId) { loading.value = false; return; }
@@ -45,17 +51,39 @@ onMounted(fetchResources);
 
 <template>
   <div class="resources-page">
-    <div class="page-header">
+    <section class="resources-hero">
       <div class="page-header__left">
-        <span class="material-symbols-outlined page-icon">menu_book</span>
         <div>
-          <h1>Student Resources</h1>
-          <p class="page-subtitle">Academic support, career services, and helpful tools for your studies</p>
+          <p class="hero-eyebrow">Student Support</p>
+          <div class="hero-title">
+            <span class="material-symbols-outlined page-icon">menu_book</span>
+            <div>
+              <h1>Student Resources</h1>
+              <p class="page-subtitle">Academic support, career services, and helpful tools for your studies.</p>
+            </div>
+          </div>
+          <p class="hero-note">Access the support services and tools most relevant to your study progress and current needs.</p>
         </div>
       </div>
-    </div>
+
+      <div v-if="resources.length" class="hero-summary">
+        <div v-for="item in summaryStats" :key="item.label" class="summary-card">
+          <span class="material-symbols-outlined summary-icon">{{ item.icon }}</span>
+          <div>
+            <span class="summary-value">{{ item.value }}</span>
+            <span class="summary-label">{{ item.label }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <div v-if="loading" class="loading-state"><div class="loading-spinner"></div></div>
+
+    <div v-else-if="!authStore.user?.program_id" class="no-program-state">
+      <span class="material-symbols-outlined no-program-icon">info</span>
+      <h2>No Program Assigned</h2>
+      <p>Resources are tailored to your program. Please contact your administrator to get a program assigned to your account.</p>
+    </div>
 
     <template v-else-if="resources.length">
       <!-- Category Filter -->
@@ -116,11 +144,98 @@ onMounted(fetchResources);
 <style scoped>
 .resources-page { padding: var(--space-lg); }
 
-.page-header { margin-bottom: var(--space-xl); }
-.page-header__left { display: flex; align-items: center; gap: var(--space-md); }
+.resources-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: var(--space-lg);
+  padding: 24px;
+  margin-bottom: var(--space-lg);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 247, 251, 0.96));
+  box-shadow: 0 18px 32px rgba(20, 15, 80, 0.08);
+}
+
+.page-header__left { display: flex; align-items: stretch; }
+.hero-eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(20, 15, 80, 0.06);
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.hero-title { display: flex; align-items: center; gap: var(--space-md); }
 .page-icon { font-size: 32px; color: var(--color-primary); }
 .page-header h1 { font-size: var(--font-size-2xl); font-weight: 700; color: var(--color-text-primary); }
 .page-subtitle { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-top: 2px; }
+.hero-note {
+  margin: 14px 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  max-width: 54ch;
+}
+
+.hero-summary {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.summary-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--color-white);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 18px;
+  padding: 14px 16px;
+  box-shadow: 0 10px 20px rgba(20, 15, 80, 0.05);
+}
+
+.summary-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--color-primary);
+  background: rgba(20, 15, 80, 0.06);
+  flex-shrink: 0;
+}
+
+.summary-value {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.15;
+}
+
+.summary-label {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+/* No program */
+.no-program-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: var(--space-3xl); text-align: center;
+}
+.no-program-icon { font-size: 48px; color: var(--color-text-light); margin-bottom: var(--space-md); }
+.no-program-state h2 { color: var(--color-text-primary); margin-bottom: var(--space-sm); }
+.no-program-state p { color: var(--color-text-secondary); max-width: 380px; }
 
 /* Filter */
 .filter-bar {
@@ -130,7 +245,7 @@ onMounted(fetchResources);
 .filter-btn {
   display: flex; align-items: center; gap: var(--space-xs);
   padding: var(--space-xs) var(--space-md);
-  border: 1px solid var(--color-border); border-radius: var(--border-radius-full);
+  border: 1px solid rgba(20, 15, 80, 0.08); border-radius: var(--border-radius-full);
   background: var(--color-white);
   font-size: var(--font-size-xs); font-weight: 500; font-family: inherit;
   color: var(--color-text-secondary); cursor: pointer;
@@ -154,13 +269,14 @@ onMounted(fetchResources);
 
 .resource-card {
   display: flex; align-items: flex-start; gap: var(--space-md);
-  background: var(--color-white); border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-lg); padding: var(--space-lg);
+  background: var(--color-white); border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 22px; padding: var(--space-lg);
   transition: all var(--transition-fast); text-decoration: none;
+  box-shadow: 0 12px 24px rgba(20, 15, 80, 0.06);
 }
 
 .resource-card:hover {
-  border-color: var(--color-primary); box-shadow: var(--shadow-md);
+  border-color: rgba(20, 15, 80, 0.18); box-shadow: 0 18px 32px rgba(20, 15, 80, 0.1);
   transform: translateY(-2px);
 }
 
@@ -210,6 +326,8 @@ onMounted(fetchResources);
 @keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 768px) {
+  .resources-page { padding: var(--space-md); }
+  .resources-hero { grid-template-columns: 1fr; padding: 20px 18px; }
   .resources-grid { grid-template-columns: 1fr; }
 }
 </style>

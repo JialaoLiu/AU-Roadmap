@@ -26,6 +26,12 @@ const uniqueTypes = computed(() => {
   return [...types];
 });
 
+const summaryStats = computed(() => [
+  { label: 'Program Partners', value: partners.value.length, icon: 'handshake' },
+  { label: 'Opportunity Types', value: uniqueTypes.value.length, icon: 'hub' },
+  { label: 'Active Filter', value: filterType.value ? (partnershipTypes[filterType.value]?.label || filterType.value) : 'All', icon: 'tune' },
+]);
+
 async function fetchPartners() {
   const programId = authStore.user?.program_id;
   if (!programId) { loading.value = false; return; }
@@ -44,33 +50,40 @@ onMounted(fetchPartners);
 
 <template>
   <div class="industry-page">
-    <div class="page-header">
+    <section class="industry-hero">
       <div class="page-header__left">
-        <span class="material-symbols-outlined page-icon">business</span>
         <div>
-          <h1>Industry Connections</h1>
-          <p class="page-subtitle">Explore industry partners and career opportunities linked to your program</p>
+          <p class="hero-eyebrow">Industry Engagement</p>
+          <div class="hero-title">
+            <span class="material-symbols-outlined page-icon">business</span>
+            <div>
+              <h1>Industry Connections</h1>
+              <p class="page-subtitle">Explore industry partners and career opportunities linked to your program.</p>
+            </div>
+          </div>
+          <p class="hero-note">Review how your program connects with placements, projects, and graduate pathways.</p>
         </div>
       </div>
-    </div>
+
+      <div v-if="partners.length" class="hero-summary">
+        <div v-for="item in summaryStats" :key="item.label" class="summary-card">
+          <span class="material-symbols-outlined summary-icon">{{ item.icon }}</span>
+          <div>
+            <span class="summary-value">{{ item.value }}</span>
+            <span class="summary-label">{{ item.label }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <div v-if="loading" class="loading-state"><div class="loading-spinner"></div></div>
 
     <template v-else-if="partners.length">
-      <!-- Stats -->
-      <div class="stats-row">
-        <div class="stat-chip">
-          <span class="material-symbols-outlined">handshake</span>
-          <strong>{{ partners.length }}</strong> Partners
-        </div>
-        <div v-for="t in uniqueTypes" :key="t" class="stat-chip">
-          <span class="material-symbols-outlined">{{ partnershipTypes[t]?.icon || 'business' }}</span>
-          <strong>{{ partners.filter(p => p.partnership_type === t).length }}</strong>
-          {{ partnershipTypes[t]?.label || t }}
-        </div>
-      </div>
+      <p class="results-note">
+        Showing <strong>{{ filteredPartners.length }}</strong> partner{{ filteredPartners.length === 1 ? '' : 's' }}
+        <span v-if="filterType"> for {{ partnershipTypes[filterType]?.label || filterType }}</span>.
+      </p>
 
-      <!-- Filter -->
       <div class="filter-bar">
         <button
           class="filter-btn"
@@ -130,14 +143,38 @@ onMounted(fetchPartners);
 <style scoped>
 .industry-page { padding: var(--space-lg); }
 
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--space-xl);
+.industry-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: var(--space-lg);
+  padding: 24px;
+  margin-bottom: var(--space-lg);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 247, 251, 0.96));
+  box-shadow: 0 18px 32px rgba(20, 15, 80, 0.08);
 }
 
 .page-header__left {
+  display: flex;
+  align-items: stretch;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(20, 15, 80, 0.06);
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.hero-title {
   display: flex;
   align-items: center;
   gap: var(--space-md);
@@ -157,39 +194,80 @@ onMounted(fetchPartners);
   margin-top: 2px;
 }
 
-/* Stats */
-.stats-row {
-  display: flex;
-  gap: var(--space-md);
-  margin-bottom: var(--space-lg);
-  flex-wrap: wrap;
+.hero-note {
+  margin: 14px 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  max-width: 54ch;
 }
 
-.stat-chip {
+.hero-summary {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.summary-card {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-xs) var(--space-md);
+  gap: 12px;
   background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-full);
-  font-size: var(--font-size-xs);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 18px;
+  padding: 14px 16px;
+  box-shadow: 0 10px 20px rgba(20, 15, 80, 0.05);
+}
+
+.summary-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--color-primary);
+  background: rgba(20, 15, 80, 0.06);
+  flex-shrink: 0;
+}
+
+.summary-value {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.15;
+}
+
+.summary-label {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--color-text-secondary);
 }
 
-.stat-chip .material-symbols-outlined { font-size: 16px; color: var(--color-primary); }
-.stat-chip strong { color: var(--color-text-primary); }
+.results-note {
+  margin: 0 0 var(--space-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.results-note strong {
+  color: var(--color-text-primary);
+}
 
 /* Filter */
 .filter-bar {
   display: flex;
   gap: var(--space-sm);
   margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
 }
 
 .filter-btn {
   padding: var(--space-xs) var(--space-md);
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(20, 15, 80, 0.08);
   border-radius: var(--border-radius-full);
   background: var(--color-white);
   font-size: var(--font-size-xs);
@@ -217,15 +295,17 @@ onMounted(fetchPartners);
 
 .partner-card {
   background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-lg);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 22px;
   padding: var(--space-lg);
   transition: all var(--transition-fast);
+  box-shadow: 0 12px 24px rgba(20, 15, 80, 0.06);
 }
 
 .partner-card:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-md);
+  border-color: rgba(20, 15, 80, 0.18);
+  box-shadow: 0 18px 32px rgba(20, 15, 80, 0.1);
+  transform: translateY(-2px);
 }
 
 .partner-card__header {
@@ -282,7 +362,7 @@ onMounted(fetchPartners);
   color: var(--color-primary);
   background: rgba(20, 15, 80, 0.04);
   padding: var(--space-sm) var(--space-md);
-  border-radius: var(--border-radius-md);
+  border-radius: 16px;
   margin-bottom: var(--space-md);
   line-height: 1.4;
 }
@@ -319,6 +399,8 @@ onMounted(fetchPartners);
 @keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 768px) {
+  .industry-page { padding: var(--space-md); }
+  .industry-hero { grid-template-columns: 1fr; padding: 20px 18px; }
   .partners-grid { grid-template-columns: 1fr; }
 }
 </style>

@@ -2,6 +2,27 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
 const { success, error } = require('../utils/response');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const avatarDir = path.join(__dirname, '../../frontend/public/avatar');
+
+const avatarStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, avatarDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `user_${req.user.id}_${Date.now()}${ext}`);
+  },
+});
+
+const avatarFilter = (req, file, cb) => {
+  const allowed = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+  const ext = path.extname(file.originalname).toLowerCase();
+  allowed.includes(ext) ? cb(null, true) : cb(new Error('Only image files are allowed'));
+};
+
+const uploadAvatar = multer({ storage: avatarStorage, fileFilter: avatarFilter, limits: { fileSize: 5 * 1024 * 1024 } }).single('avatar');
 
 const SALT_ROUNDS = 12;
 
@@ -131,4 +152,51 @@ async function getMe(req, res, next) {
   }
 }
 
-module.exports = { register, login, getMe };
+async function updateProfile(req, res, next) {
+  try {
+    const { first_name, last_name, avatar_url } = req.body;
+
+    if (!first_name || !last_name) {
+      return error(res, 'First name and last name are required', 400, 'VALIDATION_ERROR');
+    }
+
+    await pool.query(
+      'UPDATE users SET first_name = ?, last_name = ?, avatar_url = ? WHERE id = ?',
+      [first_name.trim(), last_name.trim(), avatar_url || null, req.user.id]
+    );
+
+    const [users] = await pool.query(
+      'SELECT id, first_name, last_name, email, role, avatar_url, student_id, program_id, created_at FROM users WHERE id = ?',
+      [req.user.id]
+    );
+
+    return success(res, users[0]);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function uploadAvatarHandler(req, res, next) {
+  uploadAvatar(req, res, async (err) => {
+    if (err) return error(res, err.message, 400, 'UPLOAD_ERROR');
+    if (!req.file) return error(res, 'No file uploaded', 400, 'NO_FILE');
+
+    const avatarUrl = `/avatar/${req.file.filename}`;
+
+    // Delete old avatar file if it was locally stored
+    try {
+      const [rows] = await pool.query('SELECT avatar_url FROM users WHERE id = ?', [req.user.id]);
+      const oldUrl = rows[0]?.avatar_url;
+      if (oldUrl && oldUrl.startsWith('/avatar/')) {
+        const oldPath = path.join(avatarDir, path.basename(oldUrl));
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+      }
+    } catch {}
+
+    await pool.query('UPDATE users SET avatar_url = ? WHERE id = ?', [avatarUrl, req.user.id]);
+
+    return success(res, { avatar_url: avatarUrl });
+  });
+}
+
+module.exports = { register, login, getMe, updateProfile, uploadAvatarHandler };

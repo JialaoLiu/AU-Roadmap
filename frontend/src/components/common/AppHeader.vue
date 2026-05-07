@@ -1,13 +1,16 @@
-cd ..<script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { RouterLink, useRouter } from 'vue-router';
+<script setup>
+import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import SearchBar from '@/components/common/SearchBar.vue';
 
 const authStore = useAuthStore();
+const route = useRoute();
 const router = useRouter();
 const activeMenu = ref(null);
 const mobileMenuOpen = ref(false);
+const isStudentPortal = computed(() => route.path.startsWith('/student'));
+const showMainNav = computed(() => !isStudentPortal.value);
 
 // Mega Menu data structure - 4 main categories (based on official Adelaide University website)
 const megaMenuItems = [
@@ -235,6 +238,17 @@ onUnmounted(() => {
           <RouterLink to="/student/alumni" class="utility-link" @click="handleNavClick">Alumni</RouterLink>
         </div>
         <div class="utility-right">
+          <RouterLink
+            v-if="isStudentPortal"
+            to="/"
+            class="utility-home-link"
+            @click="handleNavClick"
+            aria-label="Return to Adelaide University home"
+            title="University Home"
+          >
+            <span class="material-symbols-outlined utility-home-logo" aria-hidden="true">home</span>
+            <span class="utility-home-label">University Home</span>
+          </RouterLink>
           <template v-if="authStore.isAuthenticated">
             <RouterLink v-if="authStore.isStudent" to="/student" class="utility-link" @click="handleNavClick">
               <span class="material-symbols-outlined utility-icon">person</span>
@@ -264,7 +278,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Main navigation bar -->
-    <div class="main-nav-bar">
+    <div v-if="showMainNav" class="main-nav-bar">
       <div class="nav-container">
         <RouterLink to="/" class="header-logo" @click="handleNavClick">
           <img src="@/assets/images/adelaide-university-logo.png" alt="Adelaide University" class="logo-img" />
@@ -369,10 +383,10 @@ onUnmounted(() => {
     </div>
 
     <!-- Mobile overlay -->
-    <div v-if="mobileMenuOpen" class="mobile-overlay" @click="toggleMobileMenu"></div>
+    <div v-if="showMainNav && mobileMenuOpen" class="mobile-overlay" @click="toggleMobileMenu"></div>
 
     <!-- Mobile navigation panel -->
-    <nav v-if="mobileMenuOpen" class="mobile-nav" aria-label="Mobile navigation">
+    <nav v-if="showMainNav && mobileMenuOpen" class="mobile-nav" aria-label="Mobile navigation">
       <div v-for="item in megaMenuItems" :key="item.id" class="mobile-section">
         <button class="mobile-section-trigger" @click="toggleMobileSubmenu(item.id)" :aria-expanded="activeMenu === item.id">
           {{ item.label }}
@@ -447,6 +461,44 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: var(--space-md);
+}
+
+.utility-home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 4px 4px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.84);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.utility-home-link:hover {
+  color: var(--color-white);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.utility-home-logo {
+  font-size: 18px;
+  line-height: 1;
+  opacity: 0.96;
+  flex-shrink: 0;
+}
+
+.utility-home-label {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  transition: max-width var(--transition-fast), opacity var(--transition-fast);
+}
+
+.utility-home-link:hover .utility-home-label,
+.utility-home-link:focus-visible .utility-home-label {
+  max-width: 120px;
+  opacity: 1;
 }
 
 .utility-link {

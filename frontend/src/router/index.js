@@ -162,6 +162,12 @@ const router = createRouter({
           component: () => import('@/pages/level1/ResourcesPage.vue'),
           meta: { title: 'Student Resources' },
         },
+        {
+          path: 'profile',
+          name: 'StudentProfile',
+          component: () => import('@/pages/level1/ProfilePage.vue'),
+          meta: { title: 'My Profile' },
+        },
       ],
     },
 
@@ -233,7 +239,7 @@ const router = createRouter({
 });
 
 // Navigation guards
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, from) => {
   const defaultTitle = 'AU Roadmap';
   document.title = to.meta.title
     ? `${to.meta.title} | ${defaultTitle}`
@@ -246,26 +252,25 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return next({ name: 'Login', query: { redirect: to.fullPath } });
+    return { name: 'Login', query: { redirect: to.fullPath } };
   }
 
   if (to.meta.role && authStore.user?.role !== to.meta.role) {
     // Allow alumni to access student pages (community hub)
     if (to.meta.role === 'student' && authStore.user?.role === 'alumni') {
-      return next();
+      return true;
     }
-    if (authStore.isAdmin) return next({ name: 'AdminDashboard' });
-    if (authStore.isStudent) return next({ name: 'StudentDashboard' });
-    return next({ name: 'Home' });
+    if (authStore.isAdmin) return { name: 'AdminDashboard' };
+    if (authStore.isStudent) return { name: 'StudentDashboard' };
+    return { name: 'Home' };
   }
 
   if ((to.name === 'Login' || to.name === 'Register') && authStore.isAuthenticated) {
-    if (authStore.isAdmin) return next({ name: 'AdminDashboard' });
-    if (authStore.isStudent) return next({ name: 'StudentDashboard' });
-    return next({ name: 'Home' });
+    if (authStore.isAdmin) return { name: 'AdminDashboard' };
+    if (authStore.isStudent) return { name: 'StudentDashboard' };
+    if (authStore.isAlumni) return { name: 'Community' };
+    return { name: 'Home' };
   }
-
-  next();
 });
 
 export default router;

@@ -13,7 +13,7 @@ export function getMe() {
 }
 
 export function updateProfile(data) {
-  return api.put('/users/profile', data);
+  return api.put('/auth/profile', data);
 }
 
 export function changePassword(data) {
@@ -21,7 +21,7 @@ export function changePassword(data) {
 }
 
 export function uploadAvatar(formData) {
-  return api.post('/users/avatar', formData, {
+  return api.post('/auth/avatar', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 }

@@ -4,6 +4,9 @@ import { useAuthStore } from '@/stores/auth';
 import { getProgramRoadmap } from '@/api/programs';
 import RoadmapTimeline from '@/components/level1/RoadmapTimeline.vue';
 import CourseDetailModal from '@/components/level1/CourseDetailModal.vue';
+import { Doughnut } from 'vue-chartjs';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 const authStore = useAuthStore();
 const loading = ref(true);
@@ -28,6 +31,26 @@ const totalCourses = computed(() => allCourses.value.length);
 const coreCourses = computed(() => allCourses.value.filter(c => c.is_core).length);
 const electiveCourses = computed(() => allCourses.value.filter(c => !c.is_core).length);
 const totalUnits = computed(() => allCourses.value.reduce((sum, c) => sum + (c.units || 0), 0));
+
+const courseChartData = computed(() => ({
+  labels: ['Core', 'Elective'],
+  datasets: [{
+    data: [coreCourses.value, electiveCourses.value],
+    backgroundColor: ['#140f50', '#e65100'],
+    borderWidth: 0,
+    hoverOffset: 4,
+  }],
+}));
+
+const courseChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 12 } } },
+    tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw} courses` } },
+  },
+  cutout: '65%',
+};
 
 async function fetchRoadmap() {
   const programId = authStore.user?.program_id;
@@ -67,17 +90,6 @@ onMounted(fetchRoadmap);
 
 <template>
   <div class="roadmap-page">
-    <!-- Page Header -->
-    <div class="page-header">
-      <div class="page-header__left">
-        <span class="material-symbols-outlined page-icon">route</span>
-        <div>
-          <h1 class="page-title">My Study Roadmap</h1>
-          <p v-if="program" class="page-subtitle">{{ program.code }} - {{ program.name }}</p>
-        </div>
-      </div>
-    </div>
-
     <!-- Loading State -->
     <div v-if="loading" class="loading-state">
       <div class="loading-spinner"></div>
@@ -93,41 +105,96 @@ onMounted(fetchRoadmap);
 
     <!-- Roadmap Content -->
     <template v-else-if="roadmap.length">
-      <!-- Stats Summary -->
-      <div class="stats-bar">
-        <div class="stat-item">
-          <span class="material-symbols-outlined">calendar_today</span>
-          <div>
-            <span class="stat-value">{{ program?.duration_years }}</span>
-            <span class="stat-label">Years</span>
+      <section class="roadmap-hero">
+        <div class="roadmap-hero__copy">
+          <p class="hero-eyebrow">Program Overview</p>
+          <div class="hero-title">
+            <span class="material-symbols-outlined page-icon">route</span>
+            <div>
+              <h1 class="page-title">My Study Roadmap</h1>
+              <p v-if="program" class="page-subtitle">{{ program.code }} - {{ program.name }}</p>
+            </div>
+          </div>
+          <p class="hero-note">Review your complete study structure, course mix, and progression across each year and semester.</p>
+        </div>
+
+        <div class="hero-summary">
+          <div class="summary-card">
+            <span class="material-symbols-outlined summary-icon">calendar_today</span>
+            <div>
+              <span class="summary-value">{{ program?.duration_years }}</span>
+              <span class="summary-label">Years</span>
+            </div>
+          </div>
+          <div class="summary-card">
+            <span class="material-symbols-outlined summary-icon">menu_book</span>
+            <div>
+              <span class="summary-value">{{ totalCourses }}</span>
+              <span class="summary-label">Courses</span>
+            </div>
+          </div>
+          <div class="summary-card">
+            <span class="material-symbols-outlined summary-icon">school</span>
+            <div>
+              <span class="summary-value">{{ totalUnits }}</span>
+              <span class="summary-label">Total Units</span>
+            </div>
           </div>
         </div>
-        <div class="stat-item">
-          <span class="material-symbols-outlined">menu_book</span>
-          <div>
-            <span class="stat-value">{{ totalCourses }}</span>
-            <span class="stat-label">Courses</span>
+      </section>
+
+      <!-- Stats + Chart -->
+      <div class="stats-section">
+        <div class="stats-bar">
+          <div class="stats-bar__header">
+            <div>
+              <p class="stats-eyebrow">Program Summary</p>
+              <h2>Roadmap Summary</h2>
+            </div>
+            <p class="stats-note">A summary of your study load and course composition.</p>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="material-symbols-outlined">calendar_today</span>
+              <div>
+                <span class="stat-value">{{ program?.duration_years }}</span>
+                <span class="stat-label">Years</span>
+              </div>
+            </div>
+            <div class="stat-item">
+              <span class="material-symbols-outlined">menu_book</span>
+              <div>
+                <span class="stat-value">{{ totalCourses }}</span>
+                <span class="stat-label">Courses</span>
+              </div>
+            </div>
+            <div class="stat-item">
+              <span class="material-symbols-outlined">check_circle</span>
+              <div>
+                <span class="stat-value">{{ coreCourses }}</span>
+                <span class="stat-label">Core</span>
+              </div>
+            </div>
+            <div class="stat-item">
+              <span class="material-symbols-outlined">tune</span>
+              <div>
+                <span class="stat-value">{{ electiveCourses }}</span>
+                <span class="stat-label">Electives</span>
+              </div>
+            </div>
+            <div class="stat-item">
+              <span class="material-symbols-outlined">school</span>
+              <div>
+                <span class="stat-value">{{ totalUnits }}</span>
+                <span class="stat-label">Total Units</span>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="stat-item">
-          <span class="material-symbols-outlined">check_circle</span>
-          <div>
-            <span class="stat-value">{{ coreCourses }}</span>
-            <span class="stat-label">Core</span>
-          </div>
-        </div>
-        <div class="stat-item">
-          <span class="material-symbols-outlined">tune</span>
-          <div>
-            <span class="stat-value">{{ electiveCourses }}</span>
-            <span class="stat-label">Electives</span>
-          </div>
-        </div>
-        <div class="stat-item">
-          <span class="material-symbols-outlined">school</span>
-          <div>
-            <span class="stat-value">{{ totalUnits }}</span>
-            <span class="stat-label">Total Units</span>
+        <div class="chart-card">
+          <p class="chart-title">Course Breakdown</p>
+          <div class="chart-wrap">
+            <Doughnut :data="courseChartData" :options="courseChartOptions" />
           </div>
         </div>
       </div>
@@ -178,17 +245,42 @@ onMounted(fetchRoadmap);
   padding: var(--space-lg);
 }
 
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--space-xl);
+.roadmap-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: var(--space-lg);
+  padding: 24px;
+  margin-bottom: var(--space-lg);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 247, 251, 0.96));
+  box-shadow: 0 18px 32px rgba(20, 15, 80, 0.08);
 }
 
-.page-header__left {
+.roadmap-hero__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hero-title {
   display: flex;
   align-items: center;
   gap: var(--space-md);
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(20, 15, 80, 0.06);
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
 }
 
 .page-icon {
@@ -208,40 +300,179 @@ onMounted(fetchRoadmap);
   margin-top: 2px;
 }
 
-/* Stats Bar */
+.hero-note {
+  margin: 14px 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  max-width: 54ch;
+}
+
+.hero-summary {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.summary-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--color-white);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 18px;
+  padding: 14px 16px;
+  box-shadow: 0 10px 20px rgba(20, 15, 80, 0.05);
+}
+
+.summary-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--color-primary);
+  background: rgba(20, 15, 80, 0.06);
+  flex-shrink: 0;
+}
+
+.summary-value {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.15;
+}
+
+.summary-label {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+/* Stats Section */
+.stats-section {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  align-items: stretch;
+}
+
 .stats-bar {
   display: flex;
+  flex-direction: column;
   gap: var(--space-lg);
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-lg);
-  padding: var(--space-md) var(--space-xl);
-  margin-bottom: var(--space-lg);
+  background: linear-gradient(180deg, #fbfbfd, #f4f6fb);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 22px;
+  padding: 22px 24px;
+  flex: 1;
+}
+
+.stats-bar__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-lg);
+}
+
+.stats-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-light);
+  margin-bottom: 6px;
+}
+
+.stats-bar__header h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.1;
+}
+
+.stats-note {
+  max-width: 260px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.chart-card {
+  background: var(--color-white);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 22px;
+  padding: var(--space-md) var(--space-lg);
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chart-title {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-sm);
+}
+
+.chart-wrap {
+  width: 150px;
+  height: 140px;
 }
 
 .stat-item {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: 12px;
+  padding: 14px 16px;
+  min-height: 86px;
+  border-radius: 18px;
+  background: var(--color-white);
+  border: 1px solid rgba(20, 15, 80, 0.07);
+  box-shadow: 0 10px 20px rgba(20, 15, 80, 0.05);
 }
 
 .stat-item .material-symbols-outlined {
-  font-size: 24px;
+  font-size: 22px;
   color: var(--color-primary);
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: rgba(20, 15, 80, 0.06);
+  flex-shrink: 0;
 }
 
 .stat-value {
   display: block;
-  font-size: var(--font-size-lg);
+  font-size: 28px;
   font-weight: 700;
   color: var(--color-text-primary);
-  line-height: 1;
+  line-height: 1.05;
 }
 
 .stat-label {
   display: block;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-light);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
 }
 
 /* Legend */
@@ -349,9 +580,38 @@ onMounted(fetchRoadmap);
 
 /* Responsive */
 @media (max-width: 768px) {
+  .roadmap-page {
+    padding: var(--space-md);
+  }
+
+  .roadmap-hero {
+    grid-template-columns: 1fr;
+    padding: 20px 18px;
+  }
+
+  .stats-section {
+    flex-direction: column;
+  }
+
+  .stats-bar__header {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .stats-note {
+    max-width: none;
+  }
+
   .stats-bar {
-    flex-wrap: wrap;
-    gap: var(--space-md);
+    padding: 18px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .chart-card {
+    width: 100%;
   }
 
   .legend {

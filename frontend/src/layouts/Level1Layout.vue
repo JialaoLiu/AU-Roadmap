@@ -9,10 +9,11 @@ const uiStore = useUiStore();
 const sidebarLinks = [
   { to: '/student', label: 'Dashboard', icon: 'dashboard', exact: true },
   { to: '/student/roadmap', label: 'My Roadmap', icon: 'route' },
+  { to: '/student/community', label: 'Community', icon: 'groups' },
   { to: '/student/timetable', label: 'Timetable', icon: 'calendar_month' },
   { to: '/student/industry', label: 'Industry', icon: 'business' },
-  { to: '/student/community', label: 'Community', icon: 'groups' },
   { to: '/student/resources', label: 'Resources', icon: 'menu_book' },
+  { to: '/student/profile', label: 'My Profile', icon: 'account_circle' },
 ];
 </script>
 
@@ -121,10 +122,27 @@ const sidebarLinks = [
   color: var(--color-white);
 }
 
+.sidebar.collapsed .sidebar-nav {
+  align-items: center;
+}
+
+.sidebar.collapsed .sidebar-link {
+  justify-content: center;
+  width: 40px;
+  padding: 10px 0;
+}
+
+.sidebar.collapsed .sidebar-link .material-symbols-outlined {
+  margin: 0;
+}
+
 .main-content {
   flex: 1;
   padding: var(--space-xl);
   max-width: calc(100% - var(--sidebar-width));
+  background:
+    radial-gradient(circle at top right, rgba(20, 15, 80, 0.05), transparent 34%),
+    linear-gradient(180deg, rgba(250, 250, 253, 0.96), rgba(243, 245, 250, 0.96));
 }
 
 .sidebar.collapsed + .main-content {

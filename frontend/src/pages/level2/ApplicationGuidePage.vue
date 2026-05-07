@@ -58,18 +58,21 @@ const faqs = [
 
 <template>
   <div class="apply-page">
-    <!-- Hero -->
     <div class="apply-hero">
       <div class="hero-inner">
+        <span class="hero-eyebrow">Admissions</span>
         <h1>How to Apply</h1>
-        <p>Your step-by-step guide to applying for admission at Adelaide University.</p>
+        <p>Your formal guide to program selection, application requirements, deadlines, and enrolment preparation at Adelaide University.</p>
       </div>
     </div>
 
     <div class="apply-content">
-      <!-- Steps -->
-      <section class="steps-section">
-        <h2>Application Steps</h2>
+      <section class="section-shell steps-section">
+        <div class="section-heading">
+          <span class="section-eyebrow">Application Process</span>
+          <h2>Application Steps</h2>
+          <p>Follow each step in sequence to move from program selection to enrolment.</p>
+        </div>
         <div class="steps">
           <div v-for="s in steps" :key="s.number" class="step">
             <div class="step-marker">
@@ -91,11 +94,12 @@ const faqs = [
         </div>
       </section>
 
-      <!-- Key Dates + FAQ -->
       <div class="bottom-grid">
-        <!-- Key Dates -->
-        <section class="dates-section">
-          <h2>Key Dates 2026</h2>
+        <section class="section-shell dates-section">
+          <div class="section-heading section-heading--compact">
+            <span class="section-eyebrow">Important Dates</span>
+            <h2>Key Dates 2026</h2>
+          </div>
           <div class="dates-list">
             <div v-for="d in keyDates" :key="d.title" class="date-item">
               <div class="date-dot" :class="'dot--' + d.category"></div>
@@ -107,9 +111,11 @@ const faqs = [
           </div>
         </section>
 
-        <!-- FAQ -->
-        <section class="faq-section">
-          <h2>Frequently Asked Questions</h2>
+        <section class="section-shell faq-section">
+          <div class="section-heading section-heading--compact">
+            <span class="section-eyebrow">Support</span>
+            <h2>Frequently Asked Questions</h2>
+          </div>
           <details v-for="f in faqs" :key="f.q" class="faq-item">
             <summary>{{ f.q }}</summary>
             <p>{{ f.a }}</p>
@@ -117,9 +123,9 @@ const faqs = [
         </section>
       </div>
 
-      <!-- CTA -->
       <div class="cta-section">
         <h2>Ready to Apply?</h2>
+        <p>Start by reviewing available programs, then continue with the formal admissions process.</p>
         <div class="cta-buttons">
           <RouterLink to="/explore" class="cta-btn cta-btn--primary">Find Your Program</RouterLink>
           <RouterLink to="/explore/careers" class="cta-btn cta-btn--secondary">View Career Outcomes</RouterLink>
@@ -130,18 +136,93 @@ const faqs = [
 </template>
 
 <style scoped>
-.apply-page { min-height: 100vh; }
+.apply-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(20, 15, 80, 0.06), transparent 34%),
+    linear-gradient(180deg, #f7f8fc 0%, #f3f5fb 100%);
+}
 
-.apply-hero { background: var(--color-primary); color: var(--color-white); padding: var(--space-3xl) var(--space-lg); }
-.hero-inner { max-width: 720px; margin: 0 auto; text-align: center; }
-.hero-inner h1 { font-size: 2rem; font-weight: 700; margin-bottom: var(--space-sm); }
-.hero-inner p { font-size: var(--font-size-md); opacity: 0.8; }
+.apply-hero {
+  background: linear-gradient(135deg, #140f50 0%, #1e1870 55%, #314191 100%);
+  color: var(--color-white);
+  padding: 5.5rem var(--space-lg) 5rem;
+}
 
-.apply-content { max-width: 1000px; margin: 0 auto; padding: var(--space-2xl) var(--space-lg); }
+.hero-inner {
+  max-width: 50rem;
+  margin: 0 auto;
+  text-align: center;
+}
 
-/* Steps */
+.hero-eyebrow {
+  display: inline-flex;
+  margin-bottom: var(--space-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.hero-inner h1 {
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+}
+
+.hero-inner p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.apply-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.25rem 1rem var(--space-3xl);
+}
+
+.section-shell {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 16px 36px rgba(20, 15, 80, 0.08);
+  padding: 1.5rem;
+}
+
 .steps-section { margin-bottom: var(--space-3xl); }
-.steps-section h2 { font-size: var(--font-size-xl); font-weight: 700; color: var(--color-text-primary); margin-bottom: var(--space-xl); text-align: center; }
+
+.section-heading {
+  margin-bottom: var(--space-xl);
+}
+
+.section-heading--compact {
+  margin-bottom: var(--space-lg);
+}
+
+.section-eyebrow {
+  display: inline-flex;
+  margin-bottom: 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6b7394;
+}
+
+.section-heading h2 {
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 0.55rem;
+}
+
+.section-heading p {
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
 
 .steps { display: flex; flex-direction: column; gap: var(--space-md); }
 
@@ -154,17 +235,24 @@ const faqs = [
   display: flex; align-items: center; justify-content: center;
   font-size: var(--font-size-sm); font-weight: 700;
 }
-.step-line { width: 2px; flex: 1; background: var(--color-border); margin-top: var(--space-sm); }
+.step-line { width: 2px; flex: 1; background: rgba(20, 15, 80, 0.12); margin-top: var(--space-sm); }
 .step:last-child .step-line { display: none; }
 
 .step-content {
-  background: var(--color-white); border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-lg); padding: var(--space-lg);
+  background: var(--color-white); border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 20px; padding: var(--space-lg);
+  box-shadow: 0 12px 28px rgba(20, 15, 80, 0.06);
   flex: 1; margin-bottom: var(--space-sm);
 }
 
 .step-icon-wrap { margin-bottom: var(--space-sm); }
-.step-icon-wrap .material-symbols-outlined { font-size: 28px; color: var(--color-primary); }
+.step-icon-wrap .material-symbols-outlined {
+  font-size: 28px;
+  color: var(--color-primary);
+  background: rgba(20, 15, 80, 0.07);
+  border-radius: 16px;
+  padding: 0.6rem;
+}
 
 .step-content h3 { font-size: var(--font-size-md); font-weight: 600; color: var(--color-text-primary); margin-bottom: var(--space-xs); }
 .step-content p { font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: 1.6; }
@@ -177,51 +265,59 @@ const faqs = [
 .step-link:hover { text-decoration: underline; }
 .step-link .material-symbols-outlined { font-size: 16px; }
 
-/* Bottom Grid */
 .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2xl); margin-bottom: var(--space-3xl); }
 
-.dates-section h2, .faq-section h2 {
-  font-size: var(--font-size-lg); font-weight: 700;
-  color: var(--color-text-primary); margin-bottom: var(--space-lg);
-}
-
-/* Dates */
 .dates-list { display: flex; flex-direction: column; gap: var(--space-sm); }
-.date-item { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-sm) var(--space-md); background: var(--color-white); border: 1px solid var(--color-border); border-radius: var(--border-radius-md); }
+.date-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--color-white);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 18px;
+}
 .date-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .dot--application { background: var(--color-primary); }
-.dot--orientation { background: #6a1b9a; }
-.dot--semester { background: var(--color-success); }
+.dot--orientation { background: #314191; }
+.dot--semester { background: #0f766e; }
 .date-title { display: block; font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-primary); }
 .date-value { display: block; font-size: var(--font-size-xs); color: var(--color-text-light); }
 
-/* FAQ */
 .faq-item {
-  background: var(--color-white); border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-md); margin-bottom: var(--space-sm);
+  background: var(--color-white);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 18px;
+  margin-bottom: var(--space-sm);
 }
 
 .faq-item summary {
-  padding: var(--space-md); font-size: var(--font-size-sm); font-weight: 500;
+  padding: var(--space-md); font-size: var(--font-size-sm); font-weight: 600;
   color: var(--color-text-primary); cursor: pointer; list-style: none;
 }
 .faq-item summary::-webkit-details-marker { display: none; }
 
-.faq-item[open] summary { border-bottom: 1px solid var(--color-border); }
+.faq-item[open] summary { border-bottom: 1px solid rgba(20, 15, 80, 0.08); }
 
 .faq-item p {
   padding: var(--space-md); font-size: var(--font-size-sm);
   color: var(--color-text-secondary); line-height: 1.6;
 }
 
-/* CTA */
-.cta-section { text-align: center; padding: var(--space-2xl); background: rgba(20,15,80,0.03); border-radius: var(--border-radius-lg); }
-.cta-section h2 { font-size: var(--font-size-xl); font-weight: 700; color: var(--color-text-primary); margin-bottom: var(--space-lg); }
+.cta-section {
+  text-align: center;
+  padding: var(--space-2xl);
+  background: linear-gradient(180deg, rgba(20, 15, 80, 0.05), rgba(49, 65, 145, 0.08));
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 24px;
+}
+.cta-section h2 { font-size: var(--font-size-xl); font-weight: 700; color: var(--color-text-primary); margin-bottom: var(--space-sm); }
+.cta-section p { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--space-lg); }
 .cta-buttons { display: flex; gap: var(--space-md); justify-content: center; }
 
 .cta-btn {
   display: inline-flex; padding: var(--space-md) var(--space-xl);
-  border-radius: var(--border-radius-md); font-size: var(--font-size-sm); font-weight: 600;
+  border-radius: 999px; font-size: var(--font-size-sm); font-weight: 600;
   transition: all var(--transition-fast);
 }
 .cta-btn--primary { background: var(--color-primary); color: var(--color-white); }
@@ -231,5 +327,6 @@ const faqs = [
 
 @media (max-width: 768px) {
   .bottom-grid { grid-template-columns: 1fr; }
+  .cta-buttons { flex-direction: column; }
 }
 </style>
