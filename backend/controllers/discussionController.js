@@ -1,6 +1,34 @@
 const pool = require('../config/db');
 const { validationResult } = require('express-validator');
 const { success, error } = require('../utils/response');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const postImageDir = path.join(__dirname, '../../frontend/public/posts');
+if (!fs.existsSync(postImageDir)) {
+  fs.mkdirSync(postImageDir, { recursive: true });
+}
+
+const postImageStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, postImageDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `post_${req.user.id}_${Date.now()}${ext}`);
+  },
+});
+
+const postImageFilter = (req, file, cb) => {
+  const allowed = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+  const ext = path.extname(file.originalname).toLowerCase();
+  allowed.includes(ext) ? cb(null, true) : cb(new Error('Only image files are allowed'));
+};
+
+const uploadPostImageMiddleware = multer({
+  storage: postImageStorage,
+  fileFilter: postImageFilter,
+  limits: { fileSize: 5 * 1024 * 1024 },
+}).single('image');
 
 // GET all threads (supports optional program_id and category filters)
 async function getAllThreads(req, res, next) {
@@ -90,12 +118,12 @@ async function createThread(req, res, next) {
     }
 
     const programId = req.params.programId || req.body.program_id || null;
-    const { title, content, category } = req.body;
+    const { title, content, category, image_url } = req.body;
     const userId = req.user.id;
 
     const [result] = await pool.query(
-      'INSERT INTO discussion_threads (program_id, user_id, title, content, category) VALUES (?, ?, ?, ?, ?)',
-      [programId, userId, title, content, category || 'general']
+      'INSERT INTO discussion_threads (program_id, user_id, title, content, category, image_url) VALUES (?, ?, ?, ?, ?, ?)',
+      [programId, userId, title, content, category || 'general', image_url || null]
     );
 
     const [rows] = await pool.query(
@@ -110,6 +138,15 @@ async function createThread(req, res, next) {
   } catch (err) {
     next(err);
   }
+}
+
+function uploadPostImage(req, res) {
+  uploadPostImageMiddleware(req, res, (err) => {
+    if (err) return error(res, err.message, 400, 'UPLOAD_ERROR');
+    if (!req.file) return error(res, 'No file uploaded', 400, 'NO_FILE');
+
+    return success(res, { image_url: `/posts/${req.file.filename}` }, 201);
+  });
 }
 
 // POST create reply
@@ -205,4 +242,13 @@ async function deleteReply(req, res, next) {
   }
 }
 
-module.exports = { getAllThreads, getThreads, getThread, createThread, createReply, deleteThread, deleteReply };
+module.exports = {
+  getAllThreads,
+  getThreads,
+  getThread,
+  createThread,
+  createReply,
+  deleteThread,
+  deleteReply,
+  uploadPostImage,
+};

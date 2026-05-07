@@ -276,3 +276,11 @@ bug记录
           文件系统或 DB 查询异常会被完全吞掉，后续排查困难
     解决：将空 catch 改为输出 warning 日志，
           至少保留 cleanupErr.message 供后续定位
+
+45. Community 发帖上传图片后未刷新页面时显示裂图
+    原因：CommunityHubPage.vue 发帖成功后先将本地 blob 预览图复用到新帖子，
+          但随后 clearThreadImage() 立即对该 blob URL 执行 URL.revokeObjectURL()，
+          导致帖子中的本地图片地址被提前销毁
+    解决：发帖成功后若新帖子仍使用本地预览图，
+          清空表单时不立即 revoke 该 blob URL，仅重置 input 和状态；
+          刷新页面后再自然回到服务器 /posts/... 图片路径

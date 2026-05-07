@@ -6,7 +6,7 @@ import {
   getAlumniProfiles, getAlumniProfile,
   sendConnectionRequest, respondToConnection,
   getMessages, sendMessage,
-  getAllThreads, getThread, createThread, createReply, deleteThread, deleteReply,
+  getAllThreads, getThread, createThread, createReply, deleteThread, deleteReply, uploadPostImage,
 } from '@/api/community';
 
 const authStore = useAuthStore();
@@ -38,6 +38,9 @@ const showNewThread = ref(false);
 const newTitle = ref('');
 const newContent = ref('');
 const newCategory = ref('general');
+const imageFile = ref(null);
+const imagePreview = ref('');
+const imageInput = ref(null);
 const replyContent = ref('');
 const posting = ref(false);
 const feedCategory = ref('all');
@@ -110,16 +113,64 @@ async function submitThread() {
   if (!newTitle.value.trim() || !newContent.value.trim()) return;
   posting.value = true;
   try {
-    await createThread({ title: newTitle.value, content: newContent.value, category: newCategory.value });
+    let imageUrl = null;
+    const localPreviewUrl = imagePreview.value;
+
+    if (imageFile.value) {
+      const formData = new FormData();
+      formData.append('image', imageFile.value);
+      const uploadRes = await uploadPostImage(formData);
+      imageUrl = uploadRes.data.data.image_url;
+    }
+
+    const createRes = await createThread({
+      title: newTitle.value,
+      content: newContent.value,
+      category: newCategory.value,
+      image_url: imageUrl,
+    });
+
+    const createdThread = createRes.data.data;
+    if (localPreviewUrl) {
+      createdThread.image_url = localPreviewUrl;
+    }
+
+    if (feedCategory.value === 'all' || feedCategory.value === createdThread.category) {
+      threads.value.unshift(createdThread);
+    }
+
     newTitle.value = '';
     newContent.value = '';
     newCategory.value = 'general';
+    clearThreadImage({ revokePreview: !localPreviewUrl });
     showNewThread.value = false;
-    await fetchThreads();
   } catch (err) {
     console.error(err);
   } finally {
     posting.value = false;
+  }
+}
+
+function handleThreadImageChange(e) {
+  const file = e.target.files?.[0];
+  if (!file) {
+    clearThreadImage();
+    return;
+  }
+
+  imageFile.value = file;
+  imagePreview.value = URL.createObjectURL(file);
+}
+
+function clearThreadImage(options = {}) {
+  const { revokePreview = true } = options;
+  imageFile.value = null;
+  if (revokePreview && imagePreview.value) {
+    URL.revokeObjectURL(imagePreview.value);
+  }
+  imagePreview.value = '';
+  if (imageInput.value) {
+    imageInput.value.value = '';
   }
 }
 
@@ -367,13 +418,32 @@ onMounted(async () => {
               <div v-if="showNewThread" class="compose-form">
                 <input v-model="newTitle" type="text" placeholder="Post title..." class="form-input" maxlength="200" />
                 <textarea v-model="newContent" placeholder="What would you like to discuss?" class="form-textarea" rows="3"></textarea>
+                <input
+                  ref="imageInput"
+                  type="file"
+                  accept="image/*"
+                  class="file-input-hidden"
+                  @change="handleThreadImageChange"
+                />
+                <div v-if="imagePreview" class="compose-image-preview">
+                  <img :src="imagePreview" alt="Post preview" />
+                  <button class="image-remove-btn" type="button" @click="clearThreadImage">
+                    <span class="material-symbols-outlined">close</span>
+                  </button>
+                </div>
                 <div class="compose-form-footer">
-                  <select v-model="newCategory" class="form-select">
-                    <option value="general">General</option>
-                    <option value="career">Career</option>
-                    <option value="academic">Academic</option>
-                    <option value="social">Social</option>
-                  </select>
+                  <div class="compose-tools">
+                    <select v-model="newCategory" class="form-select">
+                      <option value="general">General</option>
+                      <option value="career">Career</option>
+                      <option value="academic">Academic</option>
+                      <option value="social">Social</option>
+                    </select>
+                    <button class="btn-secondary-lite" type="button" @click="imageInput?.click()">
+                      <span class="material-symbols-outlined">image</span>
+                      {{ imageFile ? 'Change image' : 'Add image' }}
+                    </button>
+                  </div>
                   <button class="btn-primary" :disabled="!newTitle.trim() || !newContent.trim() || posting" @click="submitThread">
                     <span class="material-symbols-outlined">send</span>
                     {{ posting ? 'Posting...' : 'Post' }}
@@ -430,6 +500,7 @@ onMounted(async () => {
 
               <div class="post-body">
                 <h3 class="post-title" @click="openThread(t)">{{ t.title }}</h3>
+                <img v-if="t.image_url" :src="t.image_url" :alt="t.title" class="post-image" @click="openThread(t)" />
               </div>
 
               <div class="post-actions">
@@ -449,6 +520,12 @@ onMounted(async () => {
                   <template v-else-if="activeThreadData">
                     <div class="thread-body">
                       <p>{{ activeThreadData.thread.content }}</p>
+                      <img
+                        v-if="activeThreadData.thread.image_url"
+                        :src="activeThreadData.thread.image_url"
+                        :alt="activeThreadData.thread.title"
+                        class="thread-image"
+                      />
                     </div>
                     <div class="replies-section">
                       <div v-for="r in activeThreadData.replies" :key="r.id" class="reply-item">
@@ -1005,6 +1082,27 @@ onMounted(async () => {
 .btn-primary .material-symbols-outlined { font-size: 18px; }
 .btn-primary--icon { padding: var(--space-sm); }
 
+.btn-secondary-lite {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 12px;
+  border: 1px solid rgba(20, 15, 80, 0.1);
+  border-radius: var(--border-radius-md);
+  background: var(--color-white);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.btn-secondary-lite:hover {
+  border-color: rgba(20, 15, 80, 0.22);
+  color: var(--color-primary);
+}
+.btn-secondary-lite .material-symbols-outlined { font-size: 18px; }
+
 .btn-icon {
   background: none; border: none; cursor: pointer;
   color: var(--color-text-light); padding: 4px;
@@ -1034,6 +1132,8 @@ onMounted(async () => {
   border: 1px solid var(--color-border); border-radius: var(--border-radius-md);
   font-size: var(--font-size-sm); outline: none;
 }
+
+.file-input-hidden { display: none; }
 
 /* ── Shared: Role Tags ── */
 .role-tag {
@@ -1121,9 +1221,46 @@ onMounted(async () => {
   transform: translateY(-1px);
 }
 .compose-form { padding: 6px 12px 12px; }
+.compose-image-preview {
+  position: relative;
+  margin-top: 10px;
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f7f8fc;
+}
+.compose-image-preview img {
+  width: 100%;
+  max-height: 260px;
+  object-fit: cover;
+  display: block;
+}
+.image-remove-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(17, 24, 39, 0.72);
+  color: #fff;
+  cursor: pointer;
+}
+.image-remove-btn .material-symbols-outlined { font-size: 18px; }
 .compose-form-footer {
   display: flex; justify-content: space-between; align-items: center;
   margin-top: var(--space-sm);
+  gap: 12px;
+}
+.compose-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 .compose-footer {
   display: flex;
@@ -1236,6 +1373,16 @@ onMounted(async () => {
   line-height: 1.35;
   cursor: pointer;
 }
+.post-image,
+.thread-image {
+  width: 100%;
+  border-radius: 16px;
+  margin-top: 14px;
+  object-fit: cover;
+  max-height: 380px;
+  border: 1px solid rgba(20, 15, 80, 0.08);
+}
+.post-image { cursor: pointer; }
 
 .post-actions {
   display: flex;
@@ -1557,6 +1704,8 @@ onMounted(async () => {
   .page-header { flex-direction: column; }
   .compose-box { grid-template-columns: 1fr; }
   .compose-footer { padding-left: 12px; }
+  .compose-form-footer { flex-direction: column; align-items: stretch; }
+  .compose-tools { width: 100%; }
   .tab-bar { overflow-x: auto; }
   .people-grid { grid-template-columns: repeat(2, 1fr); }
   .connections-grid { grid-template-columns: 1fr 1fr; }
