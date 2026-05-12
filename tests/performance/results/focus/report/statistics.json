@@ -1,0 +1,50 @@
+{
+  "GET /api/programs/3/roadmap" : {
+    "transaction" : "GET /api/programs/3/roadmap",
+    "sampleCount" : 180,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 3.044444444444445,
+    "medianResTime" : 3.0,
+    "minResTime" : 1.0,
+    "maxResTime" : 25.0,
+    "pct1ResTime" : 4.0,
+    "pct2ResTime" : 4.0,
+    "pct3ResTime" : 20.139999999999986,
+    "throughput" : 14.139827179890023,
+    "receivedKBytesPerSec" : 47.376706107619796,
+    "sentKBytesPerSec" : 2.2783901217596227
+  },
+  "GET /api/search" : {
+    "transaction" : "GET /api/search",
+    "sampleCount" : 180,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 2.0222222222222217,
+    "medianResTime" : 2.0,
+    "minResTime" : 1.0,
+    "maxResTime" : 4.0,
+    "pct1ResTime" : 3.0,
+    "pct2ResTime" : 3.0,
+    "pct3ResTime" : 3.1899999999999977,
+    "throughput" : 14.168765743073047,
+    "receivedKBytesPerSec" : 31.60298921599496,
+    "sentKBytesPerSec" : 2.5874601503463475
+  },
+  "Total" : {
+    "transaction" : "Total",
+    "sampleCount" : 360,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 2.5333333333333323,
+    "medianResTime" : 2.0,
+    "minResTime" : 1.0,
+    "maxResTime" : 25.0,
+    "pct1ResTime" : 3.0,
+    "pct2ResTime" : 4.0,
+    "pct3ResTime" : 6.389999999999986,
+    "throughput" : 27.93512842399317,
+    "receivedKBytesPerSec" : 77.95373971832079,
+    "sentKBytesPerSec" : 4.801350197873826
+  }
+}

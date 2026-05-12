@@ -9,7 +9,7 @@ const loading = ref(true);
 const programs = ref([]);
 const search = ref(route.query.search || '');
 const levelFilter = ref(route.query.level || '');
-const facultyFilter = ref('');
+const facultyFilter = ref(route.query.faculty || '');
 const featuredProgramCodes = ['BCOMP', 'BENG-SW', 'BDS', 'BCYBER'];
 const demoProgramBanners = {
   BCOMP: '/program/hero-banner-computer-science.jpg',
