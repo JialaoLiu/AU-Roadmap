@@ -31,6 +31,7 @@ const megaMenuItems = [
           { label: 'Undegraduate Degree', to: '/explore?level=undergraduate' },
           {label: 'Postgraduate Coursework', to: '/explore?level=postgraduate' },
           { label: 'Postgraduate Research', to: '/explore?level=research' },
+          { label: 'Program Recommendation', to: '/explore/quiz' },
         ],
       },
       {

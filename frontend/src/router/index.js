@@ -65,6 +65,12 @@ const router = createRouter({
           component: () => import('@/pages/level2/ApplicationGuidePage.vue'),
           meta: { title: 'How to Apply' },
         },
+        {
+          path: 'quiz',
+          name: 'Quiz',
+          component: () => import('@/pages/level2/QuizPage.vue'),
+          meta: { title: 'Program Recommendation' },
+        },
       ],
     },
 
