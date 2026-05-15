@@ -9,13 +9,13 @@ const hasStarted = ref(false);
 
 const questions = [
   {
-    question: 'Which type of study activity interests you most?',
-    answers: {
-      a: { text: 'Building software, systems, or digital products', faculty: 'Sciences, Engineering and Technology' },
-      b: { text: 'Analysing business decisions, finance, or markets', faculty: 'Accounting, Commerce & Economics' },
-      c: { text: 'Understanding health, biology, or human wellbeing', faculty: 'Health & Biomedical Sciences' },
-      d: { text: 'Exploring society, culture, communication, or creative practice', faculty: 'Arts, Humanities & Social Sciences' },
-    },
+  question: "What type of activity do you enjoy most?",
+  answers: {
+    a: { text: "Doing science experiments or solving technical problems", faculty: "Sciences, Engineering and Technology" },
+    b: { text: "Working with money, budgets or business reports", faculty: "Accounting, Commerce & Economics" },
+    c: { text: "Caring for animals, farms or the environment", faculty: "Agriculture, Animal and Veterinary Science" },
+    d: { text: "Helping people recover their physical health", faculty: "Allied Health" }
+  }
   },
   {
     question: 'Which subject area would you prefer to explore further?',
@@ -27,14 +27,103 @@ const questions = [
     },
   },
   {
-    question: 'What kind of professional environment sounds most suitable?',
-    answers: {
-      a: { text: 'Technology teams, laboratories, or engineering projects', faculty: 'Sciences, Engineering and Technology' },
-      b: { text: 'Business teams, consulting, finance, or enterprise planning', faculty: 'Accounting, Commerce & Economics' },
-      c: { text: 'Healthcare, research, community wellbeing, or medical settings', faculty: 'Health & Biomedical Sciences' },
-      d: { text: 'Creative studios, policy teams, education, or public communication', faculty: 'Arts, Humanities & Social Sciences' },
-    },
-  },
+  question: "Which subject interests you the most?",
+  answers: {
+    a: { text: "Buildings, spaces and visual design", faculty: "Architecture & Design" },
+    b: { text: "Culture, history, languages and society", faculty: "Arts, Humanities & Social Sciences" },
+    c: { text: "Planes, airports and flight operations", faculty: "Aviation" },
+    d: { text: "Business, brands and customer behaviour", faculty: "Business, Marketing & Management" }
+  }
+},
+
+{
+  question: "What kind of work would you enjoy?",
+  answers: {
+    a: { text: "Building software, websites or IT systems", faculty: "Computer Science & Information Technology" },
+    b: { text: "Creating videos, media content or communication campaigns", faculty: "Creative, Media & Communication" },
+    c: { text: "Designing machines, structures or technical solutions", faculty: "Engineering" },
+    d: { text: "Studying health, disease or biomedical science", faculty: "Health & Biomedical Sciences" }
+  }
+},
+
+{
+  question: "Which career path sounds most interesting to you?",
+  answers: {
+    a: { text: "Working with law, justice or public safety", faculty: "Law and Justice" },
+    b: { text: "Using numbers, statistics and data to solve problems", faculty: "Mathematics & Data Science" },
+    c: { text: "Becoming a doctor, dentist or oral health professional", faculty: "Medicine, Dentistry & Oral Health" },
+    d: { text: "Performing, composing or producing music", faculty: "Music" }
+  }
+},
+
+{
+  question: "How would you most like to help others?",
+  answers: {
+    a: { text: "Providing care for patients, mothers or babies", faculty: "Nursing and Midwifery" },
+    b: { text: "Helping people make healthy food and diet choices", faculty: "Nutrition & Food Science" },
+    c: { text: "Helping people find, manage or develop property", faculty: "Property, Construction & Real Estate" },
+    d: { text: "Supporting people's mental health and wellbeing", faculty: "Psychology & Social Work" }
+  }
+},
+
+{
+  question: "What kind of future job sounds appealing?",
+  answers: {
+    a: { text: "Teaching students and helping them learn", faculty: "Teaching & Education" },
+    b: { text: "Planning travel, sports activities or events", faculty: "Tourism, Sport & Events" },
+    c: { text: "Working with science, engineering and new technology", faculty: "Sciences, Engineering and Technology" },
+    d: { text: "Understanding economics, accounting or financial systems", faculty: "Accounting, Commerce & Economics" }
+  }
+},
+
+{
+  question: "Which activity would you choose for a project?",
+  answers: {
+    a: { text: "Improving farming, animal care or food production", faculty: "Agriculture, Animal and Veterinary Science" },
+    b: { text: "Helping patients with movement, treatment or rehabilitation", faculty: "Allied Health" },
+    c: { text: "Designing a building, room or public space", faculty: "Architecture & Design" },
+    d: { text: "Exploring human society, culture or social issues", faculty: "Arts, Humanities & Social Sciences" }
+  }
+},
+
+{
+  question: "Which topic would you like to learn more about?",
+  answers: {
+    a: { text: "Flight safety, aircraft and airport systems", faculty: "Aviation" },
+    b: { text: "Managing teams, products or marketing strategies", faculty: "Business, Marketing & Management" },
+    c: { text: "Cybersecurity, programming or information systems", faculty: "Computer Science & Information Technology" },
+    d: { text: "Digital media, journalism or public communication", faculty: "Creative, Media & Communication" }
+  }
+},
+
+{
+  question: "What kind of problems do you like solving?",
+  answers: {
+    a: { text: "Building practical solutions for real-world technical problems", faculty: "Engineering" },
+    b: { text: "Understanding the human body and medical science", faculty: "Health & Biomedical Sciences" },
+    c: { text: "Understanding rules, rights and justice issues", faculty: "Law and Justice" },
+    d: { text: "Finding patterns using maths, data or statistics", faculty: "Mathematics & Data Science" }
+  }
+},
+
+{
+  question: "Which workplace sounds best to you?",
+  answers: {
+    a: { text: "Hospitals, dental clinics or medical centres", faculty: "Medicine, Dentistry & Oral Health" },
+    b: { text: "Music studios, stages or performance spaces", faculty: "Music" },
+    c: { text: "Hospitals, aged care or maternity services", faculty: "Nursing and Midwifery" },
+    d: { text: "Food labs, nutrition clinics or food companies", faculty: "Nutrition & Food Science" }
+  }
+},
+{
+  question: "What would you enjoy doing in a team project?",
+  answers: {
+    a: { text: "Planning construction, housing or real estate projects", faculty: "Property, Construction & Real Estate" },
+    b: { text: "Supporting people through counselling or social services", faculty: "Psychology & Social Work" },
+    c: { text: "Designing lessons or explaining ideas to others", faculty: "Teaching & Education" },
+    d: { text: "Organising events, sport programs or travel experiences", faculty: "Tourism, Sport & Events" }
+  }
+}
 ];
 
 const facultyReasons = {
@@ -42,6 +131,24 @@ const facultyReasons = {
   'Accounting, Commerce & Economics': 'Your responses suggest an interest in business decision-making, financial analysis, organisations, or market-focused careers.',
   'Health & Biomedical Sciences': 'Your responses suggest an interest in human wellbeing, health systems, biomedical knowledge, or evidence-based care.',
   'Arts, Humanities & Social Sciences': 'Your responses suggest an interest in people, society, communication, creative practice, or cultural understanding.',
+  'Agriculture, Animal and Veterinary Science': 'Your responses suggest an interest in agriculture, animal care, environmental sustainability, or food production systems.',
+'Allied Health': 'Your responses suggest an interest in rehabilitation, physical wellbeing, patient support, or practical healthcare services.',
+'Architecture & Design': 'Your responses suggest an interest in spatial design, creativity, planning, or designing functional environments.',
+'Aviation': 'Your responses suggest an interest in aviation systems, flight operations, transport technology, or airport environments.',
+'Business, Marketing & Management': 'Your responses suggest an interest in leadership, marketing strategies, organisational management, or business operations.',
+'Computer Science & Information Technology': 'Your responses suggest an interest in programming, cybersecurity, software systems, or digital innovation.',
+'Creative, Media & Communication': 'Your responses suggest an interest in media production, communication, storytelling, or creative digital content.',
+'Engineering': 'Your responses suggest an interest in technical design, problem solving, innovation, or developing practical engineering solutions.',
+'Law and Justice': 'Your responses suggest an interest in legal systems, justice, public policy, or protecting rights and responsibilities.',
+'Mathematics & Data Science': 'Your responses suggest an interest in data analysis, statistics, logical thinking, or solving quantitative problems.',
+'Medicine, Dentistry & Oral Health': 'Your responses suggest an interest in medical science, patient treatment, clinical practice, or healthcare professions.',
+'Music': 'Your responses suggest an interest in music performance, composition, audio production, or creative artistic expression.',
+'Nursing and Midwifery': 'Your responses suggest an interest in patient care, community health, maternal support, or clinical healthcare environments.',
+'Nutrition & Food Science': 'Your responses suggest an interest in nutrition, food systems, health science, or improving wellbeing through diet and food research.',
+'Property, Construction & Real Estate': 'Your responses suggest an interest in property development, construction projects, urban planning, or real estate management.',
+'Psychology & Social Work': 'Your responses suggest an interest in mental health, human behaviour, counselling, or supporting community wellbeing.',
+'Teaching & Education': 'Your responses suggest an interest in teaching, mentoring, knowledge sharing, or supporting student development.',
+'Tourism, Sport & Events': 'Your responses suggest an interest in event management, travel experiences, sport industries, or customer-focused services.',
 };
 
 const currentQuestion = computed(() => questions[current.value]);
@@ -71,6 +178,24 @@ function submitQuiz() {
     'Accounting, Commerce & Economics': 0,
     'Health & Biomedical Sciences': 0,
     'Arts, Humanities & Social Sciences': 0,
+    'Agriculture, Animal and Veterinary Science': 0,
+    'Allied Health': 0,
+    'Architecture & Design': 0,
+    'Aviation': 0,
+    'Business, Marketing & Management': 0,
+    'Computer Science & Information Technology': 0,
+    'Creative, Media & Communication': 0,
+    'Engineering': 0,
+    'Law and Justice': 0,
+    'Mathematics & Data Science': 0,
+    'Medicine, Dentistry & Oral Health': 0,
+    'Music': 0,
+    'Nursing and Midwifery': 0,
+    'Nutrition & Food Science': 0,
+    'Property, Construction & Real Estate': 0,
+    'Psychology & Social Work': 0,
+    'Teaching & Education': 0,
+    'Tourism, Sport & Events': 0,
   };
 
   for (let i = 0; i < questions.length; i += 1) {
