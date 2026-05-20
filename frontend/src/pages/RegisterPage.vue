@@ -83,168 +83,257 @@ async function handleRegister() {
 
 <template>
   <div class="register-page">
-    <div class="auth-card">
-      <h2>Create Account</h2>
-      <p class="auth-subtitle">Join AU Roadmap to explore your academic journey</p>
+    <section class="auth-shell">
+      <aside class="auth-panel">
+        <span class="auth-eyebrow">Create Your Account</span>
+        <h1>Start exploring Adelaide University programs.</h1>
+        <p>Create an account to save your pathway, access student tools, and continue your program discovery journey.</p>
+      </aside>
 
-      <form @submit.prevent="handleRegister" class="auth-form">
-        <div class="form-row">
+      <div class="auth-card">
+        <div class="auth-card-header">
+          <span class="material-symbols-outlined auth-card-icon">person_add</span>
+          <div>
+            <h2>Create Account</h2>
+            <p class="auth-subtitle">Join AU Roadmap to explore your academic journey.</p>
+          </div>
+        </div>
+
+        <form @submit.prevent="handleRegister" class="auth-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="first_name">First Name</label>
+              <input
+                id="first_name"
+                v-model="form.first_name"
+                type="text"
+                class="form-input"
+                placeholder="First name"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="last_name">Last Name</label>
+              <input
+                id="last_name"
+                v-model="form.last_name"
+                type="text"
+                class="form-input"
+                placeholder="Last name"
+                required
+              />
+            </div>
+          </div>
+
           <div class="form-group">
-            <label class="form-label" for="first_name">First Name</label>
-            <input
-              id="first_name"
-              v-model="form.first_name"
-              type="text"
-              class="form-input"
-              placeholder="First name"
-              required
-            />
+            <label class="form-label" for="reg-email">Email</label>
+            <div class="input-wrapper">
+              <span class="material-symbols-outlined input-icon">mail</span>
+              <input
+                id="reg-email"
+                v-model="form.email"
+                type="email"
+                class="form-input with-icon"
+                placeholder="your@email.com"
+                required
+              />
+            </div>
           </div>
+
           <div class="form-group">
-            <label class="form-label" for="last_name">Last Name</label>
+            <label class="form-label">I am a...</label>
+            <div class="role-selector">
+              <label class="role-option">
+                <input type="radio" v-model="form.role" value="prospective" />
+                <span class="role-label">
+                  <span class="material-symbols-outlined">person_search</span>
+                  Prospective Student
+                </span>
+              </label>
+              <label class="role-option">
+                <input type="radio" v-model="form.role" value="student" />
+                <span class="role-label">
+                  <span class="material-symbols-outlined">school</span>
+                  Current Student
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-password">Password</label>
+            <div class="input-wrapper">
+              <span class="material-symbols-outlined input-icon">lock</span>
+              <input
+                id="reg-password"
+                v-model="form.password"
+                :type="showPassword ? 'text' : 'password'"
+                class="form-input with-icon"
+                placeholder="Create a password"
+                required
+                minlength="8"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                @click="showPassword = !showPassword"
+              >
+                <span class="material-symbols-outlined">
+                  {{ showPassword ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="confirm-password">Confirm Password</label>
             <input
-              id="last_name"
-              v-model="form.last_name"
-              type="text"
+              id="confirm-password"
+              v-model="form.confirm_password"
+              type="password"
               class="form-input"
-              placeholder="Last name"
+              placeholder="Confirm your password"
               required
             />
           </div>
-        </div>
 
-        <div class="form-group">
-          <label class="form-label" for="reg-email">Email</label>
-          <div class="input-wrapper">
-            <span class="material-symbols-outlined input-icon">mail</span>
-            <input
-              id="reg-email"
-              v-model="form.email"
-              type="email"
-              class="form-input with-icon"
-              placeholder="your@email.com"
-              required
-            />
-          </div>
-        </div>
+          <div ref="turnstileContainer" class="turnstile-widget"></div>
 
-        <div class="form-group">
-          <label class="form-label">I am a...</label>
-          <div class="role-selector">
-            <label class="role-option">
-              <input type="radio" v-model="form.role" value="prospective" />
-              <span class="role-label">
-                <span class="material-symbols-outlined">person_search</span>
-                Prospective Student
-              </span>
-            </label>
-            <label class="role-option">
-              <input type="radio" v-model="form.role" value="student" />
-              <span class="role-label">
-                <span class="material-symbols-outlined">school</span>
-                Current Student
-              </span>
-            </label>
-          </div>
-        </div>
+          <button type="submit" class="btn btn-primary btn-full" :disabled="authStore.loading || !captchaToken">
+            {{ authStore.loading ? 'Creating account...' : 'Create Account' }}
+          </button>
+        </form>
 
-        <div class="form-group">
-          <label class="form-label" for="reg-password">Password</label>
-          <div class="input-wrapper">
-            <span class="material-symbols-outlined input-icon">lock</span>
-            <input
-              id="reg-password"
-              v-model="form.password"
-              :type="showPassword ? 'text' : 'password'"
-              class="form-input with-icon"
-              placeholder="Create a password"
-              required
-              minlength="8"
-            />
-            <button
-              type="button"
-              class="password-toggle"
-              @click="showPassword = !showPassword"
-            >
-              <span class="material-symbols-outlined">
-                {{ showPassword ? 'visibility_off' : 'visibility' }}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="confirm-password">Confirm Password</label>
-          <input
-            id="confirm-password"
-            v-model="form.confirm_password"
-            type="password"
-            class="form-input"
-            placeholder="Confirm your password"
-            required
-          />
-        </div>
-
-        <div ref="turnstileContainer" class="turnstile-widget"></div>
-
-        <button type="submit" class="btn btn-primary btn-full" :disabled="authStore.loading || !captchaToken">
-          {{ authStore.loading ? 'Creating account...' : 'Create Account' }}
-        </button>
-      </form>
-
-      <p class="auth-footer">
-        Already have an account?
-        <RouterLink to="/login">Sign in here</RouterLink>
-      </p>
-    </div>
+        <p class="auth-footer">
+          Already have an account?
+          <RouterLink to="/login">Sign in here</RouterLink>
+        </p>
+      </div>
+    </section>
   </div>
 </template>
 
 <style scoped>
 .register-page {
+  min-height: calc(100vh - var(--header-height));
+  background: rgba(20, 15, 80, 0.025);
+  padding: 2rem var(--space-lg) 1.5rem;
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - var(--header-height) - 200px);
-  padding: var(--space-xl);
+}
+
+.auth-shell {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) 500px;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.auth-panel {
+  min-height: 31rem;
+  border-radius: 8px;
+  padding: var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  color: var(--color-white);
+  background:
+    linear-gradient(135deg, rgba(20, 15, 80, 0.95), rgba(34, 28, 104, 0.84)),
+    url('@/assets/images/campus.webp') center / cover;
+  box-shadow: 0 20px 44px rgba(20, 15, 80, 0.14);
+}
+
+.auth-eyebrow {
+  margin-bottom: var(--space-md);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.auth-panel h1 {
+  max-width: 35rem;
+  margin: 0;
+  color: var(--color-white);
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1.05;
+}
+
+.auth-panel p {
+  max-width: 31rem;
+  margin: var(--space-md) 0 0;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.7;
 }
 
 .auth-card {
   background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-xl);
-  padding: var(--space-2xl);
+  border: 1px solid rgba(20, 15, 80, 0.1);
+  border-radius: 8px;
+  padding: 1.5rem;
   width: 100%;
-  max-width: 480px;
-  box-shadow: var(--shadow-lg);
+  min-height: 31rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 14px 30px rgba(20, 15, 80, 0.08);
+}
+
+.auth-card-header {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.auth-card-icon {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(20, 15, 80, 0.08);
+  color: var(--color-primary);
 }
 
 .auth-card h2 {
-  text-align: center;
-  margin-bottom: var(--space-xs);
+  margin-bottom: 4px;
+  color: var(--color-text-primary);
 }
 
 .auth-subtitle {
-  text-align: center;
   color: var(--color-text-secondary);
-  margin-bottom: var(--space-xl);
   font-size: var(--font-size-sm);
 }
 
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: 0.75rem;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-md);
+  gap: 0.75rem;
 }
 
 .input-wrapper {
   position: relative;
+}
+
+.form-input {
+  border-radius: 8px;
+  border-color: rgba(20, 15, 80, 0.14);
+}
+
+.form-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(20, 15, 80, 0.08);
 }
 
 .input-icon {
@@ -267,6 +356,7 @@ async function handleRegister() {
   transform: translateY(-50%);
   color: var(--color-text-light);
   padding: 4px;
+  border-radius: 8px;
 }
 
 .password-toggle .material-symbols-outlined {
@@ -276,7 +366,7 @@ async function handleRegister() {
 .role-selector {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-sm);
+  gap: 0.6rem;
 }
 
 .role-option {
@@ -291,16 +381,16 @@ async function handleRegister() {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-md);
+  padding: 0.65rem 0.8rem;
   border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-md);
+  border-radius: 8px;
   font-size: var(--font-size-sm);
   transition: all var(--transition-fast);
 }
 
 .role-option input:checked + .role-label {
   border-color: var(--color-primary);
-  background: rgba(0, 40, 85, 0.05);
+  background: rgba(20, 15, 80, 0.06);
   color: var(--color-primary);
 }
 
@@ -311,7 +401,7 @@ async function handleRegister() {
 .turnstile-widget {
   display: flex;
   justify-content: center;
-  margin-top: var(--space-xs);
+  margin-top: 0.2rem;
 }
 
 .btn-full {
@@ -319,18 +409,47 @@ async function handleRegister() {
   justify-content: center;
   padding: 12px;
   font-size: var(--font-size-md);
-  margin-top: var(--space-sm);
+  margin-top: 0.25rem;
+  border-radius: 8px;
 }
 
 .auth-footer {
   text-align: center;
-  margin-top: var(--space-lg);
+  margin-top: 0.9rem;
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
 }
 
 .auth-footer a {
   color: var(--color-primary);
-  font-weight: 500;
+  font-weight: 700;
+}
+
+@media (max-width: 560px) {
+  .register-page {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .auth-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-panel {
+    min-height: 18rem;
+  }
+
+  .auth-card {
+    min-height: auto;
+    padding: var(--space-xl);
+  }
+
+  .auth-card-header {
+    align-items: flex-start;
+  }
+
+  .form-row,
+  .role-selector {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
