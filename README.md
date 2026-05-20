@@ -1,157 +1,321 @@
-# Adelaide University Program Roadmap
+# AU Roadmap
 
-A web platform designed for Adelaide University to help **current students** plan their study progression and connect with industry/alumni, and **prospective students** explore programs, career outcomes, and campus life.
+AU Roadmap is a web-based platform developed for the Adelaide University Industry Research Project. It supports two main audiences:
 
-Built as part of the Industry Research Project (IRP) course, Semester 1, 2026.
+- Current students who need a central portal for program roadmap, timetable, resources, industry connections, and community interaction.
+- Prospective students who need a public-facing program discovery experience with program previews, career outcomes, campus life, application guidance, and a short recommendation quiz.
 
-## Features
+The project uses a Vue 3 frontend, an Express backend, and a MySQL database.
 
-### Level 1 — Current Students (Authenticated)
-- **Dashboard** — personalized overview of enrolled program, progress, and key dates
-- **Roadmap** — interactive course roadmap with prerequisites, year/semester layout, and completion tracking
-- **Industry Connections** — browse industry partners filtered by partnership type
-- **Alumni Network** — featured alumni profiles with success stories
-- **Student Resources** — categorized links to academic, career, wellbeing, and technology resources
+## Quick Start
 
-### Level 2 — Prospective Students (Public)
-- **Explore Programs** — search and filter programs by level, faculty, and keywords
-- **Program Preview** — detailed program pages with overview, courses, careers, and alumni tabs
-- **Career Outcomes** — data visualizations (Chart.js) for salary, employment rates, and demand
-- **Campus Life** — highlights of facilities, clubs, city, and accommodation
-- **Application Guide** — step-by-step guide, key dates, and FAQ
-
-### Research & Innovation (Public)
-- **Research Home** — overview with stats, leadership, performance rankings, ERA results, institutes, centres, facilities
-- **Research Impact** — impact stories and Discovery Podcast series
-- **Connect With Us** — industry partnerships, ThincLab incubator, graduate research training, commercialisation
-- **Research Support** — researcher portal, graduate school, HPC and technology support
-- **Research Institutes** — 8 institute cards (AIML, Environment, ISER, IPAS, Robinson, SAiGENCI, Waite, DSI)
-- **Research Events** — Research Tuesdays, upcoming events calendar, past highlights
-
-### Admin Panel
-- Full CRUD management for programs, courses, alumni, industry partners, career data, and users
-- Role-based access control (student / prospective / admin)
-
-### Search
-- Unified search across programs, courses, alumni, industry partners, and career paths
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Vue.js 3 (Composition API) + Vite + Vue Router 4 + Pinia |
-| Backend | Node.js + Express.js (RESTful API) |
-| Database | MySQL (14 tables) |
-| Auth | JWT + bcrypt with role-based middleware |
-| Charts | Chart.js + vue-chartjs |
-| Styling | CSS Variables, scoped styles, Material Symbols Outlined icons |
-
-## Project Structure
-
-```
-AU-Roadmap/
-├── backend/
-│   ├── config/          # DB and Cloudinary config
-│   ├── controllers/     # Route handlers (auth, admin, program, search)
-│   ├── middleware/       # auth, roleGuard, errorHandler
-│   ├── routes/          # Express route definitions
-│   ├── utils/           # Response helpers
-│   └── server.js        # Entry point
-├── frontend/
-│   ├── src/
-│   │   ├── api/         # Axios API layer
-│   │   ├── assets/      # Images, CSS variables, shared styles
-│   │   ├── components/  # Reusable components (Header, Footer, SearchBar, etc.)
-│   │   ├── layouts/     # Default, Level1, Level2, Admin layouts
-│   │   ├── pages/       # All page components (level1/, level2/, research/, admin/)
-│   │   ├── router/      # Vue Router config
-│   │   └── stores/      # Pinia stores (auth, ui)
-│   └── index.html
-├── database/
-│   ├── schema.sql       # 14-table schema
-│   └── seed.sql         # Test data with 3 programs, courses, alumni, etc.
-└── setup.sh             # One-click setup script
-```
-
-## Getting Started
-
-### Prerequisites
-- Node.js >= 20.19.0
-- MySQL 8.0+ 
-
-### 1. Database Setup
+For a new computer, run the setup script from the project root:
 
 ```bash
-# macOS
-mysql -u root < database/schema.sql
-mysql -u root au_roadmap < database/seed.sql
+bash setup.sh
+```
 
-# Linux / password-protected MySQL
+The script will:
+
+- Check Node.js and npm.
+- Install backend and frontend dependencies.
+- Ask for MySQL connection details.
+- Generate `backend/.env` and `frontend/.env` after confirmation if those files already exist.
+- Import `database/schema.sql` and `database/seed.sql` if MySQL CLI is available.
+- Start the backend and frontend development servers.
+
+After setup, open:
+
+- Frontend: `http://localhost:5173`
+- Backend health check: `http://localhost:8080/api/health`
+
+Useful setup options:
+
+```bash
+bash setup.sh --no-start
+bash setup.sh --no-db
+bash setup.sh --help
+```
+
+## Prerequisites
+
+- Node.js `20.19+` or newer
+- npm
+- MySQL `8.0+`
+- Git
+
+Recommended macOS installation:
+
+```bash
+brew install node mysql
+brew services start mysql
+```
+
+If you do not use Homebrew, install Node.js from `https://nodejs.org/` and MySQL from `https://dev.mysql.com/downloads/mysql/`.
+
+## Test Accounts
+
+All seeded test account passwords are:
+
+```text
+11111111
+```
+
+| Role | Email |
+| --- | --- |
+| Admin | `admin@example.com` |
+| Current Student | `jialaoliu@adelaide.edu.au` |
+| Prospective Student | `prospect@example.com` |
+
+## Manual Setup
+
+Use this section if the setup script is not suitable for your environment.
+
+### 1. Install Dependencies
+
+```bash
+cd backend
+npm install
+
+cd ../frontend
+npm install
+```
+
+### 2. Configure Environment Files
+
+Create `backend/.env`:
+
+```env
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=au_roadmap
+DB_PORT=3306
+
+JWT_SECRET=replace_with_a_long_random_secret
+
+PORT=8080
+
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+CORS_ORIGIN=http://localhost:5173
+NODE_ENV=development
+```
+
+Create `frontend/.env`:
+
+```env
+VITE_API_BASE_URL=/api
+VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
+```
+
+Cloudinary values are optional for most local demo flows. Local avatar and community post image uploads use the project public folders.
+
+### 3. Create and Seed the Database
+
+```bash
 mysql -u root -p < database/schema.sql
 mysql -u root -p au_roadmap < database/seed.sql
 ```
 
-### 2. Backend Setup
+If your local MySQL root account has no password, omit `-p`.
+
+### 4. Run the Application
+
+Open two terminal windows.
+
+Terminal 1:
 
 ```bash
 cd backend
-cp .env.example .env
-npm install
 npm run dev
 ```
 
-Edit `.env` with your settings:
-```
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=          
-DB_NAME=au_roadmap
-DB_PORT=3306
-JWT_SECRET=your_jwt_secret_here
-PORT=8080
-CORS_ORIGIN=http://localhost:5173
-```
-
-Backend runs at `http://localhost:8080`
-
-### 3. Frontend Setup
+Terminal 2:
 
 ```bash
 cd frontend
-cp .env.example .env
-npm install
 npm run dev
 ```
 
-Frontend runs at `http://localhost:5173`
+## Main Features
 
-### Test Accounts
+### Level 1 Student Portal
 
-All test account passwords: `11111111`
+- Dashboard overview with roadmap-oriented program summary.
+- My Study Roadmap with year/semester course structure.
+- Community Hub with posts, image upload, replies, and student/alumni interaction.
+- Timetable page using Adelaide timezone handling.
+- Industry connections and student resources.
+- My Profile with read-only account information and avatar upload.
 
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@example.com | 11111111 |
-| Student | jialaoliu@adelaide.edu.au | 11111111 |
-| Prospective | prospect@example.com | 11111111 |
+### Level 2 Public Website
 
+- Homepage and program discovery entry points.
+- Explore Programs with filtering and program cards.
+- Program Preview pages for detailed program information.
+- Program Recommendation Quiz.
+- Application Guide.
+- Campus Life.
+- Career Outcomes.
 
+### Admin Portal
 
-# 3. Roadmap - Git Branch Usage Guide
-# IMPORTANT for dev
+- Admin dashboard.
+- Manage programs, courses, alumni, industry data, career data, and users.
+- Program-course relationship management for roadmap data.
 
-To ensure clean collaboration, **each team member must work on their own branch**.
-**Never commit directly to the `main` branch.** All changes must go through pull requests (PRs).
+### Research Pages
 
-## Assigned Development Branches
+- Research homepage.
+- Research impact.
+- Research support.
+- Research institutes.
+- Research events.
+- Research connection page.
 
-Current dev branches for each member:
-(example)
-- Jialao: dev/jialao
-- Nhat Tan: dev/nhattan
-- Deze: dev/deze
+## Project Structure
 
-## Step 1: Create Your Branch (One-time setup)
+```text
+AU Roadmap/
+├── backend/
+│   ├── config/          Database configuration
+│   ├── controllers/     Express controller logic
+│   ├── middleware/      Auth, role guard, and error handling
+│   ├── routes/          API route definitions
+│   ├── utils/           Shared response helpers
+│   ├── .env.example     Backend environment template
+│   └── server.js        Backend entry point
+├── database/
+│   ├── schema.sql       MySQL schema
+│   └── seed.sql         Demo data and test accounts
+├── docs/                Project documentation and reports
+├── frontend/
+│   ├── public/          Static public files and uploaded demo assets
+│   ├── src/
+│   │   ├── api/         Axios API wrappers
+│   │   ├── assets/      Images and global styles
+│   │   ├── components/  Shared Vue components
+│   │   ├── layouts/     Default, Level 1, Level 2, and admin layouts
+│   │   ├── pages/       Page-level Vue components
+│   │   ├── router/      Vue Router configuration
+│   │   └── stores/      Pinia stores
+│   ├── .env.example     Frontend environment template
+│   └── index.html
+├── tests/               API, smoke, and performance test materials
+├── README.md
+└── setup.sh
+```
+
+## API Overview
+
+Default backend base URL:
+
+```text
+http://localhost:8080/api
+```
+
+Main route groups:
+
+- `/api/auth`
+- `/api/programs`
+- `/api/admin`
+- `/api/search`
+- `/api/discussions`
+- `/api/community`
+- `/api/health`
+
+The frontend development server proxies `/api` requests to `http://localhost:8080`.
+
+## Development Commands
+
+Backend:
+
+```bash
+cd backend
+npm run dev
+npm start
+```
+
+Frontend:
+
+```bash
+cd frontend
+npm run dev
+npm run build
+```
+
+## Testing Materials
+
+Testing files and supporting reports are stored under:
+
+```text
+tests/
+docs/
+```
+
+The project includes API testing, smoke testing, and performance testing materials prepared for the final project documentation.
+
+## Common Issues
+
+### Vite shows `ECONNREFUSED` for `/api/...`
+
+The frontend is running, but the backend is not running. Start the backend:
+
+```bash
+cd backend
+npm run dev
+```
+
+### MySQL import fails
+
+Check that MySQL is running and your credentials match `backend/.env`.
+
+On macOS with Homebrew:
+
+```bash
+brew services start mysql
+```
+
+### Favicon or static image does not update immediately
+
+Browsers cache favicons and static assets aggressively. Restart `npm run dev`, hard refresh the page, or open the site in a private browsing window.
+
+### Port already in use
+
+Default ports:
+
+- Frontend: `5173`
+- Backend: `8080`
+- MySQL: `3306`
+
+Stop the conflicting process or change `PORT` in `backend/.env`.
+
+## Delivery Notes
+
+Before submitting or sharing the source code:
+
+- Do not commit real secrets in `.env` files.
+- Use `.env.example` as the safe configuration reference.
+- Confirm `database/schema.sql` and `database/seed.sql` are included.
+- Confirm `README.md`, `setup.sh`, `docs/`, and `tests/` are included.
+- Run `cd frontend && npm run build` to confirm the frontend builds successfully.
+
+## Git Branch Usage Guide
+
+To keep collaboration clean, each team member should work on their own development branch. Do not commit directly to `main`; changes should be merged through pull requests.
+
+### Assigned Development Branches
+
+Examples:
+
+- Jialao: `dev/jialao`
+- Nhat Tan: `dev/nhattan`
+- Deze: `dev/deze`
+
+### Create Your Branch
 
 Start from the latest `main` branch:
 
@@ -165,32 +329,34 @@ git push -u origin dev/yourname
 
 Replace `yourname` with your actual name or alias.
 
-## Step 2: Keep Your Branch Updated with `main`
+### Keep Your Branch Updated
 
-Before you start working, always sync with the latest `main` to avoid conflicts:
+Before starting new work, sync with the latest `main`:
 
 ```bash
 git checkout main
 git pull origin main
 
 git checkout dev/yourname
-git rebase main        # or: git merge main
+git rebase main
 ```
 
-If conflicts occur, fix them, then:
+If conflicts occur, resolve them, then continue:
 
 ```bash
 git add .
 git rebase --continue
 ```
 
-Then push your updated branch:
+Then push the updated branch:
 
 ```bash
-git push -f     # Use force push only after rebase
+git push --force-with-lease
 ```
 
-## Step 3: Commit and Push Your Changes
+Use force push only after a rebase.
+
+### Commit and Push Changes
 
 ```bash
 git add .
@@ -198,39 +364,22 @@ git commit -m "feat: add login page"
 git push
 ```
 
-## Step 4: Submit a Pull Request (PR)
+### Submit a Pull Request
 
 After finishing your task:
 
-1. Go to the GitHub repository
-2. Click "Compare & pull request"
-3. Fill in PR title and description (e.g., what changed, what was tested)
-4. Submit PR → team lead will review and merge
+1. Go to the GitHub repository.
+2. Click "Compare & pull request".
+3. Add a clear PR title and description.
+4. Include what changed and what was tested.
+5. Submit the PR for review and merge.
 
-## Step 5: How to Sync main into Your Branch When Behind
+### Notes
 
-If your branch shows something like "33 commits behind main":
+- Never commit or push directly to `main`.
+- Always work in your own branch, such as `dev/yourname`.
+- Sync with `main` regularly using rebase or merge.
+- All changes should go through a pull request.
+- If GitHub shows "nothing to compare", recreate your branch from the latest `main` or ask the team lead for help.
 
-1. Go to the repository on GitHub
-2. Switch to your branch (e.g., dev/jialao)
-3. Click "Compare & pull request" (if available) to merge main into your branch
-
-Or use terminal commands:
-```bash
-git checkout dev/yourname
-git pull origin main
-git push origin dev/yourname
-```
-
-## Notes
-
-- Never commit or push directly to `main`
-- Always work in your own branch (e.g., `dev/yournanme`)
-- Sync with `main` regularly using rebase or merge
-- All changes must go through a PR
-
-If your branch shows **"nothing to compare"** when opening a PR, it means your branch was not created from the latest `main`. Please recreate your branch correctly or contact Jialao for help.
-
----
-
-Maintained: **Jialao(Jarvis)**
+Maintained by Jialao (Jarvis).

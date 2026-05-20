@@ -500,6 +500,7 @@ onMounted(async () => {
 
               <div class="post-body">
                 <h3 class="post-title" @click="openThread(t)">{{ t.title }}</h3>
+                <p v-if="t.content" class="post-content">{{ t.content }}</p>
                 <img v-if="t.image_url" :src="t.image_url" :alt="t.title" class="post-image" @click="openThread(t)" />
               </div>
 
@@ -518,15 +519,6 @@ onMounted(async () => {
                 <div v-if="activeThreadId === t.id" class="thread-expanded">
                   <div v-if="threadLoading" class="loading-state" style="padding: 16px"><div class="loading-spinner"></div></div>
                   <template v-else-if="activeThreadData">
-                    <div class="thread-body">
-                      <p>{{ activeThreadData.thread.content }}</p>
-                      <img
-                        v-if="activeThreadData.thread.image_url"
-                        :src="activeThreadData.thread.image_url"
-                        :alt="activeThreadData.thread.title"
-                        class="thread-image"
-                      />
-                    </div>
                     <div class="replies-section">
                       <div v-for="r in activeThreadData.replies" :key="r.id" class="reply-item">
                         <div class="avatar avatar--xs avatar--initials">{{ getInitials(r) }}</div>
@@ -1373,8 +1365,14 @@ onMounted(async () => {
   line-height: 1.35;
   cursor: pointer;
 }
-.post-image,
-.thread-image {
+.post-content {
+  margin-top: 10px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+.post-image {
   width: 100%;
   border-radius: 16px;
   margin-top: 14px;
@@ -1402,10 +1400,7 @@ onMounted(async () => {
 
 /* Expanded thread */
 .thread-expanded { border-top: 1px solid var(--color-border); }
-.thread-body { padding: var(--space-md) 0; }
-.thread-body p { font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: 1.6; white-space: pre-wrap; }
-
-.replies-section { padding: 0 0 var(--space-md); }
+.replies-section { padding: var(--space-sm) 0 var(--space-md); }
 .reply-item { display: flex; gap: var(--space-sm); padding: var(--space-sm) 0; border-top: 1px solid var(--color-bg-secondary); }
 .reply-content { flex: 1; min-width: 0; }
 .reply-meta { display: flex; align-items: center; gap: var(--space-xs); margin-bottom: 2px; font-size: var(--font-size-xs); }
