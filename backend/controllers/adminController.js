@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const bcrypt = require('bcrypt');
 const { success, error, paginated } = require('../utils/response');
 
 // ─── STATS ───────────────────────────────────────────────
@@ -7,7 +8,12 @@ async function getStats(req, res, next) {
     const [[{ programs }]] = await pool.query('SELECT COUNT(*) as programs FROM programs');
     const [[{ courses }]] = await pool.query('SELECT COUNT(*) as courses FROM courses');
     const [[{ users }]] = await pool.query('SELECT COUNT(*) as users FROM users');
-    const [[{ alumni }]] = await pool.query('SELECT COUNT(*) as alumni FROM alumni');
+    const [[{ alumni }]] = await pool.query(
+      `SELECT COUNT(*) as alumni
+       FROM users u
+       JOIN alumni_profiles ap ON u.id = ap.user_id
+       WHERE u.role = 'alumni'`
+    );
     const [[{ partners }]] = await pool.query('SELECT COUNT(*) as partners FROM industry_partners');
     const [[{ resources }]] = await pool.query('SELECT COUNT(*) as resources FROM resources');
 
@@ -327,27 +333,41 @@ async function listAlumni(req, res, next) {
     const { search, program_id, page = 1, limit = 50 } = req.query;
     const offset = (page - 1) * limit;
 
-    let query = 'SELECT a.*, p.code as program_code, p.name as program_name FROM alumni a LEFT JOIN programs p ON a.program_id = p.id WHERE 1=1';
-    let countQuery = 'SELECT COUNT(*) as total FROM alumni WHERE 1=1';
+    let query = `
+      SELECT u.id, u.email, u.first_name, u.last_name, u.avatar_url,
+             ap.graduation_year, ap.program_id, ap.current_role, ap.current_company,
+             ap.location, ap.bio, ap.success_story, ap.linkedin_url, ap.is_featured,
+             p.code as program_code, p.name as program_name
+      FROM users u
+      JOIN alumni_profiles ap ON u.id = ap.user_id
+      LEFT JOIN programs p ON ap.program_id = p.id
+      WHERE u.role = 'alumni'
+    `;
+    let countQuery = `
+      SELECT COUNT(*) as total
+      FROM users u
+      JOIN alumni_profiles ap ON u.id = ap.user_id
+      WHERE u.role = 'alumni'
+    `;
     const params = [];
     const countParams = [];
 
     if (search) {
-      query += ' AND (a.first_name LIKE ? OR a.last_name LIKE ? OR a.current_company LIKE ?)';
-      countQuery += ' AND (first_name LIKE ? OR last_name LIKE ? OR current_company LIKE ?)';
+      query += ' AND (u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ? OR ap.current_company LIKE ? OR ap.current_role LIKE ?)';
+      countQuery += ' AND (u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ? OR ap.current_company LIKE ? OR ap.current_role LIKE ?)';
       const term = `%${search}%`;
-      params.push(term, term, term);
-      countParams.push(term, term, term);
+      params.push(term, term, term, term, term);
+      countParams.push(term, term, term, term, term);
     }
 
     if (program_id) {
-      query += ' AND a.program_id = ?';
-      countQuery += ' AND program_id = ?';
+      query += ' AND ap.program_id = ?';
+      countQuery += ' AND ap.program_id = ?';
       params.push(program_id);
       countParams.push(program_id);
     }
 
-    query += ' ORDER BY a.graduation_year DESC LIMIT ? OFFSET ?';
+    query += ' ORDER BY ap.is_featured DESC, ap.graduation_year DESC LIMIT ? OFFSET ?';
     params.push(parseInt(limit), parseInt(offset));
 
     const [alumni] = await pool.query(query, params);
@@ -360,32 +380,56 @@ async function listAlumni(req, res, next) {
 }
 
 async function createAlumni(req, res, next) {
+  const connection = await pool.getConnection();
   try {
     const {
-      first_name, last_name, graduation_year, program_id,
+      email, first_name, last_name, graduation_year, program_id,
       current_role, current_company, location, bio, success_story,
-      photo_url, linkedin_url, is_featured,
+      avatar_url, linkedin_url, is_featured,
     } = req.body;
 
-    if (!first_name || !last_name || !graduation_year || !program_id) {
-      return error(res, 'first_name, last_name, graduation_year, and program_id are required', 400, 'VALIDATION_ERROR');
+    if (!email || !first_name || !last_name || !graduation_year || !program_id) {
+      return error(res, 'email, first_name, last_name, graduation_year, and program_id are required', 400, 'VALIDATION_ERROR');
     }
 
-    const [result] = await pool.query(
-      `INSERT INTO alumni (first_name, last_name, graduation_year, program_id,
-        current_role, current_company, location, bio, success_story,
-        photo_url, linkedin_url, is_featured)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [first_name, last_name, graduation_year, program_id,
-       current_role || null, current_company || null, location || null,
-       bio || null, success_story || null, photo_url || null,
-       linkedin_url || null, is_featured || false]
+    await connection.beginTransaction();
+
+    const passwordHash = await bcrypt.hash('11111111', 12);
+    const [userResult] = await connection.query(
+      `INSERT INTO users (email, password_hash, first_name, last_name, role, avatar_url)
+       VALUES (?, ?, ?, ?, 'alumni', ?)`,
+      [email, passwordHash, first_name, last_name, avatar_url || null]
     );
 
-    const [created] = await pool.query('SELECT * FROM alumni WHERE id = ?', [result.insertId]);
+    await connection.query(
+      `INSERT INTO alumni_profiles (
+        user_id, graduation_year, program_id, current_role, current_company,
+        location, bio, success_story, linkedin_url, is_featured
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        userResult.insertId, graduation_year, program_id,
+        current_role || null, current_company || null, location || null,
+        bio || null, success_story || null, linkedin_url || null, is_featured || false,
+      ]
+    );
+
+    await connection.commit();
+
+    const [created] = await pool.query(
+      `SELECT u.id, u.email, u.first_name, u.last_name, u.avatar_url,
+              ap.graduation_year, ap.program_id, ap.current_role, ap.current_company,
+              ap.location, ap.bio, ap.success_story, ap.linkedin_url, ap.is_featured
+       FROM users u
+       JOIN alumni_profiles ap ON u.id = ap.user_id
+       WHERE u.id = ?`,
+      [userResult.insertId]
+    );
     return success(res, created[0], 201);
   } catch (err) {
+    await connection.rollback();
     next(err);
+  } finally {
+    connection.release();
   }
 }
 
@@ -394,27 +438,56 @@ async function updateAlumni(req, res, next) {
     const { id } = req.params;
     const fields = req.body;
 
-    const allowed = [
-      'first_name', 'last_name', 'graduation_year', 'program_id',
+    const userFields = ['email', 'first_name', 'last_name', 'avatar_url'];
+    const profileFields = [
+      'graduation_year', 'program_id',
       'current_role', 'current_company', 'location', 'bio', 'success_story',
-      'photo_url', 'linkedin_url', 'is_featured', 'is_active',
+      'linkedin_url', 'is_featured',
     ];
 
-    const updates = [];
-    const values = [];
-    for (const key of allowed) {
+    const userUpdates = [];
+    const userValues = [];
+    for (const key of userFields) {
       if (fields[key] !== undefined) {
-        updates.push(`${key} = ?`);
-        values.push(fields[key]);
+        userUpdates.push(`${key} = ?`);
+        userValues.push(fields[key] || null);
       }
     }
 
-    if (updates.length === 0) return error(res, 'No valid fields to update', 400, 'VALIDATION_ERROR');
+    const profileUpdates = [];
+    const profileValues = [];
+    for (const key of profileFields) {
+      if (fields[key] !== undefined) {
+        profileUpdates.push(`${key} = ?`);
+        profileValues.push(fields[key]);
+      }
+    }
 
-    values.push(id);
-    await pool.query(`UPDATE alumni SET ${updates.join(', ')} WHERE id = ?`, values);
+    if (userUpdates.length === 0 && profileUpdates.length === 0) {
+      return error(res, 'No valid fields to update', 400, 'VALIDATION_ERROR');
+    }
 
-    const [updated] = await pool.query('SELECT * FROM alumni WHERE id = ?', [id]);
+    if (userUpdates.length) {
+      userValues.push(id);
+      await pool.query(`UPDATE users SET ${userUpdates.join(', ')} WHERE id = ? AND role = 'alumni'`, userValues);
+    }
+
+    if (profileUpdates.length) {
+      profileValues.push(id);
+      await pool.query(`UPDATE alumni_profiles SET ${profileUpdates.join(', ')} WHERE user_id = ?`, profileValues);
+    }
+
+    const [updated] = await pool.query(
+      `SELECT u.id, u.email, u.first_name, u.last_name, u.avatar_url,
+              ap.graduation_year, ap.program_id, ap.current_role, ap.current_company,
+              ap.location, ap.bio, ap.success_story, ap.linkedin_url, ap.is_featured,
+              p.code as program_code, p.name as program_name
+       FROM users u
+       JOIN alumni_profiles ap ON u.id = ap.user_id
+       LEFT JOIN programs p ON ap.program_id = p.id
+       WHERE u.id = ? AND u.role = 'alumni'`,
+      [id]
+    );
     if (updated.length === 0) return error(res, 'Alumni not found', 404, 'NOT_FOUND');
 
     return success(res, updated[0]);
@@ -426,7 +499,7 @@ async function updateAlumni(req, res, next) {
 async function deleteAlumni(req, res, next) {
   try {
     const { id } = req.params;
-    const [result] = await pool.query('DELETE FROM alumni WHERE id = ?', [id]);
+    const [result] = await pool.query("DELETE FROM users WHERE id = ? AND role = 'alumni'", [id]);
     if (result.affectedRows === 0) return error(res, 'Alumni not found', 404, 'NOT_FOUND');
     return success(res, { message: 'Alumni deleted' });
   } catch (err) {
