@@ -4,6 +4,7 @@ import AppHeader from '@/components/common/AppHeader.vue';
 
 const adminLinks = [
   { to: '/admin', label: 'Dashboard', icon: 'dashboard', exact: true },
+  { to: '/student/community', label: 'Community', icon: 'forum' },
   { to: '/admin/programs', label: 'Programs', icon: 'school' },
   { to: '/admin/courses', label: 'Courses', icon: 'class' },
   { to: '/admin/alumni', label: 'Alumni', icon: 'group' },

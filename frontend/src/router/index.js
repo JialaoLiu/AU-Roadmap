@@ -160,8 +160,8 @@ const router = createRouter({
           component: () => import('@/pages/level1/CommunityHubPage.vue'),
           meta: { title: 'Community Hub' },
         },
-        { path: 'alumni', redirect: { name: 'Community' } },
-        { path: 'discussion', redirect: { name: 'Community' } },
+        { path: 'alumni', name: 'CommunityAlumniRedirect', redirect: { name: 'Community' } },
+        { path: 'discussion', name: 'CommunityDiscussionRedirect', redirect: { name: 'Community' } },
         {
           path: 'resources',
           name: 'Resources',
@@ -262,8 +262,12 @@ router.beforeEach(async (to, from) => {
   }
 
   if (to.meta.role && authStore.user?.role !== to.meta.role) {
-    // Allow alumni to access student pages (community hub)
-    if (to.meta.role === 'student' && authStore.user?.role === 'alumni') {
+    // Allow alumni to access student community; allow admins to review community only.
+    const adminCommunityRoutes = ['Community', 'CommunityAlumniRedirect', 'CommunityDiscussionRedirect'];
+    if (
+      to.meta.role === 'student' &&
+      (authStore.user?.role === 'alumni' || (authStore.user?.role === 'admin' && adminCommunityRoutes.includes(to.name)))
+    ) {
       return true;
     }
     if (authStore.isAdmin) return { name: 'AdminDashboard' };

@@ -96,10 +96,6 @@ JWT_SECRET=replace_with_a_long_random_secret
 
 PORT=8080
 
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-
 CORS_ORIGIN=http://localhost:5173
 NODE_ENV=development
 ```
@@ -108,10 +104,7 @@ Create `frontend/.env`:
 
 ```env
 VITE_API_BASE_URL=/api
-VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
 ```
-
-Cloudinary values are optional for most local demo flows. Local avatar and community post image uploads use the project public folders.
 
 ### 3. Create and Seed the Database
 
@@ -303,83 +296,3 @@ Before submitting or sharing the source code:
 - Confirm `README.md`, `setup.sh`, `docs/`, and `tests/` are included.
 - Run `cd frontend && npm run build` to confirm the frontend builds successfully.
 
-## Git Branch Usage Guide
-
-To keep collaboration clean, each team member should work on their own development branch. Do not commit directly to `main`; changes should be merged through pull requests.
-
-### Assigned Development Branches
-
-Examples:
-
-- Jialao: `dev/jialao`
-- Nhat Tan: `dev/nhattan`
-- Deze: `dev/deze`
-
-### Create Your Branch
-
-Start from the latest `main` branch:
-
-```bash
-git checkout main
-git pull origin main
-
-git checkout -b dev/yourname
-git push -u origin dev/yourname
-```
-
-Replace `yourname` with your actual name or alias.
-
-### Keep Your Branch Updated
-
-Before starting new work, sync with the latest `main`:
-
-```bash
-git checkout main
-git pull origin main
-
-git checkout dev/yourname
-git rebase main
-```
-
-If conflicts occur, resolve them, then continue:
-
-```bash
-git add .
-git rebase --continue
-```
-
-Then push the updated branch:
-
-```bash
-git push --force-with-lease
-```
-
-Use force push only after a rebase.
-
-### Commit and Push Changes
-
-```bash
-git add .
-git commit -m "feat: add login page"
-git push
-```
-
-### Submit a Pull Request
-
-After finishing your task:
-
-1. Go to the GitHub repository.
-2. Click "Compare & pull request".
-3. Add a clear PR title and description.
-4. Include what changed and what was tested.
-5. Submit the PR for review and merge.
-
-### Notes
-
-- Never commit or push directly to `main`.
-- Always work in your own branch, such as `dev/yourname`.
-- Sync with `main` regularly using rebase or merge.
-- All changes should go through a pull request.
-- If GitHub shows "nothing to compare", recreate your branch from the latest `main` or ask the team lead for help.
-
-Maintained by Jialao (Jarvis).

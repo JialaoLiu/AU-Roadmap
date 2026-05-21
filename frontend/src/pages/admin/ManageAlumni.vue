@@ -12,7 +12,8 @@ const editing = ref(null);
 const saving = ref(false);
 
 const emptyForm = {
-  first_name: '', last_name: '', graduation_year: new Date().getFullYear(),
+  email: '', first_name: '', last_name: '', avatar_url: '',
+  graduation_year: new Date().getFullYear(),
   program_id: '', current_role: '', current_company: '',
   location: '', bio: '', success_story: '', linkedin_url: '', is_featured: false,
 };
@@ -43,7 +44,8 @@ function openCreate() {
 function openEdit(a) {
   editing.value = a.id;
   form.value = {
-    first_name: a.first_name, last_name: a.last_name,
+    email: a.email || '', first_name: a.first_name, last_name: a.last_name,
+    avatar_url: a.avatar_url || '',
     graduation_year: a.graduation_year, program_id: a.program_id,
     current_role: a.current_role || '', current_company: a.current_company || '',
     location: a.location || '', bio: a.bio || '',
@@ -117,6 +119,10 @@ onMounted(fetchData);
           </div>
           <form class="modal-body" @submit.prevent="handleSubmit">
             <div class="form-grid">
+              <div class="form-group form-group--full">
+                <label>Email *</label>
+                <input v-model="form.email" type="email" required placeholder="name@alumni.adelaide.edu.au" />
+              </div>
               <div class="form-group">
                 <label>First Name *</label>
                 <input v-model="form.first_name" required />
@@ -153,6 +159,10 @@ onMounted(fetchData);
                 <input v-model="form.linkedin_url" placeholder="https://linkedin.com/in/..." />
               </div>
               <div class="form-group form-group--full">
+                <label>Avatar URL</label>
+                <input v-model="form.avatar_url" placeholder="/alumni/example.jpeg" />
+              </div>
+              <div class="form-group form-group--full">
                 <label>Bio</label>
                 <textarea v-model="form.bio" rows="2" placeholder="Short bio..."></textarea>
               </div>
@@ -185,6 +195,7 @@ onMounted(fetchData);
         <thead>
           <tr>
             <th>Name</th>
+            <th>Email</th>
             <th>Program</th>
             <th>Year</th>
             <th>Role</th>
@@ -196,6 +207,7 @@ onMounted(fetchData);
         <tbody>
           <tr v-for="a in alumni" :key="a.id">
             <td>{{ a.first_name }} {{ a.last_name }}</td>
+            <td>{{ a.email || '-' }}</td>
             <td class="td-code">{{ a.program_code || '-' }}</td>
             <td>{{ a.graduation_year }}</td>
             <td>{{ a.current_role || '-' }}</td>
@@ -215,7 +227,7 @@ onMounted(fetchData);
             </td>
           </tr>
           <tr v-if="!alumni.length">
-            <td colspan="7" class="td-empty">No alumni found</td>
+            <td colspan="8" class="td-empty">No alumni found</td>
           </tr>
         </tbody>
       </table>

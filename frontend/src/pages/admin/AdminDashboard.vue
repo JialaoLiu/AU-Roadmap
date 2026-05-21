@@ -33,9 +33,10 @@ async function fetchStats() {
 const statsChartData = computed(() => ({
   labels: ['Programs', 'Courses', 'Users', 'Alumni', 'Partners', 'Resources'],
   datasets: [{
+    label: 'Total records',
     data: stats.value ? [
-      stats.value.programs, stats.value.courses, stats.value.users,
-      stats.value.alumni, stats.value.partners, stats.value.resources,
+      stats.value.programs ?? 0, stats.value.courses ?? 0, stats.value.users ?? 0,
+      stats.value.alumni ?? 0, stats.value.partners ?? 0, stats.value.resources ?? 0,
     ] : [],
     backgroundColor: ['#140f5022', '#1976d222', '#2e7d3222', '#e6510022', '#6a1b9a22', '#00838f22'],
     borderColor: ['#140f50', '#1976d2', '#2e7d32', '#e65100', '#6a1b9a', '#00838f'],
@@ -47,7 +48,10 @@ const statsChartData = computed(() => ({
 const statsChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
-  plugins: { tooltip: { callbacks: { label: ctx => ` ${ctx.raw}` } } },
+  plugins: {
+    legend: { display: false },
+    tooltip: { callbacks: { label: ctx => ` ${ctx.raw}` } },
+  },
   scales: {
     y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 }, grid: { color: '#f0f0f0' } },
     x: { grid: { display: false } },

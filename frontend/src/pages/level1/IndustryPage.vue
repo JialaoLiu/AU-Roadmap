@@ -7,6 +7,7 @@ const authStore = useAuthStore();
 const loading = ref(true);
 const partners = ref([]);
 const filterType = ref('');
+const failedLogos = ref(new Set());
 
 const partnershipTypes = {
   internship: { label: 'Internship', icon: 'work_history', color: '#1976d2' },
@@ -31,6 +32,51 @@ const summaryStats = computed(() => [
   { label: 'Opportunity Types', value: uniqueTypes.value.length, icon: 'hub' },
   { label: 'Active Filter', value: filterType.value ? (partnershipTypes[filterType.value]?.label || filterType.value) : 'All', icon: 'tune' },
 ]);
+
+const partnerLogoDomains = {
+  'Google Australia': 'google.com',
+  Atlassian: 'atlassian.com',
+  Santos: 'santos.com',
+  'Defence Science and Technology Group': 'dst.defence.gov.au',
+  'PwC Australia': 'pwc.com.au',
+};
+
+function getLogoDomain(partner) {
+  if (partnerLogoDomains[partner.name]) return partnerLogoDomains[partner.name];
+  if (!partner.website_url) return '';
+
+  try {
+    return new URL(partner.website_url).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
+}
+
+function getPartnerLogo(partner) {
+  if (partner.logo_url) return partner.logo_url;
+
+  const domain = getLogoDomain(partner);
+  if (!domain) return '';
+
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+}
+
+function getPartnerInitials(name = '') {
+  return name
+    .replace(/Australia|Group|Science|Technology|and|&/gi, '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(word => word[0])
+    .join('')
+    .toUpperCase() || 'IP';
+}
+
+function handleLogoError(partnerId) {
+  const next = new Set(failedLogos.value);
+  next.add(partnerId);
+  failedLogos.value = next;
+}
 
 async function fetchPartners() {
   const programId = authStore.user?.program_id;
@@ -103,10 +149,15 @@ onMounted(fetchPartners);
       <div class="partners-grid">
         <div v-for="p in filteredPartners" :key="p.id" class="partner-card">
           <div class="partner-card__header">
-            <div class="partner-logo-placeholder" :style="{ background: (partnershipTypes[p.partnership_type]?.color || '#140f50') + '12' }">
-              <span class="material-symbols-outlined" :style="{ color: partnershipTypes[p.partnership_type]?.color || '#140f50' }">
-                {{ partnershipTypes[p.partnership_type]?.icon || 'business' }}
-              </span>
+            <div class="partner-logo" :class="{ 'partner-logo--fallback': !getPartnerLogo(p) || failedLogos.has(p.id) }">
+              <img
+                v-if="getPartnerLogo(p) && !failedLogos.has(p.id)"
+                :src="getPartnerLogo(p)"
+                :alt="`${p.name} logo`"
+                loading="lazy"
+                @error="handleLogoError(p.id)"
+              />
+              <span v-else class="partner-initials">{{ getPartnerInitials(p.name) }}</span>
             </div>
             <div>
               <h3 class="partner-name">{{ p.name }}</h3>
@@ -315,17 +366,37 @@ onMounted(fetchPartners);
   margin-bottom: var(--space-md);
 }
 
-.partner-logo-placeholder {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--border-radius-md);
+.partner-logo {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  background: var(--color-white);
+  border: 1px solid rgba(20, 15, 80, 0.08);
+  box-shadow: 0 10px 18px rgba(20, 15, 80, 0.07);
+  overflow: hidden;
 }
 
-.partner-logo-placeholder .material-symbols-outlined { font-size: 24px; }
+.partner-logo img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  display: block;
+}
+
+.partner-logo--fallback {
+  background: rgba(20, 15, 80, 0.06);
+  color: var(--color-primary);
+}
+
+.partner-initials {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
 
 .partner-name {
   font-size: var(--font-size-md);
