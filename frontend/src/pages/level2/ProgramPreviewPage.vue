@@ -2,6 +2,7 @@
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getProgramDetail, getProgramCourses, getProgramAlumni, getProgramCareers } from '@/api/programs';
+import { getProgramBanner } from '@/utils/programMedia';
 
 const route = useRoute();
 const router = useRouter();
@@ -12,12 +13,6 @@ const alumni = ref([]);
 const careers = ref({ outcomes: [], paths: [] });
 const activeTab = ref('overview');
 const overviewSection = ref(null);
-const demoProgramBanners = {
-  BCOMP: '/program/hero-banner-computer-science.jpg',
-  'BENG-SW': '/program/hero-banner-software-engineer.jpg',
-  BDS: '/program/hero-banner-data-science.jpg',
-  BCYBER: '/program/hero-banner-cyber-security.jpg',
-};
 
 async function fetchData() {
   try {
@@ -48,11 +43,6 @@ const courseYears = computed(() => [...new Set(courses.value.map(c => c.year_lev
 function formatCurrency(val) {
   if (!val) return '-';
   return '$' + Number(val).toLocaleString();
-}
-
-function getProgramBanner(programData) {
-  if (!programData) return '';
-  return programData.banner_url || demoProgramBanners[programData.code] || '';
 }
 
 async function openOverview() {

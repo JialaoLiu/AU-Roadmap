@@ -64,14 +64,15 @@ async function search(req, res, next) {
     if (type === 'all' || type === 'alumni') {
       searches.push(
         pool.query(
-          `SELECT a.id, a.first_name, a.last_name, a.graduation_year,
-                  a.current_role, a.current_company, a.photo_url,
+          `SELECT u.id, u.first_name, u.last_name, ap.graduation_year,
+                  ap.current_role, ap.current_company, u.avatar_url AS photo_url,
                   p.name AS program_name
-           FROM alumni a
-           LEFT JOIN programs p ON a.program_id = p.id
-           WHERE a.is_active = TRUE
-             AND (CONCAT(a.first_name, ' ', a.last_name) LIKE ?
-                  OR a.current_role LIKE ? OR a.current_company LIKE ?)
+           FROM users u
+           JOIN alumni_profiles ap ON u.id = ap.user_id
+           LEFT JOIN programs p ON ap.program_id = p.id
+           WHERE u.role = 'alumni'
+             AND (CONCAT(u.first_name, ' ', u.last_name) LIKE ?
+                  OR ap.current_role LIKE ? OR ap.current_company LIKE ?)
            LIMIT ?`,
           [keyword, keyword, keyword, cap]
         ).then(([rows]) => { results.alumni = rows; })
