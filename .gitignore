@@ -29,6 +29,8 @@ coverage/
 
 # Claude
 .claude/
+.refactor/
+.reasonix/
 
 # Misc
 *.tmp

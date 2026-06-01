@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
 import { getProgramList } from '@/api/programs';
+import { getProgramBanner } from '@/utils/programMedia';
 import RPimg from '@/assets/images/Rhaneela Punitham.jpeg';
 import LKimg from '@/assets/images/Lasni Kumarasinghe.jpeg';
 import WMimg from '@/assets/images/Walter Marsh.jpeg';
@@ -9,12 +10,6 @@ import DFimg from '@/assets/images/Dave Fletcher.jpg';
 
 const programs = ref([]);
 const featuredProgramCodes = ['BCOMP', 'BENG-SW', 'BDS', 'BCYBER'];
-const demoProgramBanners = {
-  BCOMP: '/program/hero-banner-computer-science.jpg',
-  'BENG-SW': '/program/hero-banner-software-engineer.jpg',
-  BDS: '/program/hero-banner-data-science.jpg',
-  BCYBER: '/program/hero-banner-cyber-security.jpg',
-};
 
 const alumni = [
   { name: 'Rhaneela Punitham', job: 'Technology Consultant at KPMG', year: 'Class of 2024', blockquote: 'The strong foundation in algorithms and data structures prepared me well for my career.', profile: RPimg },
@@ -31,10 +26,6 @@ function getLevelLabel(level) {
 function getDurationText(years) {
   const y = parseFloat(years);
   return y === 1 ? '1 year' : `${y} years`;
-}
-
-function getProgramBanner(program) {
-  return program.banner_url || demoProgramBanners[program.code] || '';
 }
 
 onMounted(async () => {

@@ -1,49 +1,14 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { ADELAIDE_TIME_ZONE, formatDateKey, getDisplayDate, getWeekStart } from '@/utils/date';
 
 // Week navigation
 const weekOffset = ref(0);
 
-const DISPLAY_TIME_ZONE = 'Australia/Adelaide';
-
-function getDateParts(date) {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: DISPLAY_TIME_ZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(date);
-
-  return {
-    year: Number(parts.find((part) => part.type === 'year')?.value),
-    month: Number(parts.find((part) => part.type === 'month')?.value),
-    day: Number(parts.find((part) => part.type === 'day')?.value),
-  };
-}
-
-function getDisplayDate(date = new Date()) {
-  const { year, month, day } = getDateParts(date);
-  return new Date(year, month - 1, day, 12, 0, 0, 0);
-}
-
-function formatDateKey(date) {
-  const { year, month, day } = getDateParts(date);
-  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-}
-
 const today = getDisplayDate();
 const todayStr = formatDateKey(today);
 
-function getWeekStart(offset = 0) {
-  const d = new Date(today);
-  const day = d.getDay(); // 0=Sun
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday
-  d.setDate(diff + offset * 7);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-const weekStart = computed(() => getWeekStart(weekOffset.value));
+const weekStart = computed(() => getWeekStart(weekOffset.value, today));
 
 const weekDays = computed(() => {
   return Array.from({ length: 5 }, (_, i) => {
@@ -68,7 +33,7 @@ const weekLabel = computed(() => {
     d.toLocaleDateString('en-AU', {
       day: 'numeric',
       month: 'short',
-      timeZone: DISPLAY_TIME_ZONE,
+      timeZone: ADELAIDE_TIME_ZONE,
     });
   return `${fmt(start)} – ${fmt(end)}, ${start.getFullYear()}`;
 });
