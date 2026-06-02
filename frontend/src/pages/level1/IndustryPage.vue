@@ -1,6 +1,9 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth';
+import EmptyState from '@/components/common/EmptyState.vue';
+import LoadingState from '@/components/common/LoadingState.vue';
+import SummaryCard from '@/components/common/SummaryCard.vue';
 import { getProgramIndustry } from '@/api/programs';
 
 const authStore = useAuthStore();
@@ -112,17 +115,17 @@ onMounted(fetchPartners);
       </div>
 
       <div v-if="partners.length" class="hero-summary">
-        <div v-for="item in summaryStats" :key="item.label" class="summary-card">
-          <span class="material-symbols-outlined summary-icon">{{ item.icon }}</span>
-          <div>
-            <span class="summary-value">{{ item.value }}</span>
-            <span class="summary-label">{{ item.label }}</span>
-          </div>
-        </div>
+        <SummaryCard
+          v-for="item in summaryStats"
+          :key="item.label"
+          :icon="item.icon"
+          :value="item.value"
+          :label="item.label"
+        />
       </div>
     </section>
 
-    <div v-if="loading" class="loading-state"><div class="loading-spinner"></div></div>
+    <LoadingState v-if="loading" />
 
     <template v-else-if="partners.length">
       <p class="results-note">
@@ -183,11 +186,12 @@ onMounted(fetchPartners);
       </div>
     </template>
 
-    <div v-else class="empty-state">
-      <span class="material-symbols-outlined empty-icon">business</span>
-      <h2>No Industry Partners</h2>
-      <p>Industry partner information is not yet available for your program.</p>
-    </div>
+    <EmptyState
+      v-else
+      icon="business"
+      title="No Industry Partners"
+      message="Industry partner information is not yet available for your program."
+    />
   </div>
 </template>
 
@@ -256,46 +260,6 @@ onMounted(fetchPartners);
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
-}
-
-.summary-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--color-white);
-  border: 1px solid rgba(20, 15, 80, 0.08);
-  border-radius: 18px;
-  padding: 14px 16px;
-  box-shadow: 0 10px 20px rgba(20, 15, 80, 0.05);
-}
-
-.summary-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  color: var(--color-primary);
-  background: rgba(20, 15, 80, 0.06);
-  flex-shrink: 0;
-}
-
-.summary-value {
-  display: block;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  line-height: 1.15;
-}
-
-.summary-label {
-  display: block;
-  margin-top: 3px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
 }
 
 .results-note {
@@ -451,23 +415,6 @@ onMounted(fetchPartners);
 
 .partner-link:hover { text-decoration: underline; }
 .partner-link .material-symbols-outlined { font-size: 16px; }
-
-/* Empty / Loading */
-.empty-state {
-  display: flex; flex-direction: column; align-items: center;
-  padding: var(--space-3xl); text-align: center;
-}
-.empty-icon { font-size: 48px; color: var(--color-text-light); margin-bottom: var(--space-md); }
-.empty-state h2 { color: var(--color-text-primary); margin-bottom: var(--space-sm); }
-.empty-state p { color: var(--color-text-secondary); }
-
-.loading-state { display: flex; justify-content: center; padding: var(--space-3xl); }
-.loading-spinner {
-  width: 40px; height: 40px; border: 3px solid var(--color-border);
-  border-top-color: var(--color-primary); border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 768px) {
   .industry-page { padding: var(--space-md); }

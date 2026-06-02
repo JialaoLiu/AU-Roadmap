@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import LoadingState from '@/components/common/LoadingState.vue';
+import SectionTitle from '@/components/common/SectionTitle.vue';
 import { getAdminStats } from '@/api/admin';
 import { Bar } from 'vue-chartjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip } from 'chart.js';
@@ -71,9 +73,7 @@ onMounted(fetchStats);
       </div>
     </div>
 
-    <div v-if="loading" class="loading-state">
-      <div class="loading-spinner"></div>
-    </div>
+    <LoadingState v-if="loading" />
 
     <template v-else>
       <div class="stats-grid">
@@ -96,10 +96,7 @@ onMounted(fetchStats);
 
       <!-- Platform Overview Chart -->
       <div class="chart-section">
-        <h2 class="section-title">
-          <span class="material-symbols-outlined">bar_chart</span>
-          Platform Overview
-        </h2>
+        <SectionTitle icon="bar_chart" title="Platform Overview" />
         <div class="chart-card">
           <div class="chart-wrap">
             <Bar :data="statsChartData" :options="statsChartOptions" />
@@ -108,10 +105,7 @@ onMounted(fetchStats);
       </div>
 
       <div class="quick-actions">
-        <h2 class="section-title">
-          <span class="material-symbols-outlined">bolt</span>
-          Quick Actions
-        </h2>
+        <SectionTitle icon="bolt" title="Quick Actions" />
         <div class="actions-grid">
           <button class="action-btn" @click="router.push('/admin/programs')">
             <span class="material-symbols-outlined">add_circle</span>
@@ -241,22 +235,6 @@ onMounted(fetchStats);
   height: 220px;
 }
 
-/* Quick Actions */
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  font-size: var(--font-size-md);
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-md);
-}
-
-.section-title .material-symbols-outlined {
-  font-size: 22px;
-  color: var(--color-primary);
-}
-
 .actions-grid {
   display: flex;
   gap: var(--space-md);
@@ -287,26 +265,6 @@ onMounted(fetchStats);
 
 .action-btn .material-symbols-outlined {
   font-size: 20px;
-}
-
-/* Loading */
-.loading-state {
-  display: flex;
-  justify-content: center;
-  padding: var(--space-3xl);
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--color-border);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 @media (max-width: 768px) {

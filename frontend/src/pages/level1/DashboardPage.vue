@@ -4,6 +4,10 @@ import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 import { Doughnut } from 'vue-chartjs';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import LoadingState from '@/components/common/LoadingState.vue';
+import SectionTitle from '@/components/common/SectionTitle.vue';
+import SummaryCard from '@/components/common/SummaryCard.vue';
+import SummaryGrid from '@/components/common/SummaryGrid.vue';
 import { useDashboardData } from '@/composables/useDashboardData';
 import {
   createDashboardSummary,
@@ -70,9 +74,7 @@ onMounted(fetchDashboardData);
 <template>
   <div class="dashboard">
     <!-- Loading -->
-    <div v-if="loading" class="loading-state">
-      <div class="loading-spinner"></div>
-    </div>
+    <LoadingState v-if="loading" />
 
     <template v-else>
       <section class="dashboard-hero">
@@ -96,23 +98,24 @@ onMounted(fetchDashboardData);
         </div>
 
         <div v-if="program" class="hero-summary">
-          <div class="summary-grid">
-            <div v-for="item in dashboardSummary" :key="item.label" class="summary-card">
-              <span class="material-symbols-outlined summary-icon">{{ item.icon }}</span>
-              <div>
-                <span class="summary-value">{{ item.value }}</span>
-                <span class="summary-label">{{ item.label }}</span>
-              </div>
-            </div>
-            <button class="summary-card summary-card--cta" @click="router.push('/student/roadmap')">
-              <span class="material-symbols-outlined summary-icon">route</span>
-              <div>
-                <span class="summary-value">View Roadmap</span>
-                <span class="summary-label">See your full plan</span>
-              </div>
-              <span class="material-symbols-outlined card-arrow">arrow_forward</span>
-            </button>
-          </div>
+          <SummaryGrid>
+            <SummaryCard
+              v-for="item in dashboardSummary"
+              :key="item.label"
+              :icon="item.icon"
+              :value="item.value"
+              :label="item.label"
+            />
+            <SummaryCard
+              as="button"
+              variant="cta"
+              icon="route"
+              value="View Roadmap"
+              label="See your full plan"
+              show-arrow
+              @click="router.push('/student/roadmap')"
+            />
+          </SummaryGrid>
         </div>
       </section>
 
@@ -158,10 +161,7 @@ onMounted(fetchDashboardData);
 
       <!-- Program Chart -->
       <div v-if="program && totalCourses > 0" class="program-chart-section">
-        <h2 class="section-title">
-          <span class="material-symbols-outlined">donut_large</span>
-          Program Structure
-        </h2>
+          <SectionTitle icon="donut_large" title="Program Structure" />
         <div class="program-chart-card">
           <div class="program-chart-wrap">
             <Doughnut :data="programChartData" :options="programChartOptions" />
@@ -190,10 +190,7 @@ onMounted(fetchDashboardData);
       <div class="dashboard-grid">
         <!-- Quick Links -->
         <div class="dashboard-section">
-          <h2 class="section-title">
-            <span class="material-symbols-outlined">apps</span>
-            Quick Access
-          </h2>
+          <SectionTitle icon="apps" title="Quick Access" />
           <div class="quick-links">
             <RouterLink
               v-for="link in quickLinks"
@@ -213,10 +210,7 @@ onMounted(fetchDashboardData);
 
         <!-- Key Dates -->
         <div class="dashboard-section">
-          <h2 class="section-title">
-            <span class="material-symbols-outlined">event</span>
-            Key Dates
-          </h2>
+          <SectionTitle icon="event" title="Key Dates" />
           <div class="dates-list">
             <div v-for="date in upcomingDates" :key="date.title" class="date-item">
               <div class="date-icon-wrap">
@@ -329,88 +323,6 @@ onMounted(fetchDashboardData);
 
 .hero-summary {
   min-width: 0;
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.summary-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--color-white);
-  border: 1px solid rgba(20, 15, 80, 0.08);
-  border-radius: 18px;
-  padding: 14px 16px;
-  box-shadow: 0 10px 20px rgba(20, 15, 80, 0.05);
-}
-
-.summary-card--cta {
-  cursor: pointer;
-  text-align: left;
-  font-family: inherit;
-  transition: all var(--transition-fast);
-  width: 100%;
-  background: linear-gradient(135deg, #140f50, #221b68);
-  border-color: rgba(20, 15, 80, 0.2);
-}
-
-.summary-card--cta:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 28px rgba(20, 15, 80, 0.16);
-}
-
-.summary-card--cta .summary-icon,
-.summary-card--cta .summary-value,
-.summary-card--cta .summary-label,
-.summary-card--cta .card-arrow {
-  color: var(--color-white);
-}
-
-.summary-card--cta .summary-label {
-  color: rgba(255, 255, 255, 0.74);
-}
-
-.summary-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  color: var(--color-primary);
-  background: rgba(20, 15, 80, 0.06);
-  flex-shrink: 0;
-}
-
-.summary-card--cta .summary-icon {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.summary-value {
-  display: block;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  line-height: 1.15;
-}
-
-.summary-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  margin-top: 3px;
-}
-
-.card-arrow {
-  margin-left: auto;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 18px;
 }
 
 /* Dashboard Grid */
@@ -542,21 +454,6 @@ onMounted(fetchDashboardData);
   box-shadow: 0 12px 24px rgba(20, 15, 80, 0.18);
 }
 
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  font-size: var(--font-size-md);
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-md);
-}
-
-.section-title .material-symbols-outlined {
-  font-size: 22px;
-  color: var(--color-primary);
-}
-
 /* Quick Links */
 .quick-links {
   display: flex;
@@ -660,26 +557,6 @@ onMounted(fetchDashboardData);
   padding: var(--space-md);
 }
 
-/* Loading */
-.loading-state {
-  display: flex;
-  justify-content: center;
-  padding: var(--space-3xl);
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--color-border);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 /* Program Chart */
 .program-chart-section {
   margin-bottom: var(--space-xl);
@@ -753,10 +630,6 @@ onMounted(fetchDashboardData);
 
   .hero-profile {
     align-items: flex-start;
-  }
-
-  .summary-grid {
-    grid-template-columns: 1fr;
   }
 
   .dashboard-grid {

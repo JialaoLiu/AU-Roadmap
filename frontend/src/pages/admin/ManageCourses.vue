@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import LoadingState from '@/components/common/LoadingState.vue';
 import { getProgramList } from '@/api/programs';
 import { listCourses, createCourse, updateCourse, deleteCourse } from '@/api/admin';
 
@@ -232,7 +233,7 @@ onMounted(async () => {
     </Teleport>
 
     <!-- Table -->
-    <div v-if="loading" class="loading-state"><div class="loading-spinner"></div></div>
+    <LoadingState v-if="loading" />
     <div v-else class="data-table-wrap">
       <table class="data-table">
         <thead>

@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import EmptyState from '@/components/common/EmptyState.vue';
+import LoadingState from '@/components/common/LoadingState.vue';
 import { getProgramList } from '@/api/programs';
 import { getProgramMediaStyle, hasProgramBanner } from '@/utils/programMedia';
 
@@ -115,7 +117,7 @@ onMounted(fetchPrograms);
       </div>
 
       <!-- Loading -->
-      <div v-if="loading" class="loading-state"><div class="loading-spinner"></div></div>
+      <LoadingState v-if="loading" />
 
       <!-- Program Grid -->
       <div v-else-if="filteredPrograms.length" class="programs-grid">
@@ -167,12 +169,14 @@ onMounted(fetchPrograms);
       </div>
 
       <!-- Empty -->
-      <div v-else class="empty-state">
-        <span class="material-symbols-outlined">search_off</span>
-        <h2>No Programs Found</h2>
-        <p>Try adjusting your search or filters.</p>
+      <EmptyState
+        v-else
+        icon="search_off"
+        title="No Programs Found"
+        message="Try adjusting your search or filters."
+      >
         <button class="clear-btn" @click="clearFilters">Clear All Filters</button>
-      </div>
+      </EmptyState>
     </div>
   </div>
 </template>
@@ -509,23 +513,6 @@ onMounted(fetchPrograms);
 }
 
 .program-card__cta .material-symbols-outlined { font-size: 18px; }
-
-/* Empty / Loading */
-.empty-state {
-  display: flex; flex-direction: column; align-items: center;
-  padding: var(--space-3xl); text-align: center;
-}
-.empty-state .material-symbols-outlined { font-size: 48px; color: var(--color-text-light); margin-bottom: var(--space-md); }
-.empty-state h2 { color: var(--color-text-primary); margin-bottom: var(--space-sm); }
-.empty-state p { color: var(--color-text-secondary); margin-bottom: var(--space-lg); }
-
-.loading-state { display: flex; justify-content: center; padding: var(--space-3xl); }
-.loading-spinner {
-  width: 40px; height: 40px; border: 3px solid var(--color-border);
-  border-top-color: var(--color-primary); border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 1024px) { .programs-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 1024px) {

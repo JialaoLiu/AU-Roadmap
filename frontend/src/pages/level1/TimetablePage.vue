@@ -1,4 +1,5 @@
 <script setup>
+import SummaryCard from '@/components/common/SummaryCard.vue';
 import { useTimetableWeek } from '@/composables/useTimetableWeek';
 
 const {
@@ -35,36 +36,15 @@ const {
       </div>
 
       <div class="timetable-summary">
-        <div class="summary-card">
-          <span class="material-symbols-outlined summary-icon">event_available</span>
-          <div>
-            <span class="summary-value">{{ totalSessions }}</span>
-            <span class="summary-label">Weekly Sessions</span>
-          </div>
-        </div>
-        <div class="summary-card">
-          <span class="material-symbols-outlined summary-icon">schedule</span>
-          <div>
-            <span class="summary-value">{{ totalContactHours }} hrs</span>
-            <span class="summary-label">Contact Hours</span>
-          </div>
-        </div>
-        <div class="summary-card">
-          <span class="material-symbols-outlined summary-icon">today</span>
-          <div>
-            <span class="summary-value">{{ currentFocusDay?.label || 'Week view' }}</span>
-            <span class="summary-label">Current Focus</span>
-          </div>
-        </div>
-        <div class="summary-card summary-card--cta">
-          <span class="material-symbols-outlined summary-icon">route</span>
-          <div>
-            <span class="summary-value">{{ nextSession ? nextSession.code : 'No class' }}</span>
-            <span class="summary-label">
-              {{ nextSession ? `Next: ${String(nextSession.startH).padStart(2, '0')}:00 ${nextSession.type}` : 'No session scheduled' }}
-            </span>
-          </div>
-        </div>
+        <SummaryCard icon="event_available" :value="totalSessions" label="Weekly Sessions" />
+        <SummaryCard icon="schedule" :value="`${totalContactHours} hrs`" label="Contact Hours" />
+        <SummaryCard icon="today" :value="currentFocusDay?.label || 'Week view'" label="Current Focus" />
+        <SummaryCard
+          variant="cta"
+          icon="route"
+          :value="nextSession ? nextSession.code : 'No class'"
+          :label="nextSession ? `Next: ${String(nextSession.startH).padStart(2, '0')}:00 ${nextSession.type}` : 'No session scheduled'"
+        />
       </div>
     </section>
 
@@ -254,65 +234,6 @@ h1 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
-}
-
-.summary-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--color-white);
-  border: 1px solid rgba(20, 15, 80, 0.08);
-  border-radius: 18px;
-  padding: 14px 16px;
-  box-shadow: 0 10px 20px rgba(20, 15, 80, 0.05);
-}
-
-.summary-card--cta {
-  background: linear-gradient(135deg, #140f50, #221b68);
-  border-color: rgba(20, 15, 80, 0.18);
-}
-
-.summary-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  color: var(--color-primary);
-  background: rgba(20, 15, 80, 0.06);
-  flex-shrink: 0;
-}
-
-.summary-card--cta .summary-icon {
-  color: var(--color-white);
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.summary-value {
-  display: block;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  line-height: 1.15;
-}
-
-.summary-label {
-  display: block;
-  margin-top: 3px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-}
-
-.summary-card--cta .summary-value,
-.summary-card--cta .summary-label {
-  color: var(--color-white);
-}
-
-.summary-card--cta .summary-label {
-  color: rgba(255, 255, 255, 0.74);
 }
 
 .toolbar-card {

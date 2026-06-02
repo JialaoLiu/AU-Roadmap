@@ -1,5 +1,9 @@
 <script setup>
 import { ref, onMounted, computed, watch, nextTick } from 'vue';
+import EmptyState from '@/components/common/EmptyState.vue';
+import LoadingState from '@/components/common/LoadingState.vue';
+import SummaryCard from '@/components/common/SummaryCard.vue';
+import SummaryGrid from '@/components/common/SummaryGrid.vue';
 import { getProgramList, getProgramCareers } from '@/api/programs';
 import { Bar, Doughnut } from 'vue-chartjs';
 import {
@@ -126,24 +130,27 @@ onMounted(fetchPrograms);
       </div>
     </div>
 
-    <div class="summary-grid">
-      <div class="summary-card">
-        <span class="summary-label">Selected Program</span>
-        <strong>{{ selectedProgramName || 'Loading program' }}</strong>
-      </div>
-      <div v-if="latestOutcome && latestOutcome.employment_rate" class="summary-card">
-        <span class="summary-label">Latest Employment Rate</span>
-        <strong>{{ latestOutcome.employment_rate }}%</strong>
-      </div>
-      <div v-if="latestOutcome && latestOutcome.median_salary" class="summary-card">
-        <span class="summary-label">Latest Median Salary</span>
-        <strong>{{ formatCurrency(latestOutcome.median_salary) }}</strong>
-      </div>
-      <div v-else-if="averageSalary" class="summary-card">
-        <span class="summary-label">Average Path Salary</span>
-        <strong>{{ formatCurrency(averageSalary) }}</strong>
-      </div>
-    </div>
+    <SummaryGrid class="summary-grid" variant="auto">
+      <SummaryCard variant="plain" value="Selected Program" :label="selectedProgramName || 'Loading program'" />
+      <SummaryCard
+        v-if="latestOutcome && latestOutcome.employment_rate"
+        variant="plain"
+        value="Latest Employment Rate"
+        :label="`${latestOutcome.employment_rate}%`"
+      />
+      <SummaryCard
+        v-if="latestOutcome && latestOutcome.median_salary"
+        variant="plain"
+        value="Latest Median Salary"
+        :label="formatCurrency(latestOutcome.median_salary)"
+      />
+      <SummaryCard
+        v-else-if="averageSalary"
+        variant="plain"
+        value="Average Path Salary"
+        :label="formatCurrency(averageSalary)"
+      />
+    </SummaryGrid>
 
     <div class="careers-content">
       <div class="selector-card">
@@ -160,7 +167,7 @@ onMounted(fetchPrograms);
         </div>
       </div>
 
-      <div v-if="loading" class="loading-state"><div class="loading-spinner"></div></div>
+      <LoadingState v-if="loading" />
 
       <template v-else-if="careers.outcomes?.length || careers.paths?.length">
         <div v-if="careers.outcomes?.length" class="charts-grid">
@@ -232,11 +239,12 @@ onMounted(fetchPrograms);
         </div>
       </template>
 
-      <div v-else class="empty-state">
-        <span class="material-symbols-outlined">analytics</span>
-        <h2>No Career Data Available</h2>
-        <p>Career outcome data is not yet available for this program.</p>
-      </div>
+      <EmptyState
+        v-else
+        icon="analytics"
+        title="No Career Data Available"
+        message="Career outcome data is not yet available for this program."
+      />
     </div>
   </div>
 </template>
@@ -286,33 +294,6 @@ onMounted(fetchPrograms);
 .summary-grid {
   max-width: 1100px;
   margin: 1rem auto 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--space-md);
-}
-
-.summary-card {
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(20, 15, 80, 0.08);
-  border-radius: 20px;
-  box-shadow: 0 18px 38px rgba(20, 15, 80, 0.1);
-  padding: 1.15rem 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.summary-label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #70779a;
-}
-
-.summary-card strong {
-  font-size: 1rem;
-  color: #171b33;
 }
 
 .careers-content {
@@ -454,18 +435,8 @@ td {
 tbody tr:last-child td { border-bottom: none; }
 .source-cell { font-size: var(--font-size-xs); color: var(--color-text-light); }
 
-.empty-state { display: flex; flex-direction: column; align-items: center; padding: var(--space-3xl); text-align: center; }
-.empty-state .material-symbols-outlined { font-size: 48px; color: var(--color-text-light); margin-bottom: var(--space-md); }
-.empty-state h2 { color: var(--color-text-primary); margin-bottom: var(--space-sm); }
-.empty-state p { color: var(--color-text-secondary); }
-
-.loading-state { display: flex; justify-content: center; padding: var(--space-3xl); }
-.loading-spinner { width: 40px; height: 40px; border: 3px solid var(--color-border); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
 @media (max-width: 768px) {
   .summary-grid {
-    grid-template-columns: 1fr;
     margin-inline: 1rem;
   }
 

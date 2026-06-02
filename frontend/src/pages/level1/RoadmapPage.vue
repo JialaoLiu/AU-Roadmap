@@ -2,6 +2,9 @@
 import { ref, onMounted, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { getProgramRoadmap } from '@/api/programs';
+import EmptyState from '@/components/common/EmptyState.vue';
+import LoadingState from '@/components/common/LoadingState.vue';
+import SummaryCard from '@/components/common/SummaryCard.vue';
 import RoadmapTimeline from '@/components/level1/RoadmapTimeline.vue';
 import CourseDetailModal from '@/components/level1/CourseDetailModal.vue';
 import { Doughnut } from 'vue-chartjs';
@@ -91,10 +94,7 @@ onMounted(fetchRoadmap);
 <template>
   <div class="roadmap-page">
     <!-- Loading State -->
-    <div v-if="loading" class="loading-state">
-      <div class="loading-spinner"></div>
-      <p>Loading your roadmap...</p>
-    </div>
+    <LoadingState v-if="loading" />
 
     <!-- Error State -->
     <div v-else-if="error" class="error-state">
@@ -119,27 +119,9 @@ onMounted(fetchRoadmap);
         </div>
 
         <div class="hero-summary">
-          <div class="summary-card">
-            <span class="material-symbols-outlined summary-icon">calendar_today</span>
-            <div>
-              <span class="summary-value">{{ program?.duration_years }}</span>
-              <span class="summary-label">Years</span>
-            </div>
-          </div>
-          <div class="summary-card">
-            <span class="material-symbols-outlined summary-icon">menu_book</span>
-            <div>
-              <span class="summary-value">{{ totalCourses }}</span>
-              <span class="summary-label">Courses</span>
-            </div>
-          </div>
-          <div class="summary-card">
-            <span class="material-symbols-outlined summary-icon">school</span>
-            <div>
-              <span class="summary-value">{{ totalUnits }}</span>
-              <span class="summary-label">Total Units</span>
-            </div>
-          </div>
+          <SummaryCard icon="calendar_today" :value="program?.duration_years" label="Years" />
+          <SummaryCard icon="menu_book" :value="totalCourses" label="Courses" />
+          <SummaryCard icon="school" :value="totalUnits" label="Total Units" />
         </div>
       </section>
 
@@ -224,11 +206,12 @@ onMounted(fetchRoadmap);
     </template>
 
     <!-- Empty State -->
-    <div v-else class="empty-state">
-      <span class="material-symbols-outlined empty-icon">school</span>
-      <h2>No Roadmap Data</h2>
-      <p>Course roadmap data is not yet available for your program.</p>
-    </div>
+    <EmptyState
+      v-else
+      icon="school"
+      title="No Roadmap Data"
+      message="Course roadmap data is not yet available for your program."
+    />
 
     <!-- Course Detail Modal -->
     <CourseDetailModal
@@ -311,46 +294,6 @@ onMounted(fetchRoadmap);
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
-}
-
-.summary-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--color-white);
-  border: 1px solid rgba(20, 15, 80, 0.08);
-  border-radius: 18px;
-  padding: 14px 16px;
-  box-shadow: 0 10px 20px rgba(20, 15, 80, 0.05);
-}
-
-.summary-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  color: var(--color-primary);
-  background: rgba(20, 15, 80, 0.06);
-  flex-shrink: 0;
-}
-
-.summary-value {
-  display: block;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  line-height: 1.15;
-}
-
-.summary-label {
-  display: block;
-  margin-top: 3px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
 }
 
 /* Stats Section */
@@ -508,30 +451,6 @@ onMounted(fetchRoadmap);
   font-size: 16px;
 }
 
-/* Loading */
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-3xl);
-  color: var(--color-text-light);
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--color-border);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin-bottom: var(--space-md);
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 /* Error */
 .error-state {
   display: flex;
@@ -551,31 +470,6 @@ onMounted(fetchRoadmap);
 .error-state p {
   color: var(--color-text-secondary);
   margin-bottom: var(--space-lg);
-}
-
-/* Empty */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-3xl);
-  text-align: center;
-}
-
-.empty-icon {
-  font-size: 48px;
-  color: var(--color-text-light);
-  margin-bottom: var(--space-md);
-}
-
-.empty-state h2 {
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-sm);
-}
-
-.empty-state p {
-  color: var(--color-text-secondary);
 }
 
 /* Responsive */

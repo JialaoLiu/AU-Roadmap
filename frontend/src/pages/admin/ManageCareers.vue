@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import LoadingState from '@/components/common/LoadingState.vue';
 import { getProgramList } from '@/api/programs';
 import {
   createCareerOutcome, updateCareerOutcome, deleteCareerOutcome,
@@ -200,7 +201,7 @@ onMounted(fetchData);
       </button>
     </div>
 
-    <div v-if="loading" class="loading-state"><div class="loading-spinner"></div></div>
+    <LoadingState v-if="loading" />
 
     <template v-else>
       <!-- Outcomes Tab -->

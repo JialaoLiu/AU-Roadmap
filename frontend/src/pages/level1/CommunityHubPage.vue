@@ -1,5 +1,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import EmptyState from '@/components/common/EmptyState.vue';
+import LoadingState from '@/components/common/LoadingState.vue';
+import SectionTitle from '@/components/common/SectionTitle.vue';
+import TabBar from '@/components/common/TabBar.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useCommunityStore } from '@/stores/community';
 import { useCommunityConnections } from '@/composables/useCommunityConnections';
@@ -84,6 +88,14 @@ const summaryCards = computed(() => [
 ]);
 
 const activeTabDescription = computed(() => tabDescriptions[activeTab.value] || '');
+const communityTabs = computed(() => tabs.map((tab) => ({
+  ...tab,
+  badge: tab.key === 'messages'
+    ? communityStore.unreadCount
+    : tab.key === 'network'
+      ? communityStore.pendingCount
+      : 0,
+})));
 
 // ==================== PEOPLE TAB ====================
 const {
@@ -161,20 +173,7 @@ onMounted(async () => {
     </section>
 
     <section class="hub-shell">
-      <div class="tab-bar">
-        <button
-          v-for="tab in tabs"
-          :key="tab.key"
-          class="tab-btn"
-          :class="{ 'tab-btn--active': activeTab === tab.key }"
-          @click="activeTab = tab.key"
-        >
-          <span class="material-symbols-outlined">{{ tab.icon }}</span>
-          {{ tab.label }}
-          <span v-if="tab.key === 'messages' && communityStore.unreadCount" class="tab-badge">{{ communityStore.unreadCount }}</span>
-          <span v-if="tab.key === 'network' && communityStore.pendingCount" class="tab-badge">{{ communityStore.pendingCount }}</span>
-        </button>
-      </div>
+      <TabBar v-model="activeTab" :tabs="communityTabs" />
 
       <p class="tab-description">{{ activeTabDescription }}</p>
 
@@ -248,7 +247,7 @@ onMounted(async () => {
             >{{ cat.label }}</button>
           </div>
 
-          <div v-if="threadsLoading" class="loading-state"><div class="loading-spinner"></div></div>
+          <LoadingState v-if="threadsLoading" />
 
           <!-- Posts List -->
           <div v-else-if="threads.length" class="posts-list">
@@ -296,7 +295,7 @@ onMounted(async () => {
 
               <Transition name="expand">
                 <div v-if="activeThreadId === t.id" class="thread-expanded">
-                  <div v-if="threadLoading" class="loading-state" style="padding: 16px"><div class="loading-spinner"></div></div>
+                  <LoadingState v-if="threadLoading" padding="16px" />
                   <template v-else-if="activeThreadData">
                     <div class="replies-section">
                       <div v-for="r in activeThreadData.replies" :key="r.id" class="reply-item">
@@ -327,11 +326,12 @@ onMounted(async () => {
             </div>
           </div>
 
-          <div v-else class="empty-state">
-            <span class="material-symbols-outlined empty-icon">forum</span>
-            <h2>No Discussions Yet</h2>
-            <p>Start a conversation with your community!</p>
-          </div>
+          <EmptyState
+            v-else
+            icon="forum"
+            title="No Discussions Yet"
+            message="Start a conversation with your community!"
+          />
         </div>
 
         <aside class="feed-side">
@@ -377,7 +377,7 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div v-if="alumniLoading" class="loading-state"><div class="loading-spinner"></div></div>
+      <LoadingState v-if="alumniLoading" />
 
       <div v-else-if="alumni.length" class="people-grid">
         <div v-for="(a, i) in alumni" :key="a.id" class="people-card" @click="viewProfile(a)">
@@ -415,11 +415,12 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div v-else class="empty-state">
-        <span class="material-symbols-outlined empty-icon">group</span>
-        <h2>No Alumni Found</h2>
-        <p>Try adjusting your search filters.</p>
-      </div>
+      <EmptyState
+        v-else
+        icon="group"
+        title="No Alumni Found"
+        message="Try adjusting your search filters."
+      />
 
       <!-- Alumni Detail Modal -->
       <Teleport to="body">
@@ -485,11 +486,12 @@ onMounted(async () => {
 
     <!-- ==================== MESSAGES TAB ==================== -->
     <div v-if="activeTab === 'messages'" class="tab-content">
-      <div v-if="!authStore.isAuthenticated" class="empty-state">
-        <span class="material-symbols-outlined empty-icon">lock</span>
-        <h2>Sign in Required</h2>
-        <p>You need to be logged in to view messages.</p>
-      </div>
+      <EmptyState
+        v-if="!authStore.isAuthenticated"
+        icon="lock"
+        title="Sign in Required"
+        message="You need to be logged in to view messages."
+      />
       <div v-else class="messages-layout">
         <div class="conversations-panel">
           <h3 class="panel-title">Conversations</h3>
@@ -515,10 +517,7 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-          <div v-else class="empty-state-sm">
-            <span class="material-symbols-outlined">chat</span>
-            <p>No conversations yet</p>
-          </div>
+          <EmptyState v-else variant="small" icon="chat" message="No conversations yet" />
         </div>
 
         <div class="chat-panel">
@@ -533,7 +532,7 @@ onMounted(async () => {
                 <p v-if="activeConversation.current_role" class="chat-role">{{ activeConversation.current_role }}</p>
               </div>
             </div>
-            <div v-if="chatLoading" class="loading-state"><div class="loading-spinner"></div></div>
+            <LoadingState v-if="chatLoading" />
             <div v-else class="chat-messages">
               <div
                 v-for="msg in chatMessages"
@@ -560,28 +559,23 @@ onMounted(async () => {
               </button>
             </div>
           </template>
-          <div v-else class="empty-state-sm">
-            <span class="material-symbols-outlined">chat_bubble</span>
-            <p>Select a conversation to start messaging</p>
-          </div>
+          <EmptyState v-else variant="small" icon="chat_bubble" message="Select a conversation to start messaging" />
         </div>
       </div>
     </div>
 
     <!-- ==================== NETWORK TAB ==================== -->
     <div v-if="activeTab === 'network'" class="tab-content">
-      <div v-if="!authStore.isAuthenticated" class="empty-state">
-        <span class="material-symbols-outlined empty-icon">lock</span>
-        <h2>Sign in Required</h2>
-        <p>You need to be logged in to view your network.</p>
-      </div>
+      <EmptyState
+        v-if="!authStore.isAuthenticated"
+        icon="lock"
+        title="Sign in Required"
+        message="You need to be logged in to view your network."
+      />
       <template v-else>
         <!-- Pending Requests -->
         <div v-if="communityStore.pendingRequests.length" class="network-section">
-          <h2 class="section-title">
-            <span class="material-symbols-outlined">notifications</span>
-            Pending Requests ({{ communityStore.pendingCount }})
-          </h2>
+          <SectionTitle icon="notifications" :title="`Pending Requests (${communityStore.pendingCount})`" />
           <div class="request-list">
             <div v-for="req in communityStore.pendingRequests" :key="req.connection_id" class="card request-card">
               <div class="avatar avatar--sm avatar--initials">{{ getInitials(req) }}</div>
@@ -603,10 +597,7 @@ onMounted(async () => {
 
         <!-- My Connections -->
         <div class="network-section">
-          <h2 class="section-title">
-            <span class="material-symbols-outlined">people</span>
-            My Connections ({{ communityStore.connectionCount }})
-          </h2>
+          <SectionTitle icon="people" :title="`My Connections (${communityStore.connectionCount})`" />
           <div v-if="communityStore.connections.length" class="connections-grid">
             <div v-for="(conn, i) in communityStore.connections" :key="conn.connection_id" class="card connection-card">
               <div class="conn-body">
@@ -618,11 +609,12 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-          <div v-else class="empty-state">
-            <span class="material-symbols-outlined empty-icon">hub</span>
-            <h2>No Connections Yet</h2>
-            <p>Visit the People tab to find alumni and build your network!</p>
-          </div>
+          <EmptyState
+            v-else
+            icon="hub"
+            title="No Connections Yet"
+            message="Visit the People tab to find alumni and build your network!"
+          />
         </div>
       </template>
     </div>
@@ -762,46 +754,6 @@ onMounted(async () => {
   padding: 22px;
 }
 
-/* ── Tab Bar ── */
-.tab-bar {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 6px;
-  border-radius: 18px;
-  background: #f2f4fa;
-}
-.tab-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: transparent;
-  border: none;
-  border-radius: 14px;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  font-family: inherit;
-  transition: all var(--transition-fast);
-}
-.tab-btn:hover {
-  background: rgba(20, 15, 80, 0.06);
-  color: var(--color-primary);
-}
-.tab-btn--active {
-  background: var(--color-white);
-  color: var(--color-primary);
-  box-shadow: 0 8px 16px rgba(20, 15, 80, 0.08);
-}
-.tab-btn .material-symbols-outlined { font-size: 19px; }
-.tab-badge {
-  background: var(--color-secondary); color: white;
-  font-size: 10px; font-weight: 700;
-  border-radius: 999px; padding: 1px 6px; min-width: 18px; text-align: center;
-}
-
 .tab-description {
   margin: 14px 0 22px;
   font-size: 14px;
@@ -915,34 +867,6 @@ onMounted(async () => {
 .role--admin { background: rgba(198, 40, 40, 0.08); color: #c62828; }
 .role--alumni { background: rgba(46, 125, 50, 0.08); color: #2e7d32; }
 .role--prospective { background: rgba(245, 124, 0, 0.08); color: #f57c00; }
-
-/* ── Shared: Section Title ── */
-.section-title {
-  display: flex; align-items: center; gap: var(--space-sm);
-  font-size: var(--font-size-md); font-weight: 600;
-  color: var(--color-text-primary); margin-bottom: var(--space-lg);
-}
-.section-title .material-symbols-outlined { font-size: 22px; color: var(--color-primary); }
-
-/* ── Shared: States ── */
-.empty-state { display: flex; flex-direction: column; align-items: center; padding: var(--space-3xl); text-align: center; }
-.empty-icon { font-size: 48px; color: var(--color-text-light); margin-bottom: var(--space-md); }
-.empty-state h2 { color: var(--color-text-primary); margin-bottom: var(--space-sm); }
-.empty-state p { color: var(--color-text-secondary); }
-
-.empty-state-sm {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: var(--space-xl); text-align: center; color: var(--color-text-light); height: 100%;
-}
-.empty-state-sm .material-symbols-outlined { font-size: 36px; margin-bottom: var(--space-sm); }
-
-.loading-state { display: flex; justify-content: center; padding: var(--space-3xl); }
-.loading-spinner {
-  width: 40px; height: 40px; border: 3px solid var(--color-border);
-  border-top-color: var(--color-primary); border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── Cover Color Classes (navy palette) ── */
 .cov-0 { background: linear-gradient(135deg, rgb(20,15,80), #2a2270); }
@@ -1480,7 +1404,6 @@ onMounted(async () => {
   .compose-footer { padding-left: 12px; }
   .compose-form-footer { flex-direction: column; align-items: stretch; }
   .compose-tools { width: 100%; }
-  .tab-bar { overflow-x: auto; }
   .people-grid { grid-template-columns: repeat(2, 1fr); }
   .connections-grid { grid-template-columns: 1fr 1fr; }
   .messages-layout { grid-template-columns: 1fr; }
