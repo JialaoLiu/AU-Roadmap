@@ -1,194 +1,68 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { onMounted, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
-import { getProgramDetail, getProgramRoadmap } from '@/api/programs';
 import { Doughnut } from 'vue-chartjs';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { useDashboardData } from '@/composables/useDashboardData';
+import {
+  createDashboardSummary,
+  createProgramChartData,
+  createRoadmapSnapshot,
+  dashboardKeyDates,
+  dashboardQuickLinks,
+  formatDashboardDate,
+  getCategoryIcon,
+  getCurrentSemesterLabel,
+  getFocusSemester,
+  getFocusSemesterLabel,
+  getRoadmapStats,
+  getRoadmapYears,
+  getStudentInitials,
+  getUpcomingDates,
+  programChartOptions,
+} from '@/utils/dashboardDisplay';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const authStore = useAuthStore();
 const router = useRouter();
-const loading = ref(true);
-const program = ref(null);
-const roadmapSummary = ref(null);
+const {
+  loading,
+  program,
+  roadmapSummary,
+  fetchDashboardData,
+} = useDashboardData(authStore);
 
-// Key dates (would come from API in production)
-const keyDates = ref([
-  { title: 'Semester 1 Begins', date: '2026-03-03', category: 'semester' },
-  { title: 'Mid-Semester Break', date: '2026-04-14', category: 'semester' },
-  { title: 'Semester 1 Examinations', date: '2026-06-16', category: 'examination' },
-  { title: 'Semester 2 Begins', date: '2026-07-21', category: 'semester' },
-]);
-
-const upcomingDates = computed(() => {
-  const now = new Date();
-  return keyDates.value
-    .filter(d => new Date(d.date) >= now)
-    .slice(0, 4);
-});
-
+const quickLinks = dashboardQuickLinks;
+const upcomingDates = computed(() => getUpcomingDates(dashboardKeyDates));
 const nextMilestone = computed(() => upcomingDates.value[0] || null);
-
-function formatDate(dateStr) {
-  return new Date(dateStr).toLocaleDateString('en-AU', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
-
-function getCategoryIcon(category) {
-  const icons = {
-    semester: 'event',
-    examination: 'quiz',
-    application: 'edit_note',
-    orientation: 'groups',
-    graduation: 'school',
-  };
-  return icons[category] || 'event';
-}
-
-const quickLinks = [
-  { label: 'Study Roadmap', icon: 'route', to: '/student/roadmap', desc: 'View your course progression' },
-  { label: 'Industry Connections', icon: 'business', to: '/student/industry', desc: 'Explore partner companies' },
-  { label: 'Alumni Network', icon: 'group', to: '/student/alumni', desc: 'Connect with graduates' },
-  { label: 'Student Resources', icon: 'menu_book', to: '/student/resources', desc: 'Academic support & tools' },
-];
-
-const dashboardSummary = computed(() => [
-  {
-    label: 'Program Duration',
-    value: `${program.value?.duration_years ?? 0} years`,
-    icon: 'calendar_today',
-  },
-  {
-    label: 'Total Courses',
-    value: totalCourses.value,
-    icon: 'menu_book',
-  },
-  {
-    label: 'Total Units',
-    value: totalUnits.value,
-    icon: 'school',
-  },
-]);
-
-const roadmapYears = computed(() => roadmapSummary.value?.roadmap || []);
-
-const currentSemesterLabel = computed(() => {
-  const month = new Date().getMonth();
-  return month >= 6 ? 'Semester 2' : 'Semester 1';
-});
-
-const roadmapSpan = computed(() => {
-  if (!roadmapYears.value.length) return 'Roadmap unavailable';
-  return `Year 1 - Year ${roadmapYears.value.length}`;
-});
-
-const focusSemester = computed(() => {
-  if (!roadmapYears.value.length) return null;
-
-  const currentSemesterNumber = currentSemesterLabel.value === 'Semester 2' ? 2 : 1;
-  const firstYear = roadmapYears.value[0];
-
-  return (
-    firstYear?.semesters?.find((semester) => semester.semester_number === currentSemesterNumber) ||
-    firstYear?.semesters?.[0] ||
-    null
-  );
-});
-
-const focusSemesterLabel = computed(() => {
-  if (!focusSemester.value) return currentSemesterLabel.value;
-  return `Year 1 · Semester ${focusSemester.value.semester_number}`;
-});
-
-const roadmapSnapshot = computed(() => {
-  if (!program.value || !roadmapYears.value.length) return null;
-
-  return {
-    stageTitle: focusSemesterLabel.value,
-    stageDetail: focusSemester.value
-      ? `${focusSemester.value.courses.length} courses mapped in this study stage`
-      : 'Roadmap structure is ready to explore',
-    nextMilestone: nextMilestone.value
-      ? `${nextMilestone.value.title} · ${formatDate(nextMilestone.value.date)}`
-      : 'No upcoming milestone yet',
-    roadmapSpan: roadmapSpan.value,
-    progressNote: `${coreCourses.value} core and ${electiveCourses.value} elective courses across your program`,
-  };
-});
+const roadmapYears = computed(() => getRoadmapYears(roadmapSummary.value));
+const roadmapStats = computed(() => getRoadmapStats(roadmapSummary.value));
+const totalCourses = computed(() => roadmapStats.value.totalCourses);
+const totalUnits = computed(() => roadmapStats.value.totalUnits);
+const coreCourses = computed(() => roadmapStats.value.coreCourses);
+const electiveCourses = computed(() => totalCourses.value - coreCourses.value);
+const dashboardSummary = computed(() => createDashboardSummary(program.value, roadmapStats.value));
+const currentSemesterLabel = computed(() => getCurrentSemesterLabel());
+const focusSemester = computed(() => getFocusSemester(roadmapYears.value, currentSemesterLabel.value));
+const focusSemesterLabel = computed(() => getFocusSemesterLabel(focusSemester.value, currentSemesterLabel.value));
+const roadmapSnapshot = computed(() => createRoadmapSnapshot({
+  program: program.value,
+  roadmapYears: roadmapYears.value,
+  focusSemester: focusSemester.value,
+  focusSemesterLabel: focusSemesterLabel.value,
+  nextMilestone: nextMilestone.value,
+  stats: roadmapStats.value,
+}));
+const programChartData = computed(() => createProgramChartData(coreCourses.value, electiveCourses.value));
 
 function getInitials() {
-  const f = authStore.user?.first_name?.[0] || '';
-  const l = authStore.user?.last_name?.[0] || '';
-  return (f + l).toUpperCase();
+  return getStudentInitials(authStore.user);
 }
 
-async function fetchDashboardData() {
-  const programId = authStore.user?.program_id;
-  if (!programId) {
-    loading.value = false;
-    return;
-  }
-
-  try {
-    const [programRes, roadmapRes] = await Promise.all([
-      getProgramDetail(programId),
-      getProgramRoadmap(programId),
-    ]);
-    program.value = programRes.data.data;
-    roadmapSummary.value = roadmapRes.data.data;
-  } catch (err) {
-    console.error('Dashboard fetch error:', err);
-  } finally {
-    loading.value = false;
-  }
+function formatDate(dateStr) {
+  return formatDashboardDate(dateStr);
 }
-
-const totalCourses = computed(() => {
-  if (!roadmapSummary.value) return 0;
-  let count = 0;
-  roadmapSummary.value.roadmap.forEach(y => y.semesters.forEach(s => count += s.courses.length));
-  return count;
-});
-
-const totalUnits = computed(() => {
-  if (!roadmapSummary.value) return 0;
-  let units = 0;
-  roadmapSummary.value.roadmap.forEach(y => y.semesters.forEach(s => s.courses.forEach(c => units += c.units || 0)));
-  return units;
-});
-
-const coreCourses = computed(() => {
-  if (!roadmapSummary.value) return 0;
-  let count = 0;
-  roadmapSummary.value.roadmap.forEach(y => y.semesters.forEach(s => s.courses.forEach(c => { if (c.is_core) count++; })));
-  return count;
-});
-
-const electiveCourses = computed(() => totalCourses.value - coreCourses.value);
-
-const programChartData = computed(() => ({
-  labels: ['Core', 'Elective'],
-  datasets: [{
-    data: [coreCourses.value, electiveCourses.value],
-    backgroundColor: ['#140f50', '#e65100'],
-    borderWidth: 0,
-    hoverOffset: 4,
-  }],
-}));
-
-const programChartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
-    tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}` } },
-  },
-  cutout: '60%',
-};
 
 onMounted(fetchDashboardData);
 </script>
