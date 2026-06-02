@@ -1,4 +1,7 @@
 <script setup>
+import SummaryCard from '@/components/common/SummaryCard.vue';
+import SummaryGrid from '@/components/common/SummaryGrid.vue';
+
 const highlights = [
   {
     title: 'North Terrace Campus',
@@ -63,15 +66,15 @@ function getCategoryColor(cat) {
       </div>
     </div>
 
-    <div class="summary-grid">
-      <div v-for="s in stats" :key="s.label" class="summary-card">
-        <span class="material-symbols-outlined">{{ s.icon }}</span>
-        <div class="summary-copy">
-          <span class="summary-value">{{ s.value }}</span>
-          <span class="summary-label">{{ s.label }}</span>
-        </div>
-      </div>
-    </div>
+    <SummaryGrid class="summary-grid" variant="auto">
+      <SummaryCard
+        v-for="s in stats"
+        :key="s.label"
+        :icon="s.icon"
+        :value="s.value"
+        :label="s.label"
+      />
+    </SummaryGrid>
 
     <div class="campus-content">
       <section class="section-shell">
@@ -150,48 +153,6 @@ function getCategoryColor(cat) {
 .summary-grid {
   max-width: 1100px;
   margin: 1rem auto 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-md);
-}
-
-.summary-card {
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(20, 15, 80, 0.08);
-  border-radius: 20px;
-  box-shadow: 0 18px 38px rgba(20, 15, 80, 0.1);
-  padding: 1.15rem 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
-}
-
-.summary-card .material-symbols-outlined {
-  font-size: 1.8rem;
-  color: var(--color-primary);
-  background: rgba(20, 15, 80, 0.07);
-  border-radius: 16px;
-  padding: 0.7rem;
-}
-
-.summary-copy {
-  display: flex;
-  flex-direction: column;
-}
-
-.summary-value {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #171b33;
-  line-height: 1.1;
-}
-
-.summary-label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #70779a;
 }
 
 .campus-content {

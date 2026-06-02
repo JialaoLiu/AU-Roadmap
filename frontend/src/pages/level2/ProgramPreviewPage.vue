@@ -1,6 +1,12 @@
 <script setup>
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import ContentCard from '@/components/common/ContentCard.vue';
+import EmptyState from '@/components/common/EmptyState.vue';
+import LoadingState from '@/components/common/LoadingState.vue';
+import SummaryCard from '@/components/common/SummaryCard.vue';
+import SummaryGrid from '@/components/common/SummaryGrid.vue';
+import TabBar from '@/components/common/TabBar.vue';
 import { useProgramPreviewData } from '@/composables/useProgramPreviewData';
 import {
   formatCurrency,
@@ -33,6 +39,12 @@ const latestOutcome = computed(() => getLatestOutcome(careers.value));
 const courseYears = computed(() => getCourseYears(courses.value));
 const coursesByYear = computed(() => groupCoursesByYear(courses.value));
 const heroStyle = computed(() => getProgramPreviewHeroStyle(program.value));
+const previewTabs = computed(() => [
+  { key: 'overview', label: 'Overview' },
+  { key: 'courses', label: `Courses (${courses.value.length})` },
+  { key: 'careers', label: 'Careers' },
+  { key: 'alumni', label: `Alumni (${alumni.value.length})` },
+]);
 
 async function openOverview() {
   activeTab.value = 'overview';
@@ -45,7 +57,7 @@ onMounted(fetchProgramPreviewData);
 
 <template>
   <div class="preview-page">
-    <div v-if="loading" class="loading-state"><div class="loading-spinner"></div></div>
+    <LoadingState v-if="loading" />
 
     <template v-else-if="program">
       <div class="preview-shell">
@@ -118,60 +130,35 @@ onMounted(fetchProgramPreviewData);
           </div>
         </div>
 
-        <div class="summary-grid">
-          <div class="summary-card">
-            <span class="summary-label">Faculty</span>
-            <strong>{{ program.faculty }}</strong>
-          </div>
-          <div class="summary-card">
-            <span class="summary-label">Duration</span>
-            <strong>{{ program.duration_years }} years</strong>
-          </div>
-          <div v-if="program.atar_requirement" class="summary-card">
-            <span class="summary-label">ATAR</span>
-            <strong>{{ program.atar_requirement }}</strong>
-          </div>
-          <div v-if="program.fees_domestic" class="summary-card">
-            <span class="summary-label">Domestic Fees</span>
-            <strong>{{ formatCurrency(program.fees_domestic) }}/yr</strong>
-          </div>
-          <div v-if="program.fees_international" class="summary-card">
-            <span class="summary-label">International Fees</span>
-            <strong>{{ formatCurrency(program.fees_international) }}/yr</strong>
-          </div>
-          <div v-if="latestOutcome && latestOutcome.median_salary" class="summary-card">
-            <span class="summary-label">Median Salary</span>
-            <strong>{{ formatCurrency(latestOutcome.median_salary) }}</strong>
-          </div>
-        </div>
+        <SummaryGrid class="summary-grid" variant="auto">
+          <SummaryCard variant="plain" value="Faculty" :label="program.faculty" />
+          <SummaryCard variant="plain" value="Duration" :label="`${program.duration_years} years`" />
+          <SummaryCard v-if="program.atar_requirement" variant="plain" value="ATAR" :label="program.atar_requirement" />
+          <SummaryCard v-if="program.fees_domestic" variant="plain" value="Domestic Fees" :label="`${formatCurrency(program.fees_domestic)}/yr`" />
+          <SummaryCard v-if="program.fees_international" variant="plain" value="International Fees" :label="`${formatCurrency(program.fees_international)}/yr`" />
+          <SummaryCard v-if="latestOutcome && latestOutcome.median_salary" variant="plain" value="Median Salary" :label="formatCurrency(latestOutcome.median_salary)" />
+        </SummaryGrid>
 
-        <div class="tabs-container">
-          <div class="tabs">
-            <button :class="{ active: activeTab === 'overview' }" @click="activeTab = 'overview'">Overview</button>
-            <button :class="{ active: activeTab === 'courses' }" @click="activeTab = 'courses'">Courses ({{ courses.length }})</button>
-            <button :class="{ active: activeTab === 'careers' }" @click="activeTab = 'careers'">Careers</button>
-            <button :class="{ active: activeTab === 'alumni' }" @click="activeTab = 'alumni'">Alumni ({{ alumni.length }})</button>
-          </div>
-        </div>
+        <TabBar v-model="activeTab" :tabs="previewTabs" variant="sticky" />
 
         <div ref="overviewSection" class="tab-content">
           <div v-if="activeTab === 'overview'" class="overview-tab">
             <div class="overview-grid">
               <div class="overview-main">
-                <section v-if="program.description" class="content-card section">
+                <ContentCard v-if="program.description" as="section" class="section">
                   <span class="section-eyebrow">Overview</span>
                   <h2>About This Program</h2>
                   <p>{{ program.description }}</p>
-                </section>
-                <section v-if="program.entry_requirements" class="content-card section">
+                </ContentCard>
+                <ContentCard v-if="program.entry_requirements" as="section" class="section">
                   <span class="section-eyebrow">Admission</span>
                   <h2>Entry Requirements</h2>
                   <p>{{ program.entry_requirements }}</p>
-                </section>
+                </ContentCard>
               </div>
 
               <aside class="overview-sidebar">
-                <div class="content-card info-card">
+                <ContentCard class="info-card">
                   <span class="section-eyebrow">Program Details</span>
                   <h3>Key Information</h3>
                   <div class="info-row"><span>Faculty</span><strong>{{ program.faculty }}</strong></div>
@@ -179,9 +166,9 @@ onMounted(fetchProgramPreviewData);
                   <div v-if="program.atar_requirement" class="info-row"><span>ATAR</span><strong>{{ program.atar_requirement }}</strong></div>
                   <div v-if="program.fees_domestic" class="info-row"><span>Domestic Fees</span><strong>{{ formatCurrency(program.fees_domestic) }}/yr</strong></div>
                   <div v-if="program.fees_international" class="info-row"><span>International Fees</span><strong>{{ formatCurrency(program.fees_international) }}/yr</strong></div>
-                </div>
+                </ContentCard>
 
-                <div v-if="latestOutcome" class="content-card info-card info-card--highlight">
+                <ContentCard v-if="latestOutcome" class="info-card info-card--highlight" variant="highlight">
                   <span class="section-eyebrow">Graduate Outcomes</span>
                   <h3>{{ latestOutcome.year }} Snapshot</h3>
                   <div v-if="latestOutcome.employment_rate" class="outcome-stat">
@@ -192,9 +179,9 @@ onMounted(fetchProgramPreviewData);
                     <span class="outcome-value">{{ formatCurrency(latestOutcome.median_salary) }}</span>
                     <span class="outcome-label">Median Salary</span>
                   </div>
-                </div>
+                </ContentCard>
 
-                <div class="content-card action-card">
+                <ContentCard class="action-card">
                   <span class="section-eyebrow">Next Step</span>
                   <h3>Ready to apply?</h3>
                   <p>Review the application guide and prepare your submission requirements.</p>
@@ -202,13 +189,13 @@ onMounted(fetchProgramPreviewData);
                     <span class="material-symbols-outlined">edit_note</span>
                     How to Apply
                   </button>
-                </div>
+                </ContentCard>
               </aside>
             </div>
           </div>
 
           <div v-if="activeTab === 'courses'" class="courses-tab">
-            <div class="content-card">
+            <ContentCard>
               <div class="tab-section-header">
                 <div>
                   <span class="section-eyebrow">Course Structure</span>
@@ -244,11 +231,11 @@ onMounted(fetchProgramPreviewData);
                   </div>
                 </div>
               </div>
-            </div>
+            </ContentCard>
           </div>
 
           <div v-if="activeTab === 'careers'" class="careers-tab">
-            <div v-if="careers.paths?.length" class="content-card section">
+            <ContentCard v-if="careers.paths?.length" class="section">
               <span class="section-eyebrow">Career Direction</span>
               <h2>Career Paths</h2>
               <div class="paths-grid">
@@ -264,9 +251,9 @@ onMounted(fetchProgramPreviewData);
                   </div>
                 </div>
               </div>
-            </div>
+            </ContentCard>
 
-            <div v-if="careers.outcomes?.length" class="content-card section">
+            <ContentCard v-if="careers.outcomes?.length" class="section">
               <span class="section-eyebrow">Outcomes</span>
               <h2>Graduate Outcomes</h2>
               <div class="outcomes-table-wrap">
@@ -291,16 +278,18 @@ onMounted(fetchProgramPreviewData);
                   </tbody>
                 </table>
               </div>
-            </div>
+            </ContentCard>
 
-            <div v-if="!careers.paths?.length && !careers.outcomes?.length" class="content-card empty-msg">
-              <span class="material-symbols-outlined">info</span>
-              Career data is not yet available for this program.
-            </div>
+            <EmptyState
+              v-if="!careers.paths?.length && !careers.outcomes?.length"
+              icon="info"
+              title="Career data unavailable"
+              message="Career data is not yet available for this program."
+            />
           </div>
 
           <div v-if="activeTab === 'alumni'" class="alumni-tab">
-            <div v-if="alumni.length" class="content-card">
+            <ContentCard v-if="alumni.length">
               <div class="tab-section-header">
                 <div>
                   <span class="section-eyebrow">Graduate Network</span>
@@ -317,11 +306,13 @@ onMounted(fetchProgramPreviewData);
                   <p v-if="a.bio" class="alumni-bio">{{ a.bio }}</p>
                 </div>
               </div>
-            </div>
-            <div v-else class="content-card empty-msg">
-              <span class="material-symbols-outlined">info</span>
-              No alumni profiles available for this program yet.
-            </div>
+            </ContentCard>
+            <EmptyState
+              v-else
+              icon="info"
+              title="No alumni profiles"
+              message="No alumni profiles available for this program yet."
+            />
           </div>
         </div>
       </div>
@@ -553,78 +544,8 @@ onMounted(fetchProgramPreviewData);
   width: calc(100% - 2rem);
   max-width: 1200px;
   margin: -5rem auto 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: var(--space-md);
   position: relative;
   z-index: 2;
-}
-
-.summary-card {
-  background: var(--color-white);
-  border: 1px solid rgba(20, 15, 80, 0.08);
-  border-radius: 20px;
-  box-shadow: 0 18px 38px rgba(20, 15, 80, 0.1);
-  padding: 1.15rem 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.summary-label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #70779a;
-}
-
-.summary-card strong {
-  color: #171b33;
-  font-size: 1rem;
-}
-
-.tabs-container {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  padding: 1.25rem 1rem 0;
-  display: flex;
-  justify-content: center;
-}
-
-.tabs {
-  display: flex;
-  gap: 0.45rem;
-  width: fit-content;
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 0.45rem;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(20, 15, 80, 0.08);
-  border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(20, 15, 80, 0.08);
-  backdrop-filter: blur(10px);
-}
-
-.tabs button {
-  padding: 0.85rem 1.15rem;
-  border: none;
-  background: none;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  font-family: inherit;
-  color: #666d90;
-  cursor: pointer;
-  border-radius: 14px;
-  transition: all var(--transition-fast);
-}
-
-.tabs button:hover { color: var(--color-text-primary); }
-
-.tabs button.active {
-  color: var(--color-primary);
-  background: rgba(20, 15, 80, 0.08);
 }
 
 .tab-content {
@@ -646,14 +567,6 @@ onMounted(fetchProgramPreviewData);
 .alumni-tab {
   display: grid;
   gap: var(--space-lg);
-}
-
-.content-card {
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(20, 15, 80, 0.08);
-  border-radius: 24px;
-  box-shadow: 0 16px 36px rgba(20, 15, 80, 0.08);
-  padding: 1.5rem;
 }
 
 .section { margin-bottom: var(--space-2xl); }
@@ -900,19 +813,6 @@ onMounted(fetchProgramPreviewData);
 .alumni-year { font-size: 11px; color: var(--color-text-light); }
 .alumni-bio { font-size: var(--font-size-xs); color: var(--color-text-secondary); margin-top: var(--space-sm); line-height: 1.5; }
 
-.empty-msg {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  color: var(--color-text-light);
-  font-size: var(--font-size-sm);
-}
-.empty-msg .material-symbols-outlined { font-size: 20px; }
-
-.loading-state { display: flex; justify-content: center; padding: var(--space-3xl); }
-.loading-spinner { width: 40px; height: 40px; border: 3px solid var(--color-border); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
 @media (max-width: 960px) {
   .hero-grid,
   .overview-grid {
@@ -936,16 +836,6 @@ onMounted(fetchProgramPreviewData);
 
   .summary-grid {
     width: calc(100% - 1.5rem);
-  }
-
-  .tabs-container {
-    padding-inline: 0.75rem;
-    overflow-x: auto;
-  }
-
-  .tabs {
-    display: inline-flex;
-    min-width: max-content;
   }
 
   .course-grid,

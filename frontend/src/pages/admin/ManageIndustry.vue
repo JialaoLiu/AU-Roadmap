@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import LoadingState from '@/components/common/LoadingState.vue';
 import { listIndustryPartners, createIndustryPartner, updateIndustryPartner, deleteIndustryPartner } from '@/api/admin';
 
 const loading = ref(true);
@@ -149,7 +150,7 @@ onMounted(fetchPartners);
     </Teleport>
 
     <!-- Table -->
-    <div v-if="loading" class="loading-state"><div class="loading-spinner"></div></div>
+    <LoadingState v-if="loading" />
     <div v-else class="data-table-wrap">
       <table class="data-table">
         <thead>

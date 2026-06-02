@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
+import SectionTitle from '@/components/common/SectionTitle.vue';
 import { useAuthStore } from '@/stores/auth';
 import { uploadAvatar } from '@/api/auth';
 import { useToast } from 'vue-toastification';
@@ -115,7 +116,7 @@ async function handleAvatarUpload() {
 
       <div class="details-column">
         <div class="info-card">
-          <h2 class="section-title">University Account</h2>
+          <SectionTitle title="University Account" />
           <div class="details-grid">
             <div v-for="item in profileDetails" :key="item.label" class="detail-card">
               <div class="detail-icon">
@@ -130,7 +131,7 @@ async function handleAvatarUpload() {
         </div>
 
         <div class="info-card info-card--muted">
-          <h2 class="section-title">About This Profile</h2>
+          <SectionTitle title="About This Profile" />
           <div class="info-list">
             <p>If any of this information is incorrect, please contact your administrator or student services.</p>
           </div>
@@ -272,13 +273,6 @@ async function handleAvatarUpload() {
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
-}
-
-.section-title {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-lg);
 }
 
 .details-grid {

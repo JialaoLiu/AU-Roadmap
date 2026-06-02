@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import LoadingState from '@/components/common/LoadingState.vue';
 import { getUsers, changeUserRole, deleteUser } from '@/api/admin';
 import { useAuthStore } from '@/stores/auth';
 
@@ -94,7 +95,7 @@ onMounted(fetchUsers);
     </div>
 
     <!-- Table -->
-    <div v-if="loading" class="loading-state"><div class="loading-spinner"></div></div>
+    <LoadingState v-if="loading" />
     <div v-else class="data-table-wrap">
       <table class="data-table">
         <thead>
