@@ -1,120 +1,20 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { ADELAIDE_TIME_ZONE, formatDateKey, getDisplayDate, getWeekStart } from '@/utils/date';
+import { useTimetableWeek } from '@/composables/useTimetableWeek';
 
-// Week navigation
-const weekOffset = ref(0);
-
-const today = getDisplayDate();
-const todayStr = formatDateKey(today);
-
-const weekStart = computed(() => getWeekStart(weekOffset.value, today));
-
-const weekDays = computed(() => {
-  return Array.from({ length: 5 }, (_, i) => {
-    const d = new Date(weekStart.value);
-    d.setDate(d.getDate() + i);
-    const dateStr = formatDateKey(d);
-    return {
-      label: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'][i],
-      date: d,
-      dateStr,
-      dayNum: d.getDate(),
-      isToday: dateStr === todayStr,
-    };
-  });
-});
-
-const weekLabel = computed(() => {
-  const start = weekStart.value;
-  const end = new Date(start);
-  end.setDate(end.getDate() + 4);
-  const fmt = (d) =>
-    d.toLocaleDateString('en-AU', {
-      day: 'numeric',
-      month: 'short',
-      timeZone: ADELAIDE_TIME_ZONE,
-    });
-  return `${fmt(start)} – ${fmt(end)}, ${start.getFullYear()}`;
-});
-
-const totalSessions = computed(() => courses.length);
-
-const totalContactHours = computed(() =>
-  courses.reduce((sum, course) => sum + (course.endH - course.startH), 0)
-);
-
-const currentFocusDay = computed(() => weekDays.value.find((day) => day.isToday) || weekDays.value[0]);
-
-const nextSession = computed(() => {
-  const focusDayIndex = weekDays.value.findIndex((day) => day.isToday);
-  if (focusDayIndex !== -1) {
-    const todayCourses = dayCoursesForDay(focusDayIndex).sort((a, b) => a.startH - b.startH);
-    if (todayCourses.length) return todayCourses[0];
-  }
-
-  const nextCourse = [...courses].sort((a, b) => (a.day - b.day) || (a.startH - b.startH))[0];
-  return nextCourse || null;
-});
-
-// Time slots: 8:00 to 21:00, each row = 1 hour
-const TIME_START = 8;
-const TIME_END = 21;
-const timeSlots = Array.from({ length: TIME_END - TIME_START }, (_, i) => {
-  const h = TIME_START + i;
-  return `${h.toString().padStart(2, '0')}:00`;
-});
-
-// Mock courses (day: 0=Mon, startH, endH)
-const courses = [
-  {
-    id: 1,
-    code: 'INFO6003',
-    name: 'Security Architecture and Engineering',
-    room: 'TBA',
-    type: 'Lecture',
-    color: '#140f50',
-    day: 0, startH: 18, endH: 20,
-  },
-  {
-    id: 2,
-    code: 'COMP6025',
-    name: 'Stakeholders Engagement',
-    room: 'TBA',
-    type: 'Lecture',
-    color: '#2b6cb0',
-    day: 1, startH: 11, endH: 14,
-  },
-  {
-    id: 3,
-    code: 'COMP5800',
-    name: 'Industry Research Project',
-    room: 'TBA',
-    type: 'Workshop',
-    color: '#0f766e',
-    day: 2, startH: 12, endH: 16,
-  },
-];
-
-// Map a course to grid position (top%, height%)
-const GRID_HOURS = TIME_END - TIME_START;
-
-function courseStyle(course) {
-  const top = ((course.startH - TIME_START) / GRID_HOURS) * 100;
-  const height = ((course.endH - course.startH) / GRID_HOURS) * 100;
-  return {
-    top: `${top}%`,
-    height: `calc(${height}% - 4px)`,
-    background: course.color,
-  };
-}
-
-// Get courses for a given day index
-function dayCoursesForDay(dayIndex) {
-  return courses.filter((c) => c.day === dayIndex);
-}
-
-const selectedCourse = ref(null);
+const {
+  weekOffset,
+  selectedCourse,
+  courses,
+  timeSlots,
+  weekDays,
+  weekLabel,
+  totalSessions,
+  totalContactHours,
+  currentFocusDay,
+  nextSession,
+  courseStyle,
+  dayCoursesForDay,
+} = useTimetableWeek();
 </script>
 
 <template>

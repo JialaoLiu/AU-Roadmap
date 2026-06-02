@@ -2,12 +2,10 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useCommunityStore } from '@/stores/community';
-import {
-  getAlumniProfiles, getAlumniProfile,
-  sendConnectionRequest, respondToConnection,
-  getMessages, sendMessage,
-} from '@/api/community';
+import { useCommunityConnections } from '@/composables/useCommunityConnections';
 import { useCommunityFeed } from '@/composables/useCommunityFeed';
+import { useCommunityMessages } from '@/composables/useCommunityMessages';
+import { useCommunityPeople } from '@/composables/useCommunityPeople';
 import {
   canDeleteCommunityItem,
   coverColorClass,
@@ -88,91 +86,33 @@ const summaryCards = computed(() => [
 const activeTabDescription = computed(() => tabDescriptions[activeTab.value] || '');
 
 // ==================== PEOPLE TAB ====================
-const alumni = ref([]);
-const alumniLoading = ref(false);
-const searchQuery = ref('');
-const selectedAlumni = ref(null);
-
-async function fetchAlumni() {
-  alumniLoading.value = true;
-  try {
-    const params = {};
-    if (searchQuery.value) params.search = searchQuery.value;
-    const res = await getAlumniProfiles(params);
-    alumni.value = res.data.data;
-  } catch (err) {
-    console.error(err);
-  } finally {
-    alumniLoading.value = false;
-  }
-}
-
-async function viewProfile(a) {
-  try {
-    const res = await getAlumniProfile(a.id);
-    selectedAlumni.value = res.data.data;
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-async function handleConnect(alumniUser) {
-  try {
-    await sendConnectionRequest(alumniUser.id);
-    alumniUser.connection_status = 'pending';
-  } catch (err) {
-    console.error(err);
-  }
-}
+const {
+  alumni,
+  alumniLoading,
+  searchQuery,
+  selectedAlumni,
+  fetchAlumni,
+  viewProfile,
+  handleConnect,
+  closeProfile,
+} = useCommunityPeople();
 
 // ==================== MESSAGES TAB ====================
-const activeConversation = ref(null);
-const chatMessages = ref([]);
-const chatLoading = ref(false);
-const newMessage = ref('');
-const sendingMessage = ref(false);
-
-async function openConversation(conv) {
-  activeConversation.value = conv;
-  chatLoading.value = true;
-  try {
-    const res = await getMessages(conv.partner_id);
-    chatMessages.value = res.data.data;
-    conv.unread_count = 0;
-  } catch (err) {
-    console.error(err);
-  } finally {
-    chatLoading.value = false;
-  }
-}
-
-async function handleSendMessage() {
-  if (!newMessage.value.trim() || !activeConversation.value) return;
-  sendingMessage.value = true;
-  try {
-    const res = await sendMessage(activeConversation.value.partner_id, newMessage.value);
-    chatMessages.value.push(res.data.data);
-    newMessage.value = '';
-    // Update last message in conversation list
-    activeConversation.value.last_message = res.data.data.content;
-    activeConversation.value.last_message_at = res.data.data.created_at;
-  } catch (err) {
-    console.error(err);
-  } finally {
-    sendingMessage.value = false;
-  }
-}
+const {
+  activeConversation,
+  chatMessages,
+  chatLoading,
+  newMessage,
+  sendingMessage,
+  openConversation,
+  handleSendMessage,
+} = useCommunityMessages();
 
 // ==================== NETWORK TAB ====================
-async function handleRespondConnection(connectionId, action) {
-  try {
-    await respondToConnection(connectionId, action);
-    await communityStore.fetchPendingRequests();
-    await communityStore.fetchConnections();
-  } catch (err) {
-    console.error(err);
-  }
-}
+const {
+  fetchCommunityNetwork,
+  handleRespondConnection,
+} = useCommunityConnections(communityStore);
 
 function canDelete(item) {
   return canDeleteCommunityItem(item, authStore.user, authStore.isAdmin);
@@ -182,9 +122,7 @@ onMounted(async () => {
   fetchThreads();
   fetchAlumni();
   if (authStore.isAuthenticated) {
-    communityStore.fetchConnections();
-    communityStore.fetchPendingRequests();
-    communityStore.fetchConversations();
+    fetchCommunityNetwork();
   }
 });
 </script>
@@ -486,7 +424,7 @@ onMounted(async () => {
       <!-- Alumni Detail Modal -->
       <Teleport to="body">
         <Transition name="modal">
-          <div v-if="selectedAlumni" class="modal-overlay" @click.self="selectedAlumni = null">
+          <div v-if="selectedAlumni" class="modal-overlay" @click.self="closeProfile">
             <div class="modal-content">
               <div class="modal-header">
                 <div class="modal-header__profile">
@@ -503,7 +441,7 @@ onMounted(async () => {
                     </p>
                   </div>
                 </div>
-                <button class="btn-icon" @click="selectedAlumni = null">
+                <button class="btn-icon" @click="closeProfile">
                   <span class="material-symbols-outlined">close</span>
                 </button>
               </div>

@@ -1,49 +1,38 @@
 <script setup>
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { getProgramDetail, getProgramCourses, getProgramAlumni, getProgramCareers } from '@/api/programs';
-import { getProgramBanner } from '@/utils/programMedia';
+import { useProgramPreviewData } from '@/composables/useProgramPreviewData';
+import {
+  formatCurrency,
+  getAlumniInitials,
+  getCourseBreakdown,
+  getCourseYears,
+  getLatestOutcome,
+  getProgramPreviewHeroStyle,
+  groupCoursesByYear,
+} from '@/utils/programPreviewDisplay';
 
 const route = useRoute();
 const router = useRouter();
-const loading = ref(true);
-const program = ref(null);
-const courses = ref([]);
-const alumni = ref([]);
-const careers = ref({ outcomes: [], paths: [] });
 const activeTab = ref('overview');
 const overviewSection = ref(null);
+const {
+  loading,
+  program,
+  courses,
+  alumni,
+  careers,
+  fetchProgramPreviewData,
+} = useProgramPreviewData(route);
 
-async function fetchData() {
-  try {
-    const id = route.params.id;
-    const [progRes, coursesRes, alumniRes, careersRes] = await Promise.all([
-      getProgramDetail(id),
-      getProgramCourses(id),
-      getProgramAlumni(id),
-      getProgramCareers(id),
-    ]);
-    program.value = progRes.data.data;
-    courses.value = coursesRes.data.data;
-    alumni.value = alumniRes.data.data;
-    careers.value = careersRes.data.data;
-  } catch (err) {
-    console.error(err);
-  } finally {
-    loading.value = false;
-  }
-}
-
-const coreCourses = computed(() => courses.value.filter(c => c.is_core));
-const electiveCourses = computed(() => courses.value.filter(c => !c.is_core));
-const totalUnits = computed(() => courses.value.reduce((sum, c) => sum + (c.units || 0), 0));
-const latestOutcome = computed(() => careers.value.outcomes?.[0]);
-const courseYears = computed(() => [...new Set(courses.value.map(c => c.year_level))].sort());
-
-function formatCurrency(val) {
-  if (!val) return '-';
-  return '$' + Number(val).toLocaleString();
-}
+const courseBreakdown = computed(() => getCourseBreakdown(courses.value));
+const coreCourses = computed(() => courseBreakdown.value.coreCourses);
+const electiveCourses = computed(() => courseBreakdown.value.electiveCourses);
+const totalUnits = computed(() => courseBreakdown.value.totalUnits);
+const latestOutcome = computed(() => getLatestOutcome(careers.value));
+const courseYears = computed(() => getCourseYears(courses.value));
+const coursesByYear = computed(() => groupCoursesByYear(courses.value));
+const heroStyle = computed(() => getProgramPreviewHeroStyle(program.value));
 
 async function openOverview() {
   activeTab.value = 'overview';
@@ -51,7 +40,7 @@ async function openOverview() {
   overviewSection.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-onMounted(fetchData);
+onMounted(fetchProgramPreviewData);
 </script>
 
 <template>
@@ -60,9 +49,7 @@ onMounted(fetchData);
 
     <template v-else-if="program">
       <div class="preview-shell">
-        <div class="preview-hero" :style="{ backgroundImage: getProgramBanner(program)
-          ? `linear-gradient(110deg, rgba(20, 15, 80, 0.9) 0%, rgba(20, 15, 80, 0.78) 42%, rgba(20, 15, 80, 0.45) 100%), url(${getProgramBanner(program)})`
-          : `linear-gradient(135deg, rgba(20, 15, 80, 1) 0%, rgba(30, 24, 112, 1) 55%, rgba(49, 65, 145, 1) 100%)` }">
+        <div class="preview-hero" :style="heroStyle">
           <div class="hero-inner">
             <div class="hero-grid">
               <div class="hero-content">
@@ -238,7 +225,7 @@ onMounted(fetchData);
                 <h3 class="year-title">Year {{ year }}</h3>
                 <div class="course-grid">
                   <div
-                    v-for="c in courses.filter(co => co.year_level === year)"
+                    v-for="c in coursesByYear[year]"
                     :key="c.id"
                     class="course-item"
                     :class="c.is_core ? 'course-item--core' : 'course-item--elective'"
@@ -322,7 +309,7 @@ onMounted(fetchData);
               </div>
               <div class="alumni-grid">
                 <div v-for="a in alumni" :key="a.id" class="alumni-card">
-                  <div class="alumni-avatar">{{ (a.first_name?.[0] || '') + (a.last_name?.[0] || '') }}</div>
+                  <div class="alumni-avatar">{{ getAlumniInitials(a) }}</div>
                   <h3>{{ a.first_name }} {{ a.last_name }}</h3>
                   <p class="alumni-role">{{ a.current_role }}</p>
                   <p class="alumni-company">{{ a.current_company }}</p>
